@@ -1,0 +1,40 @@
+// Wagmi v2 configuration for DealRail
+import { http, createConfig } from 'wagmi';
+import { baseSepolia, base } from 'wagmi/chains';
+import { injected, walletConnect } from 'wagmi/connectors';
+
+// WalletConnect Project ID (get from https://cloud.walletconnect.com)
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
+
+// Configure chains
+export const chains = [baseSepolia, base] as const;
+
+// Create Wagmi config
+export const config = createConfig({
+  chains,
+  connectors: [
+    injected(),
+    walletConnect({
+      projectId,
+      metadata: {
+        name: 'DealRail',
+        description: 'EIP-8183 Agentic Commerce Platform',
+        url: 'https://dealrail.xyz',
+        icons: ['https://dealrail.xyz/logo.png'],
+      },
+    }),
+  ],
+  transports: {
+    [baseSepolia.id]: http(),
+    [base.id]: http(),
+  },
+});
+
+// Export chain IDs for convenience
+export const CHAIN_IDS = {
+  BASE_SEPOLIA: baseSepolia.id,
+  BASE: base.id,
+} as const;
+
+// Default chain
+export const defaultChain = baseSepolia;

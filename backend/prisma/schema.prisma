@@ -1,0 +1,160 @@
+// Prisma schema for DealRail
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Job states (matches EIP-8183)
+enum JobState {
+  OPEN
+  FUNDED
+  SUBMITTED
+  COMPLETED
+  REJECTED
+  EXPIRED
+}
+
+// Artifact types (negotiation/evidence)
+enum ArtifactKind {
+  TERMS_DRAFT
+  COUNTER_OFFER
+  ACCEPTANCE
+  EVIDENCE
+  AMENDMENT
+  OTHER
+}
+
+// Main job/deal record
+model Job {
+  id          Int       @id @default(autoincrement())
+  jobId       Int       @unique // On-chain job ID
+  chainId     Int       // Chain ID (84532 for Base Sepolia)
+
+  // Parties
+  client      String    // Client address
+  provider    String    // Provider address
+  evaluator   String    // Evaluator address
+
+  // Job details
+  budget      String    // BigInt as string (wei)
+  expiry      DateTime  // Deadline timestamp
+  state       JobState  @default(OPEN)
+  deliverable String?   // bytes32 hash as hex string
+  hook        String?   // Optional hook contract address
+
+  // Metadata
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  fundedAt    DateTime? // When job was funded
+  submittedAt DateTime? // When work was submitted
+  completedAt DateTime? // When job was completed/rejected/expired
+
+  // Blockchain data
+  txHash         String?  // Transaction hash of job creation
+  createTxHash   String?  // Transaction hash of job creation (deprecated, use txHash)
+  fundTxHash     String?  // Transaction hash of funding
+  submitTxHash   String?  // Transaction hash of submission
+  completeTxHash String?  // Transaction hash of completion/rejection
+
+  // Relations
+  artifacts   Artifact[]
+  proof       SettlementProof?
+
+  @@index([jobId])
+  @@index([client])
+  @@index([provider])
+  @@index([state])
+  @@index([chainId])
+}
+
+// Negotiation artifacts and evidence
+model Artifact {
+  id          Int          @id @default(autoincrement())
+  job         Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId       Int
+
+  // Artifact data
+  seq         Int          // Sequence number (order)
+  contentHash String       // keccak256 hash (from contract event)
+  kind        ArtifactKind @default(OTHER)
+  author      String       // Address of who created this artifact
+
+  // Storage
+  ipfsCid     String?      // IPFS CID if uploaded
+  blob        Bytes?       // Raw data fallback (if not on IPFS)
+  metadata    Json?        // Additional metadata
+
+  // Timestamps
+  createdAt   DateTime     @default(now())
+  anchorTxHash String?     // Transaction hash when anchored on-chain
+
+  @@index([jobId])
+  @@index([author])
+  @@unique([jobId, seq])
+}
+
+// Settlement proof (generated on completion)
+model SettlementProof {
+  id        Int      @id @default(autoincrement())
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId     Int      @unique
+
+  // Proof data
+  proofJson Json     // Complete settlement proof object
+  ipfsCid   String?  // IPFS CID of the proof
+  signature String?  // EIP-712 signature
+
+  // Blockchain
+  txHash    String   // Transaction hash of settlement
+  blockNumber Int    // Block number of settlement
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([txHash])
+}
+
+// Identity verification cache (optional optimization)
+model IdentityCache {
+  id             Int      @id @default(autoincrement())
+  address        String   @unique
+
+  // Verification result
+  isVerified     Boolean
+  reputationScore Int
+  tier           String
+  isSuspended    Boolean
+
+  // Metadata
+  verifierName   String   // Which verifier was used
+  lastChecked    DateTime @default(now())
+
+  @@index([address])
+}
+
+// Event processing tracker (for reorg handling)
+model ProcessedEvent {
+  id          Int      @id @default(autoincrement())
+
+  // Event identification
+  txHash      String
+  logIndex    Int
+  blockNumber Int
+  eventName   String   // "JobCreated", "JobFunded", etc.
+
+  // Related data
+  jobId       Int?     // Job ID if applicable
+
+  // Processing
+  processedAt DateTime @default(now())
+
+  @@unique([txHash, logIndex])
+  @@index([blockNumber])
+  @@index([eventName])
+}
