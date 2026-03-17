@@ -246,7 +246,12 @@ curl -X POST http://localhost:3001/api/v1/jobs/6/complete \
   "serviceRequirement": "Generate benchmark report",
   "maxBudgetUsdc": 0.12,
   "maxDeliveryHours": 24,
-  "minReputationScore": 700
+  "minReputationScore": 700,
+  "auctionMode": "reverse_auction",
+  "maxRounds": 3,
+  "batchSize": 2,
+  "autoCounterStepBps": 500,
+  "networkMode": "testnet"
 }
 ```
 
@@ -261,6 +266,34 @@ curl -X POST http://localhost:3001/api/v1/jobs/6/complete \
   "negotiationId": "neg_1234abcd"
 }
 ```
+
+### Run Counter Round
+**Endpoint:** `POST /api/v1/x402n/rfos/:negotiationId/counter`
+
+### Create Offer Batch
+**Endpoint:** `POST /api/v1/x402n/rfos/:negotiationId/batch`
+
+```json
+{
+  "offerIds": ["offer_1", "offer_2"]
+}
+```
+
+### Confirm Batch
+**Endpoint:** `POST /api/v1/x402n/rfos/:negotiationId/confirm`
+
+```json
+{
+  "batchId": "batch_abcd1234",
+  "selectedOfferId": "offer_1"
+}
+```
+
+### Savings Receipt
+**Endpoint:** `GET /api/v1/x402n/rfos/:negotiationId/receipt`
+
+### Negotiation Activity Feed
+**Endpoint:** `GET /api/v1/x402n/rfos/:negotiationId/activities?limit=30`
 
 ---
 
@@ -302,6 +335,26 @@ Use this to ingest third-party marketplace exports into DealRail discovery.
 ```bash
 curl "http://localhost:3001/api/v1/integrations/uniswap/quote?tokenIn=USDC&tokenOut=WETH&amountIn=10&fee=3000"
 ```
+
+---
+
+## x402 Adapter
+
+### Status
+**Endpoint:** `GET /api/v1/integrations/x402/status`
+
+### Proxy Request
+**Endpoint:** `POST /api/v1/integrations/x402/proxy`
+
+```json
+{
+  "url": "https://example-x402-api.com/resource",
+  "method": "GET",
+  "paymentHeader": "optional-signed-payment-header"
+}
+```
+
+If the upstream endpoint returns `402 Payment Required`, the response includes challenge headers so the caller can complete payment and retry.
 
 ---
 

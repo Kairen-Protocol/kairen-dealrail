@@ -11,6 +11,7 @@ import { locusService } from './services/locus.service';
 import { delegationService } from './services/delegation.service';
 import { discoveryService } from './services/discovery.service';
 import { executionService } from './services/execution.service';
+import { x402Service } from './services/x402.service';
 
 const app: Express = express();
 
@@ -773,6 +774,44 @@ app.get('/api/v1/integrations/locus/tools', async (_req: Request, res: Response)
     return;
   } catch (error) {
     res.status(500).json({ error: 'Failed to list Locus tools', details: (error as Error).message });
+    return;
+  }
+});
+
+// GET /api/v1/integrations/x402/status
+app.get('/api/v1/integrations/x402/status', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    useCase:
+      'Use x402 for pay-per-call API/data purchases; keep DealRail escrow for milestone settlement and dispute resolution.',
+    endpoints: [
+      'POST /api/v1/integrations/x402/proxy',
+    ],
+  });
+  return;
+});
+
+// POST /api/v1/integrations/x402/proxy
+app.post('/api/v1/integrations/x402/proxy', async (req: Request, res: Response) => {
+  const schema = z.object({
+    url: z.string().url(),
+    method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).optional(),
+    headers: z.record(z.string()).optional(),
+    body: z.unknown().optional(),
+    paymentHeader: z.string().optional(),
+  });
+
+  try {
+    const payload = schema.parse(req.body);
+    const result = await x402Service.proxyRequest(payload);
+    res.status(result.status === 402 ? 402 : 200).json(result);
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid x402 proxy payload', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to call x402 endpoint', details: (error as Error).message });
     return;
   }
 });

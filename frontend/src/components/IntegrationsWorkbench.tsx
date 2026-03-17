@@ -21,6 +21,7 @@ export function IntegrationsWorkbench() {
   const [uniswapOut, setUniswapOut] = useState<string>('');
   const [locusOut, setLocusOut] = useState<string>('');
   const [delegationOut, setDelegationOut] = useState<string>('');
+  const [x402Out, setX402Out] = useState<string>('');
   const [delegationSignature, setDelegationSignature] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,6 +35,8 @@ export function IntegrationsWorkbench() {
   const [locusAmount, setLocusAmount] = useState('1');
   const [delegate, setDelegate] = useState('0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF');
   const [maxUsdc, setMaxUsdc] = useState('25');
+  const [x402Url, setX402Url] = useState('https://www.x402.org');
+  const [x402PaymentHeader, setX402PaymentHeader] = useState('');
 
   async function buildUniswapTxs() {
     setLoading(true);
@@ -114,6 +117,23 @@ export function IntegrationsWorkbench() {
     }
   }
 
+  async function probeX402() {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await integrationsApi.proxyX402({
+        url: x402Url,
+        method: 'GET',
+        paymentHeader: x402PaymentHeader || undefined,
+      });
+      setX402Out(JSON.stringify(result, null, 2));
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function signDelegationIntent() {
     setError(null);
     setDelegationSignature('');
@@ -156,7 +176,7 @@ export function IntegrationsWorkbench() {
     <section className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 p-6 space-y-6">
       <h2 className="text-xl font-semibold text-white">Integration Workbench (Uniswap, Locus, MetaMask)</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-gray-900/40 border border-gray-700 rounded p-4 space-y-3">
           <div className="font-semibold text-white">1. Uniswap Tx Builder</div>
           <input value={swapAmountIn} onChange={(e) => setSwapAmountIn(e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" placeholder="Amount in USDC" />
@@ -181,6 +201,13 @@ export function IntegrationsWorkbench() {
           <button onClick={buildDelegation} disabled={loading} className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 text-white rounded px-3 py-2">Build Delegation</button>
           <button onClick={signDelegationIntent} disabled={loading} className="w-full bg-violet-700 hover:bg-violet-800 disabled:bg-gray-700 text-white rounded px-3 py-2">Sign Delegation Intent</button>
         </div>
+
+        <div className="bg-gray-900/40 border border-gray-700 rounded p-4 space-y-3">
+          <div className="font-semibold text-white">4. x402 Payments</div>
+          <input value={x402Url} onChange={(e) => setX402Url(e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" placeholder="x402 endpoint URL" />
+          <input value={x402PaymentHeader} onChange={(e) => setX402PaymentHeader(e.target.value)} className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white" placeholder="Optional X-PAYMENT header" />
+          <button onClick={probeX402} disabled={loading} className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-700 text-white rounded px-3 py-2">Call x402 Endpoint</button>
+        </div>
       </div>
 
       {error && <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded p-3">{error}</div>}
@@ -195,10 +222,11 @@ export function IntegrationsWorkbench() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
         <pre className="bg-black/40 border border-gray-800 rounded p-3 overflow-auto max-h-64 text-gray-300">{uniswapOut || 'Uniswap tx payload appears here'}</pre>
         <pre className="bg-black/40 border border-gray-800 rounded p-3 overflow-auto max-h-64 text-gray-300">{locusOut || 'Locus response appears here'}</pre>
         <pre className="bg-black/40 border border-gray-800 rounded p-3 overflow-auto max-h-64 text-gray-300">{delegationOut || 'Delegation payload appears here'}</pre>
+        <pre className="bg-black/40 border border-gray-800 rounded p-3 overflow-auto max-h-64 text-gray-300">{x402Out || 'x402 probe response appears here'}</pre>
       </div>
     </section>
   );

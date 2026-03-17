@@ -378,6 +378,20 @@ export const integrationsApi = {
     const response = await api.get('/execution/providers');
     return response.data;
   },
+  getX402Status: async (): Promise<{ success: boolean; useCase: string; endpoints: string[] }> => {
+    const response = await api.get('/integrations/x402/status');
+    return response.data;
+  },
+  proxyX402: async (payload: {
+    url: string;
+    method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    headers?: Record<string, string>;
+    body?: unknown;
+    paymentHeader?: string;
+  }) => {
+    const response = await api.post('/integrations/x402/proxy', payload);
+    return response.data;
+  },
 };
 
 /**

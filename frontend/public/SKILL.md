@@ -8,9 +8,10 @@ DealRail is a trust/execution rail for agent commerce.
 
 1. Discover providers from multiple sources (x402n, external marketplaces, imported catalogs, ERC-8004 identity context).
 2. Negotiate terms (RFO/offers).
-3. Commit deal onchain with escrow.
-4. Verify delivery by evaluator.
-5. Optionally route settlement proceeds (Uniswap/Locus/other adapters).
+3. Run reverse-auction counter rounds and batch offer confirmation.
+4. Commit deal onchain with escrow.
+5. Verify delivery by evaluator.
+6. Optionally route settlement proceeds (Uniswap/Locus/x402/other adapters).
 
 ## What DealRail Is
 
@@ -39,3 +40,10 @@ DealRail is a trust/execution rail for agent commerce.
 - `POST /api/v1/discovery/providers/import`
 - `GET /api/v1/execution/providers`
 - `POST /api/v1/execution/submit`
+- `POST /api/v1/x402n/rfos/:negotiationId/counter`
+- `POST /api/v1/x402n/rfos/:negotiationId/batch`
+- `POST /api/v1/x402n/rfos/:negotiationId/confirm`
+- `GET /api/v1/x402n/rfos/:negotiationId/receipt`
+- `GET /api/v1/x402n/rfos/:negotiationId/activities`
+- `GET /api/v1/integrations/x402/status`
+- `POST /api/v1/integrations/x402/proxy`
