@@ -213,6 +213,13 @@ export const integrationsApi = {
     const response = await api.post('/integrations/uniswap/build-swap-tx', payload);
     return response.data;
   },
+  buildPostSettlementSwapTxs: async (
+    jobId: number,
+    params?: { tokenOut?: 'USDC' | 'WETH'; fee?: number; slippageBps?: number }
+  ) => {
+    const response = await api.get(`/integrations/uniswap/post-settlement/${jobId}`, { params });
+    return response.data;
+  },
   sendLocusUsdc: async (payload: {
     fromAgentId: string;
     toAddress: string;
@@ -221,6 +228,10 @@ export const integrationsApi = {
     memo?: string;
   }) => {
     const response = await api.post('/integrations/locus/send-usdc', payload);
+    return response.data;
+  },
+  listLocusTools: async () => {
+    const response = await api.get('/integrations/locus/tools');
     return response.data;
   },
   buildDelegation: async (payload: {

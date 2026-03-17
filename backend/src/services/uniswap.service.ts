@@ -53,8 +53,10 @@ export interface BuildApproveTxInput {
 export interface BuildSwapTxInput {
   tokenIn: TokenSymbol;
   tokenOut: TokenSymbol;
-  amountIn: string;
-  amountOutMinimum: string;
+  amountIn?: string;
+  amountInRaw?: string;
+  amountOutMinimum?: string;
+  amountOutMinimumRaw?: string;
   fee: number;
   recipient: string;
   deadlineSeconds?: number;
@@ -138,8 +140,12 @@ class UniswapService {
     const tokenIn = TOKENS[input.tokenIn];
     const tokenOut = TOKENS[input.tokenOut];
 
-    const amountInRaw = ethers.parseUnits(input.amountIn, tokenIn.decimals);
-    const amountOutMinRaw = ethers.parseUnits(input.amountOutMinimum, tokenOut.decimals);
+    const amountInRaw = input.amountInRaw
+      ? BigInt(input.amountInRaw)
+      : ethers.parseUnits(input.amountIn || '0', tokenIn.decimals);
+    const amountOutMinRaw = input.amountOutMinimumRaw
+      ? BigInt(input.amountOutMinimumRaw)
+      : ethers.parseUnits(input.amountOutMinimum || '0', tokenOut.decimals);
 
     const data = this.swapRouterInterface.encodeFunctionData('exactInputSingle', [
       {
@@ -160,6 +166,10 @@ class UniswapService {
       chainId: 8453,
       router: config.integrations.uniswap.swapRouter02,
     };
+  }
+
+  getTokenMeta(symbol: TokenSymbol): { address: string; decimals: number } {
+    return TOKENS[symbol];
   }
 }
 

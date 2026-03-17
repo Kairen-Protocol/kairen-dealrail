@@ -54,6 +54,7 @@ npm run dev
 - **[COMMIT_SUMMARY.md](COMMIT_SUMMARY.md)** - Latest changes
 - **[PRD_KAIREN_DEALRAIL.md](PRD_KAIREN_DEALRAIL.md)** - Product requirements
 - **[AGENT.md](AGENT.md)** - AI agent collaboration guide
+- **[skills/README.md](skills/README.md)** - Agent role skills and execution checkpoints
 - **[docs/](docs/)** - Comprehensive documentation
 
 ## ✅ Hackathon P0 Scope (Must Ship)

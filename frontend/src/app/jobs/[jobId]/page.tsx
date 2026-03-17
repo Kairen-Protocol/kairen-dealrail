@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { jobsApi, Job, getErrorMessage } from '@/lib/api';
+import { integrationsApi, jobsApi, Job, getErrorMessage } from '@/lib/api';
 import { formatDistanceToNow, format } from 'date-fns';
 import Link from 'next/link';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSendTransaction } from 'wagmi';
 import { parseUnits, encodePacked, keccak256 } from 'viem';
 import { ESCROW_ABI, USDC_ABI, getEscrowAddress, getUSDCAddress } from '@/lib/contracts';
 
@@ -42,6 +42,10 @@ export default function JobDetailPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [fundingStep, setFundingStep] = useState<'idle' | 'approving' | 'approved' | 'funding'>('idle');
+  const [postSettlementPayload, setPostSettlementPayload] = useState<any | null>(null);
+  const [postSettlementLoading, setPostSettlementLoading] = useState(false);
+
+  const { sendTransactionAsync } = useSendTransaction();
 
   const jobId = params?.jobId ? parseInt(params.jobId as string) : null;
 
@@ -213,6 +217,42 @@ export default function JobDetailPage() {
       console.error('Reject job error:', error);
       setActionError(getErrorMessage(error));
       setActionLoading(false);
+    }
+  }
+
+  async function handleBuildPostSettlementSwap() {
+    if (!jobId) return;
+    setPostSettlementLoading(true);
+    setActionError(null);
+    try {
+      const payload = await integrationsApi.buildPostSettlementSwapTxs(jobId, {
+        tokenOut: 'WETH',
+        fee: 3000,
+        slippageBps: 300,
+      });
+      setPostSettlementPayload(payload);
+    } catch (error) {
+      setActionError(getErrorMessage(error));
+    } finally {
+      setPostSettlementLoading(false);
+    }
+  }
+
+  async function executePostSettlementTx(kind: 'approve' | 'swap') {
+    if (!postSettlementPayload) return;
+    const tx = kind === 'approve'
+      ? postSettlementPayload.execution?.approveTx
+      : postSettlementPayload.execution?.swapTx;
+    if (!tx) return;
+
+    try {
+      await sendTransactionAsync({
+        to: tx.to as `0x${string}`,
+        data: tx.data as `0x${string}`,
+        value: BigInt(tx.value || '0'),
+      });
+    } catch (error) {
+      setActionError(getErrorMessage(error));
     }
   }
 
@@ -575,10 +615,38 @@ export default function JobDetailPage() {
 
               {/* COMPLETED STATE */}
               {job.stateCode === 3 && (
-                <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg space-y-3">
                   <p className="text-green-400">
-                    Job completed! Payment has been released to the provider.
+                    Job completed. You can now build post-settlement Uniswap payloads from this job.
                   </p>
+                  <button
+                    onClick={handleBuildPostSettlementSwap}
+                    disabled={postSettlementLoading}
+                    className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded transition-colors"
+                  >
+                    {postSettlementLoading ? 'Building...' : 'Build Post-Settlement Swap'}
+                  </button>
+                  {postSettlementPayload && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-300">
+                        Quote: {postSettlementPayload.quote?.amountOut} (min: {postSettlementPayload.execution?.amountOutMinimum})
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => executePostSettlementTx('approve')}
+                          className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded transition-colors"
+                        >
+                          Execute Approve
+                        </button>
+                        <button
+                          onClick={() => executePostSettlementTx('swap')}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded transition-colors"
+                        >
+                          Execute Swap
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

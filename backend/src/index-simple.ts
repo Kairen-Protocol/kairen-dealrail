@@ -488,6 +488,115 @@ app.post('/api/v1/integrations/uniswap/build-swap-tx', async (req: Request, res:
   }
 });
 
+// GET /api/v1/integrations/uniswap/post-settlement/:jobId
+// Builds approve+swap tx payloads directly from onchain job data.
+app.get('/api/v1/integrations/uniswap/post-settlement/:jobId', async (req: Request, res: Response) => {
+  const schema = z.object({
+    tokenOut: z.enum(['USDC', 'WETH']).default('WETH'),
+    fee: z
+      .string()
+      .transform((value) => Number(value))
+      .pipe(z.number().int().positive())
+      .default('3000'),
+    slippageBps: z
+      .string()
+      .transform((value) => Number(value))
+      .pipe(z.number().int().min(1).max(5_000))
+      .default('300'),
+  });
+
+  try {
+    const jobId = parseInt(req.params.jobId, 10);
+    if (Number.isNaN(jobId)) {
+      res.status(400).json({ error: 'Invalid jobId' });
+      return;
+    }
+
+    const parsed = schema.parse({
+      tokenOut: req.query.tokenOut ?? 'WETH',
+      fee: req.query.fee ?? '3000',
+      slippageBps: req.query.slippageBps ?? '300',
+    });
+
+    const job = await contractService.getJob(jobId);
+    const stateCode = Number(job.state);
+    if (stateCode !== 3) {
+      res.status(400).json({
+        error: 'Job is not completed',
+        stateCode,
+        state: stateNames[stateCode] || 'Unknown',
+      });
+      return;
+    }
+
+    const tokenIn: 'USDC' = 'USDC';
+    const tokenOut = parsed.tokenOut;
+
+    const tokenInMeta = uniswapService.getTokenMeta(tokenIn);
+    const tokenOutMeta = uniswapService.getTokenMeta(tokenOut);
+
+    const amountInRaw = job.budget.toString();
+    const amountIn = ethers.formatUnits(amountInRaw, tokenInMeta.decimals);
+
+    const quote = await uniswapService.quoteExactInputSingle({
+      tokenIn,
+      tokenOut,
+      amountIn,
+      fee: parsed.fee,
+    });
+
+    const quotedOutRaw = BigInt(quote.amountOutRaw);
+    const amountOutMinimumRaw =
+      (quotedOutRaw * BigInt(10_000 - parsed.slippageBps)) / BigInt(10_000);
+
+    const approveTx = uniswapService.buildApproveTx({
+      token: tokenIn,
+      amount: amountIn,
+    });
+
+    const swapTx = uniswapService.buildExactInputSingleTx({
+      tokenIn,
+      tokenOut,
+      amountInRaw,
+      amountOutMinimumRaw: amountOutMinimumRaw.toString(),
+      fee: parsed.fee,
+      recipient: job.provider,
+    });
+
+    res.json({
+      success: true,
+      jobId,
+      source: {
+        provider: job.provider,
+        budgetRaw: amountInRaw,
+        budget: `${amountIn} USDC`,
+      },
+      quote: {
+        amountOut: `${quote.amountOut} ${tokenOut}`,
+        amountOutRaw: quote.amountOutRaw,
+      },
+      execution: {
+        slippageBps: parsed.slippageBps,
+        amountOutMinimum: ethers.formatUnits(amountOutMinimumRaw, tokenOutMeta.decimals),
+        amountOutMinimumRaw: amountOutMinimumRaw.toString(),
+        approveTx,
+        swapTx,
+      },
+    });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid params', details: error.issues });
+      return;
+    }
+    res.status(500).json({
+      error: 'Failed to build post-settlement swap payloads',
+      details: (error as Error).message,
+    });
+    return;
+  }
+});
+
 // POST /api/v1/integrations/locus/send-usdc
 app.post('/api/v1/integrations/locus/send-usdc', async (req: Request, res: Response) => {
   const schema = z.object({

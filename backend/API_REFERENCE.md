@@ -309,6 +309,18 @@ curl "http://localhost:3001/api/v1/integrations/uniswap/quote?tokenIn=USDC&token
 
 ---
 
+### Build Post-Settlement Approve+Swap (from Job)
+**Endpoint:** `GET /api/v1/integrations/uniswap/post-settlement/:jobId`
+
+Example:
+```bash
+curl "http://localhost:3001/api/v1/integrations/uniswap/post-settlement/12?tokenOut=WETH&fee=3000&slippageBps=300"
+```
+
+Requires job state = `Completed`.
+
+---
+
 ## Locus MCP Bridge
 
 ### List Locus Tools
