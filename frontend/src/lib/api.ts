@@ -71,7 +71,7 @@ export interface NegotiationSession {
 export interface ProviderCandidate {
   providerAddress: string;
   evaluatorAddress: string;
-  source: 'x402n' | 'virtuals' | 'near' | 'mock';
+  source: 'x402n' | 'virtuals' | 'near' | 'mock' | 'imported';
   serviceId: string | null;
   serviceName: string;
   description: string;
@@ -263,8 +263,17 @@ export const integrationsApi = {
     query?: string;
     minReputation?: number;
     maxBasePriceUsdc?: number;
+    sources?: string;
   }): Promise<{ success: boolean; useCase: string; providers: ProviderCandidate[] }> => {
     const response = await api.get('/discovery/providers', { params });
+    return response.data;
+  },
+  listDiscoverySources: async (): Promise<{ success: boolean; neutral: boolean; sources: Array<{ id: string; enabled: boolean }> }> => {
+    const response = await api.get('/discovery/sources');
+    return response.data;
+  },
+  listExecutionProviders: async (): Promise<{ success: boolean; neutral: boolean; providers: Array<{ id: string; mode: string; useCase: string }> }> => {
+    const response = await api.get('/execution/providers');
     return response.data;
   },
 };

@@ -10,10 +10,22 @@ export function ProviderDiscoveryPanel() {
   const [maxBasePrice, setMaxBasePrice] = useState('0.2');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sources, setSources] = useState<string[]>(['x402n', 'mock']);
+  const [availableSources, setAvailableSources] = useState<Array<{ id: string; enabled: boolean }>>([]);
 
   useEffect(() => {
     loadProviders();
+    loadSources();
   }, []);
+
+  async function loadSources() {
+    try {
+      const res = await integrationsApi.listDiscoverySources();
+      setAvailableSources(res.sources);
+    } catch {
+      // non-blocking
+    }
+  }
 
   async function loadProviders() {
     setLoading(true);
@@ -23,6 +35,7 @@ export function ProviderDiscoveryPanel() {
         query: query || undefined,
         minReputation: Number(minReputation),
         maxBasePriceUsdc: Number(maxBasePrice),
+        sources: sources.join(','),
       });
       setProviders(res.providers);
     } catch (err) {
@@ -30,6 +43,12 @@ export function ProviderDiscoveryPanel() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function toggleSource(sourceId: string) {
+    setSources((prev) =>
+      prev.includes(sourceId) ? prev.filter((s) => s !== sourceId) : [...prev, sourceId]
+    );
   }
 
   function selectProvider(provider: ProviderCandidate) {
@@ -57,6 +76,25 @@ export function ProviderDiscoveryPanel() {
           {loading ? 'Loading...' : 'Search'}
         </button>
       </div>
+
+      {availableSources.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {availableSources.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => toggleSource(s.id)}
+              disabled={!s.enabled}
+              className={`text-xs px-2 py-1 rounded border ${
+                sources.includes(s.id)
+                  ? 'bg-blue-600/30 border-blue-500 text-blue-200'
+                  : 'bg-gray-900/40 border-gray-700 text-gray-400'
+              } disabled:opacity-40`}
+            >
+              {s.id}
+            </button>
+          ))}
+        </div>
+      )}
 
       {error && <div className="text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded p-3">{error}</div>}
 

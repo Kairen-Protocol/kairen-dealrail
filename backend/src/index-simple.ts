@@ -10,6 +10,7 @@ import { uniswapService } from './services/uniswap.service';
 import { locusService } from './services/locus.service';
 import { delegationService } from './services/delegation.service';
 import { discoveryService } from './services/discovery.service';
+import { executionService } from './services/execution.service';
 
 const app: Express = express();
 
@@ -675,6 +676,7 @@ app.get('/api/v1/discovery/providers', async (req: Request, res: Response) => {
       .transform((value) => Number(value))
       .pipe(z.number().positive())
       .optional(),
+    sources: z.string().optional(),
   });
 
   try {
@@ -682,12 +684,21 @@ app.get('/api/v1/discovery/providers', async (req: Request, res: Response) => {
       query: req.query.query,
       minReputation: req.query.minReputation,
       maxBasePriceUsdc: req.query.maxBasePriceUsdc,
+      sources: req.query.sources,
     });
+
+    const sourceList = params.sources
+      ? params.sources
+          .split(',')
+          .map((s) => s.trim().toLowerCase())
+          .filter((s) => ['x402n', 'virtuals', 'near', 'mock', 'imported'].includes(s))
+      : undefined;
 
     const providers = await discoveryService.listProviderCandidates({
       query: params.query,
       minReputation: params.minReputation,
       maxBasePriceUsdc: params.maxBasePriceUsdc,
+      sources: sourceList as any,
     });
 
     res.json({
@@ -703,6 +714,48 @@ app.get('/api/v1/discovery/providers', async (req: Request, res: Response) => {
     }
     res.status(500).json({ error: 'Failed to fetch providers', details: (error as Error).message });
     return;
+  }
+});
+
+// GET /api/v1/discovery/sources
+app.get('/api/v1/discovery/sources', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    neutral: true,
+    sources: discoveryService.listSources(),
+  });
+});
+
+// POST /api/v1/discovery/providers/import
+app.post('/api/v1/discovery/providers/import', (req: Request, res: Response) => {
+  const schema = z.object({
+    providers: z.array(
+      z.object({
+        providerAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+        evaluatorAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+        source: z.enum(['x402n', 'virtuals', 'near', 'mock', 'imported']).default('imported'),
+        serviceId: z.string().nullable(),
+        serviceName: z.string().min(1),
+        description: z.string().default(''),
+        endpoint: z.string().nullable(),
+        basePriceUsdc: z.string().nullable(),
+        reputationScore: z.number().nullable(),
+        erc8004AgentId: z.string().nullable(),
+        erc8004Registered: z.boolean(),
+      })
+    ),
+  });
+
+  try {
+    const payload = schema.parse(req.body);
+    const result = discoveryService.importCandidates(payload.providers as any);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid import payload', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to import providers', details: (error as Error).message });
   }
 });
 
@@ -724,6 +777,38 @@ app.get('/api/v1/agents/:address', async (req: Request, res: Response) => {
     return;
   } catch (error) {
     res.status(500).json({ error: 'Failed to resolve agent identity', details: (error as Error).message });
+    return;
+  }
+});
+
+// GET /api/v1/execution/providers
+app.get('/api/v1/execution/providers', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    neutral: true,
+    providers: executionService.listProviders(),
+  });
+});
+
+// POST /api/v1/execution/submit
+app.post('/api/v1/execution/submit', async (req: Request, res: Response) => {
+  const schema = z.object({
+    provider: z.enum(['wallet', 'locus', 'bankr']),
+    operation: z.enum(['send-usdc', 'send-tx']),
+    payload: z.record(z.any()),
+  });
+
+  try {
+    const payload = schema.parse(req.body);
+    const result = await executionService.execute(payload);
+    res.json({ success: true, result });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid execution payload', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to execute request', details: (error as Error).message });
     return;
   }
 });

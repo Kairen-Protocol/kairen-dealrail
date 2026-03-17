@@ -264,6 +264,30 @@ curl -X POST http://localhost:3001/api/v1/jobs/6/complete \
 
 ---
 
+## Neutral Discovery
+
+### List Discovery Sources
+**Endpoint:** `GET /api/v1/discovery/sources`
+
+### List Providers (multi-source)
+**Endpoint:** `GET /api/v1/discovery/providers`
+
+Optional params:
+- `query`
+- `minReputation`
+- `maxBasePriceUsdc`
+- `sources` (comma-separated: `x402n,virtuals,near,imported,mock`)
+
+### Import External Providers
+**Endpoint:** `POST /api/v1/discovery/providers/import`
+
+Use this to ingest third-party marketplace exports into DealRail discovery.
+
+### Agent Identity (ERC-8004)
+**Endpoint:** `GET /api/v1/agents/:address`
+
+---
+
 ## Uniswap Quote (Base Mainnet)
 
 **Endpoint:** `GET /api/v1/integrations/uniswap/quote`
@@ -358,6 +382,29 @@ Requires job state = `Completed`.
 ```
 
 ---
+
+## Neutral Execution Adapters
+
+### List Execution Providers
+**Endpoint:** `GET /api/v1/execution/providers`
+
+### Submit Execution Request
+**Endpoint:** `POST /api/v1/execution/submit`
+
+```json
+{
+  "provider": "wallet",
+  "operation": "send-tx",
+  "payload": {
+    "to": "0x...",
+    "data": "0x...",
+    "value": "0",
+    "chainId": 8453
+  }
+}
+```
+
+Providers currently exposed: `wallet`, `locus`, `bankr` (mock scaffold).
 
 ### Frontend Execution Notes
 

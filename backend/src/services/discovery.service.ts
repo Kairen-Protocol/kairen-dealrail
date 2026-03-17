@@ -4,7 +4,7 @@ import { config } from '../config';
 export interface ProviderCandidate {
   providerAddress: string;
   evaluatorAddress: string;
-  source: 'x402n' | 'virtuals' | 'near' | 'mock';
+  source: 'x402n' | 'virtuals' | 'near' | 'mock' | 'imported';
   serviceId: string | null;
   serviceName: string;
   description: string;
@@ -53,6 +53,7 @@ const MOCK_CANDIDATES: ProviderCandidate[] = [
 ];
 
 class DiscoveryService {
+  private importedCandidates: ProviderCandidate[] = [];
   private ercProvider = new ethers.JsonRpcProvider(config.integrations.erc8004.baseMainnetRpc);
   private identity = new ethers.Contract(
     config.integrations.erc8004.identityRegistry,
@@ -69,9 +70,11 @@ class DiscoveryService {
     query?: string;
     minReputation?: number;
     maxBasePriceUsdc?: number;
+    sources?: Array<'x402n' | 'virtuals' | 'near' | 'mock' | 'imported'>;
   }): Promise<ProviderCandidate[]> {
     const seed = await this.fetchAllSources();
-    const base = seed.length > 0 ? seed : MOCK_CANDIDATES;
+    const imported = this.importedCandidates.map((row) => ({ ...row, source: 'imported' as const }));
+    const base = (seed.length > 0 ? seed : MOCK_CANDIDATES).concat(imported);
     const enriched = await Promise.all(base.map((candidate) => this.enrichReputation(candidate)));
 
     return enriched
@@ -90,9 +93,35 @@ class DiscoveryService {
           const p = Number(candidate.basePriceUsdc);
           if (!Number.isNaN(p) && p > filters.maxBasePriceUsdc) return false;
         }
+        if (filters?.sources && filters.sources.length > 0) {
+          const allowed = new Set(filters.sources);
+          if (!allowed.has(candidate.source as any)) return false;
+        }
         return true;
       })
       .sort((a, b) => (b.reputationScore ?? 0) - (a.reputationScore ?? 0));
+  }
+
+  listSources(): Array<{ id: string; enabled: boolean; kind: 'discovery' }> {
+    return [
+      { id: 'x402n', enabled: config.integrations.discovery.x402nEnabled, kind: 'discovery' },
+      { id: 'virtuals', enabled: config.integrations.discovery.virtualsEnabled, kind: 'discovery' },
+      { id: 'near', enabled: config.integrations.discovery.nearEnabled, kind: 'discovery' },
+      { id: 'imported', enabled: true, kind: 'discovery' },
+      { id: 'mock', enabled: true, kind: 'discovery' },
+    ];
+  }
+
+  importCandidates(candidates: ProviderCandidate[]): { imported: number } {
+    const normalized = candidates
+      .filter((c) => /^0x[a-fA-F0-9]{40}$/.test(c.providerAddress))
+      .map((c) => ({
+        ...c,
+        providerAddress: c.providerAddress.toLowerCase(),
+        evaluatorAddress: c.evaluatorAddress.toLowerCase(),
+      }));
+    this.importedCandidates.push(...normalized);
+    return { imported: normalized.length };
   }
 
   async getAgentIdentity(address: string): Promise<{
