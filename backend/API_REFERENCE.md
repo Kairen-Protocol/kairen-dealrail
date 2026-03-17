@@ -311,6 +311,9 @@ curl "http://localhost:3001/api/v1/integrations/uniswap/quote?tokenIn=USDC&token
 
 ## Locus MCP Bridge
 
+### List Locus Tools
+**Endpoint:** `GET /api/v1/integrations/locus/tools`
+
 ### Send USDC
 **Endpoint:** `POST /api/v1/integrations/locus/send-usdc`
 
@@ -343,6 +346,14 @@ curl "http://localhost:3001/api/v1/integrations/uniswap/quote?tokenIn=USDC&token
 ```
 
 ---
+
+### Frontend Execution Notes
+
+- The dashboard `Integration Workbench` can:
+  - build Uniswap approve/swap tx payloads,
+  - send those payloads through connected wallet,
+  - build delegation caveats,
+  - sign a delegation intent via EIP-712.
 
 ## Running the API
 

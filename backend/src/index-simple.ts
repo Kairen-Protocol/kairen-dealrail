@@ -513,6 +513,18 @@ app.post('/api/v1/integrations/locus/send-usdc', async (req: Request, res: Respo
   }
 });
 
+// GET /api/v1/integrations/locus/tools
+app.get('/api/v1/integrations/locus/tools', async (_req: Request, res: Response) => {
+  try {
+    const tools = await locusService.listTools();
+    res.json({ success: true, tools });
+    return;
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to list Locus tools', details: (error as Error).message });
+    return;
+  }
+});
+
 // POST /api/v1/integrations/metamask/delegation/build
 app.post('/api/v1/integrations/metamask/delegation/build', async (req: Request, res: Response) => {
   const schema = z.object({

@@ -18,6 +18,44 @@ export interface LocusSendUsdcOutput {
 }
 
 class LocusService {
+  async listTools(): Promise<unknown> {
+    if (config.integrations.locus.mockMode || !config.integrations.locus.apiKey) {
+      return {
+        mode: 'mock',
+        tools: [
+          { name: config.integrations.locus.sendUsdcTool, description: 'Send USDC payment' },
+        ],
+      };
+    }
+
+    try {
+      const response = await fetch(config.integrations.locus.mcpUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${config.integrations.locus.apiKey}`,
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: Date.now(),
+          method: 'tools/list',
+          params: {},
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Locus tools/list failed: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      return {
+        mode: 'fallback',
+        error: (error as Error).message,
+      };
+    }
+  }
+
   async sendUsdc(input: LocusSendUsdcInput): Promise<LocusSendUsdcOutput> {
     if (!config.integrations.locus.mockMode) {
       const live = await this.tryLiveSendUsdc(input);
@@ -55,7 +93,7 @@ class LocusService {
           id: Date.now(),
           method: 'tools/call',
           params: {
-            name: 'send_usdc',
+            name: config.integrations.locus.sendUsdcTool,
             arguments: {
               fromAgentId: input.fromAgentId,
               to: input.toAddress,

@@ -85,6 +85,7 @@ export const config = {
       mcpUrl: getEnv('LOCUS_MCP_URL', 'https://mcp.paywithlocus.com/mcp'),
       apiKey: getEnv('LOCUS_API_KEY', ''),
       mockMode: getEnv('LOCUS_MOCK_MODE', 'true').toLowerCase() !== 'false',
+      sendUsdcTool: getEnv('LOCUS_SEND_USDC_TOOL', 'send_usdc'),
     },
   },
   x402n: {
