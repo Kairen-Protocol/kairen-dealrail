@@ -399,12 +399,12 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
                     key={`${line.text}-${idx}`}
                     className={
                       line.tone === 'system'
-                        ? 'text-[var(--terminal-muted)]'
+                        ? 'break-words whitespace-pre-wrap text-[var(--terminal-muted)]'
                         : line.tone === 'ok'
-                          ? 'text-[var(--terminal-good)]'
+                          ? 'break-words whitespace-pre-wrap text-[var(--terminal-good)]'
                           : line.tone === 'warn'
-                            ? 'text-[var(--terminal-warn)]'
-                            : 'text-[var(--terminal-fg)]'
+                            ? 'break-words whitespace-pre-wrap text-[var(--terminal-warn)]'
+                            : 'break-words whitespace-pre-wrap text-[var(--terminal-fg)]'
                     }
                   >
                     {line.text}

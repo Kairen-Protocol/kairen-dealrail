@@ -100,7 +100,7 @@ export default function TerminalPage() {
               {runs.map((run) => (
                 <div key={run.id} className="rounded-2xl border border-[var(--terminal-border)] bg-black/15 p-3 text-xs">
                   <div className="terminal-mono text-[var(--terminal-muted)]">{new Date(run.at).toLocaleTimeString()}</div>
-                  <div className="mt-1 terminal-mono text-[var(--terminal-fg)]">{run.command}</div>
+                  <div className="mt-1 break-words terminal-mono text-[var(--terminal-fg)]">{run.command}</div>
                   <div className="mt-1 text-[var(--terminal-good)]">{run.note}</div>
                 </div>
               ))}

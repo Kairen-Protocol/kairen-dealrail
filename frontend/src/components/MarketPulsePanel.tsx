@@ -134,10 +134,10 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
               {topProviders.length > 0 ? topProviders.map((provider) => (
                 <div key={`${provider.source}-${provider.providerAddress}`} className="rounded-xl border border-[var(--terminal-border)] bg-black/10 p-3">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="font-medium">{provider.serviceName}</div>
+                    <div className="min-w-0 break-words font-medium">{provider.serviceName}</div>
                     <div className="terminal-chip">{provider.source}</div>
                   </div>
-                  <div className="mt-2 text-sm text-[var(--terminal-muted)]">{provider.description || 'No description yet'}</div>
+                  <div className="mt-2 break-words text-sm text-[var(--terminal-muted)]">{provider.description || 'No description yet'}</div>
                   <div className="mt-2 text-xs text-[var(--terminal-muted)]">
                     Base {provider.basePriceUsdc ?? 'n/a'} USDC • Rep {provider.reputationScore ?? 'n/a'}
                   </div>
@@ -172,10 +172,10 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
                 {state.opportunities.slice(0, 3).map((opportunity) => (
                   <div key={opportunity.id} className="rounded-xl border border-[var(--terminal-border)] bg-black/10 p-3">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
+                      <div className="break-all terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
                       <div className="terminal-chip">{opportunity.source}</div>
                     </div>
-                    <div className="mt-2 text-sm text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
+                    <div className="mt-2 break-words text-sm text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
                   </div>
                 ))}
                 {state.opportunities.length === 0 && (
@@ -240,10 +240,10 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
             {topProviders.length > 0 ? topProviders.map((provider) => (
               <div key={`${provider.source}-${provider.providerAddress}`} className="rounded-xl border border-[var(--terminal-border)] bg-black/10 p-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="font-medium">{provider.serviceName}</div>
+                  <div className="min-w-0 break-words font-medium">{provider.serviceName}</div>
                   <div className="terminal-chip">{provider.source}</div>
                 </div>
-                <div className="mt-2 text-sm text-[var(--terminal-muted)]">{provider.description || 'No description yet'}</div>
+                <div className="mt-2 break-words text-sm text-[var(--terminal-muted)]">{provider.description || 'No description yet'}</div>
                 <div className="mt-2 text-xs text-[var(--terminal-muted)]">
                   Base {provider.basePriceUsdc ?? 'n/a'} USDC • Rep {provider.reputationScore ?? 'n/a'} • {provider.erc8004Registered ? 'ERC-8004 verified' : 'Unverified'}
                 </div>
@@ -281,10 +281,10 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
               {state.opportunities.slice(0, 4).map((opportunity) => (
                 <div key={opportunity.id} className="rounded-xl border border-[var(--terminal-border)] bg-black/10 p-3 text-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
+                    <div className="break-all terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
                     <div className="terminal-chip">{opportunity.status}</div>
                   </div>
-                  <div className="mt-2 text-xs text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
+                  <div className="mt-2 break-words text-xs text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
                 </div>
               ))}
               {state.opportunities.length === 0 && (

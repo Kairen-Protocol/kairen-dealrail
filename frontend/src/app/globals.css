@@ -59,6 +59,7 @@ textarea {
   }
 
   .terminal-panel {
+    min-width: 0;
     border: 1px solid var(--terminal-border);
     background: linear-gradient(180deg, var(--terminal-panel), var(--terminal-panel-2));
     box-shadow:
@@ -67,6 +68,7 @@ textarea {
   }
 
   .terminal-frame {
+    min-width: 0;
     border: 1px solid var(--terminal-border);
     background:
       radial-gradient(circle at top, color-mix(in srgb, var(--terminal-accent) 8%, transparent), transparent 42%),
@@ -77,6 +79,7 @@ textarea {
   }
 
   .terminal-console {
+    min-width: 0;
     border: 1px solid color-mix(in srgb, var(--terminal-border) 82%, black 18%);
     background:
       linear-gradient(180deg, rgba(3, 8, 12, 0.94), rgba(4, 12, 18, 0.98));
@@ -94,6 +97,7 @@ textarea {
   }
 
   .terminal-input {
+    min-width: 0;
     width: 100%;
     border: 1px solid var(--terminal-border);
     background: color-mix(in srgb, var(--terminal-panel) 82%, black 18%);
@@ -114,6 +118,7 @@ textarea {
   }
 
   .terminal-btn {
+    min-width: 0;
     border: 1px solid var(--terminal-border);
     border-radius: 9999px;
     padding: 0.65rem 0.9rem;
@@ -146,6 +151,7 @@ textarea {
   }
 
   .terminal-metric {
+    min-width: 0;
     border: 1px solid var(--terminal-border);
     border-radius: 1rem;
     background: color-mix(in srgb, var(--terminal-panel) 84%, black 16%);
@@ -175,6 +181,7 @@ textarea {
   .terminal-chip {
     display: inline-flex;
     align-items: center;
+    max-width: 100%;
     border-radius: 9999px;
     border: 1px solid var(--terminal-border);
     background: color-mix(in srgb, var(--terminal-panel) 86%, black 14%);
@@ -182,9 +189,13 @@ textarea {
     font-family: var(--font-plex-mono), monospace;
     font-size: 0.68rem;
     color: var(--terminal-muted);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .terminal-command {
+    min-width: 0;
     border: 1px solid var(--terminal-border);
     border-radius: 9999px;
     background: color-mix(in srgb, var(--terminal-panel) 84%, black 16%);
@@ -193,6 +204,8 @@ textarea {
     font-size: 0.72rem;
     color: var(--terminal-muted);
     transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .terminal-command:hover {

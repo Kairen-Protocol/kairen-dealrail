@@ -273,7 +273,7 @@ export function IntegrationsWorkbench() {
               {providersPreview.length > 0 ? providersPreview.map((provider) => (
                 <div key={`${provider.source}-${provider.serviceName}`} className="rounded-xl border border-[var(--terminal-border)] bg-black/10 p-3 text-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="font-medium">{provider.serviceName}</div>
+                    <div className="min-w-0 break-words font-medium">{provider.serviceName}</div>
                     <div className="terminal-chip">{provider.source}</div>
                   </div>
                   <div className="mt-1 text-xs text-[var(--terminal-muted)]">Base {provider.basePriceUsdc ?? 'n/a'} USDC</div>

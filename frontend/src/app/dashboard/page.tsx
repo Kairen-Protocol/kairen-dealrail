@@ -89,7 +89,7 @@ export default function DashboardPage() {
                   <span className="terminal-mono">{new Date(run.at).toLocaleString()}</span>
                   <span className="terminal-chip">{run.action}</span>
                 </div>
-                <div className="mt-2 terminal-mono text-[var(--terminal-fg)]">{run.command}</div>
+                <div className="mt-2 break-words terminal-mono text-[var(--terminal-fg)]">{run.command}</div>
                 <div className="mt-1 text-[var(--terminal-good)]">{run.note}</div>
               </div>
             ))}
@@ -104,10 +104,10 @@ export default function DashboardPage() {
               {opportunities.map((opportunity) => (
                 <div key={opportunity.id} className="rounded-2xl border border-[var(--terminal-border)] bg-black/15 p-3">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
+                    <div className="break-all terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
                     <span className="terminal-chip">{opportunity.source}</span>
                   </div>
-                  <div className="mt-2 text-sm text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
+                  <div className="mt-2 break-words text-sm text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
                   <div className="mt-1 text-xs text-[var(--terminal-muted)]">
                     Budget {opportunity.maxBudgetUsdc ?? 'n/a'} USDC | Delivery {opportunity.maxDeliveryHours ?? 'n/a'}h
                   </div>
