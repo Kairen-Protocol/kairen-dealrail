@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { healthCheck, integrationsApi, jobsApi, ProviderCandidate } from '@/lib/api';
+import { DemandOpportunity, healthCheck, integrationsApi, jobsApi, ProviderCandidate } from '@/lib/api';
 
 type MarketPulsePanelProps = {
   variant?: 'compact' | 'full';
@@ -11,6 +11,7 @@ type PulseState = {
   backendOnline: boolean;
   chainLabel: string;
   providers: ProviderCandidate[];
+  opportunities: DemandOpportunity[];
   discoverySources: Array<{ id: string; enabled: boolean }>;
   executionProviders: Array<{ id: string; mode: string; useCase: string }>;
   openJobs: number;
@@ -20,6 +21,7 @@ const initialState: PulseState = {
   backendOnline: false,
   chainLabel: 'Unknown',
   providers: [],
+  opportunities: [],
   discoverySources: [],
   executionProviders: [],
   openJobs: 0,
@@ -39,9 +41,10 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
 
     async function load() {
       try {
-        const [health, providerRes, sourceRes, executionRes, jobsRes] = await Promise.all([
+        const [health, providerRes, opportunityRes, sourceRes, executionRes, jobsRes] = await Promise.all([
           healthCheck().catch(() => null),
           integrationsApi.listProviders().catch(() => ({ providers: [] })),
+          integrationsApi.listOpportunities({ status: 'open', limit: 6 }).catch(() => ({ opportunities: [] })),
           integrationsApi.listDiscoverySources().catch(() => ({ sources: [] })),
           integrationsApi.listExecutionProviders().catch(() => ({ providers: [] })),
           jobsApi.list({ limit: 12 }).catch(() => ({ jobs: [] })),
@@ -52,6 +55,7 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
           backendOnline: !!health,
           chainLabel: chainName(health?.blockchain.chainId),
           providers: providerRes.providers || [],
+          opportunities: opportunityRes.opportunities || [],
           discoverySources: sourceRes.sources || [],
           executionProviders: executionRes.providers || [],
           openJobs: (jobsRes.jobs || []).length,
@@ -73,6 +77,11 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
   const topProviders = state.providers.slice(0, variant === 'compact' ? 3 : 5);
   const enabledSources = state.discoverySources.filter((source) => source.enabled);
   const mockOnly = state.providers.length > 0 && state.providers.every((provider) => provider.source === 'mock');
+  const visibleErc8004Agents = state.providers.filter((provider) => provider.erc8004Registered).length;
+  const sourceCounts = state.providers.reduce<Record<string, number>>((acc, provider) => {
+    acc[provider.source] = (acc[provider.source] || 0) + 1;
+    return acc;
+  }, {});
 
   if (variant === 'compact') {
     return (
@@ -108,6 +117,14 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
             <div className="terminal-label">Recent Jobs</div>
             <div className="mt-1 text-sm font-semibold">{state.openJobs}</div>
           </div>
+          <div className="terminal-metric">
+            <div className="terminal-label">Open Demand</div>
+            <div className="mt-1 text-sm font-semibold">{state.opportunities.length}</div>
+          </div>
+          <div className="terminal-metric">
+            <div className="terminal-label">ERC-8004 Visible</div>
+            <div className="mt-1 text-sm font-semibold">{visibleErc8004Agents}</div>
+          </div>
         </div>
 
         <div className="mt-5 grid gap-4 lg:grid-cols-[1.25fr,0.75fr]">
@@ -138,8 +155,38 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
                 <span key={source.id} className="terminal-chip">{source.id}</span>
               ))}
             </div>
+            <div className="mt-4 border-t border-[var(--terminal-border)] pt-4">
+              <div className="terminal-label">Kairen Supply Mix</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {Object.entries(sourceCounts).map(([source, count]) => (
+                  <span key={source} className="terminal-chip">{source}:{count}</span>
+                ))}
+                {Object.keys(sourceCounts).length === 0 && (
+                  <span className="text-sm text-[var(--terminal-muted)]">No live source counts yet.</span>
+                )}
+              </div>
+            </div>
+            <div className="mt-4 border-t border-[var(--terminal-border)] pt-4">
+              <div className="terminal-label">Open Opportunities</div>
+              <div className="mt-3 space-y-2">
+                {state.opportunities.slice(0, 3).map((opportunity) => (
+                  <div key={opportunity.id} className="rounded-xl border border-[var(--terminal-border)] bg-black/10 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
+                      <div className="terminal-chip">{opportunity.source}</div>
+                    </div>
+                    <div className="mt-2 text-sm text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
+                  </div>
+                ))}
+                {state.opportunities.length === 0 && (
+                  <div className="text-sm text-[var(--terminal-muted)]">
+                    No queued demand yet. If supply is missing, buyer requests will appear here.
+                  </div>
+                )}
+              </div>
+            </div>
             <div className="mt-4 border-t border-[var(--terminal-border)] pt-4 text-sm leading-6 text-[var(--terminal-muted)]">
-              If this section stays in `demo / mock`, the next task is not more UI. It is wiring real provider feeds.
+              If this section stays in `demo / mock`, the next task is wiring real provider feeds, but unmatched demand is now retained.
             </div>
           </div>
         </div>
@@ -176,6 +223,14 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
           <div className="terminal-label">Execution Rails</div>
           <div className="mt-1 text-sm font-semibold">{state.executionProviders.length}</div>
         </div>
+        <div className="terminal-metric">
+          <div className="terminal-label">Open Demand</div>
+          <div className="mt-1 text-sm font-semibold">{state.opportunities.length}</div>
+        </div>
+        <div className="terminal-metric">
+          <div className="terminal-label">ERC-8004 Visible</div>
+          <div className="mt-1 text-sm font-semibold">{visibleErc8004Agents}</div>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-4 xl:grid-cols-[1.2fr,0.8fr]">
@@ -206,6 +261,35 @@ export function MarketPulsePanel({ variant = 'full' }: MarketPulsePanelProps) {
               {enabledSources.map((source) => (
                 <span key={source.id} className="terminal-chip">{source.id}</span>
               ))}
+            </div>
+            <div className="mt-4 border-t border-[var(--terminal-border)] pt-4">
+              <div className="terminal-label">Kairen Supply Mix</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {Object.entries(sourceCounts).map(([source, count]) => (
+                  <span key={source} className="terminal-chip">{source}:{count}</span>
+                ))}
+                {Object.keys(sourceCounts).length === 0 && (
+                  <span className="text-sm text-[var(--terminal-muted)]">No live source counts yet.</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--terminal-border)] bg-black/10 p-4">
+            <div className="terminal-label">Open Opportunities</div>
+            <div className="mt-3 space-y-2">
+              {state.opportunities.slice(0, 4).map((opportunity) => (
+                <div key={opportunity.id} className="rounded-xl border border-[var(--terminal-border)] bg-black/10 p-3 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
+                    <div className="terminal-chip">{opportunity.status}</div>
+                  </div>
+                  <div className="mt-2 text-xs text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
+                </div>
+              ))}
+              {state.opportunities.length === 0 && (
+                <div className="text-sm text-[var(--terminal-muted)]">No queued buyer demand yet.</div>
+              )}
             </div>
           </div>
 

@@ -12,6 +12,7 @@ import { delegationService } from './services/delegation.service';
 import { discoveryService } from './services/discovery.service';
 import { executionService } from './services/execution.service';
 import { x402Service } from './services/x402.service';
+import { opportunityBookService } from './services/opportunity-book.service';
 
 const app: Express = express();
 
@@ -904,6 +905,74 @@ app.get('/api/v1/discovery/sources', (_req: Request, res: Response) => {
     neutral: true,
     sources: discoveryService.listSources(),
   });
+});
+
+// GET /api/v1/discovery/opportunities
+app.get('/api/v1/discovery/opportunities', async (req: Request, res: Response) => {
+  const schema = z.object({
+    status: z.enum(['open', 'matched', 'archived']).optional(),
+    limit: z
+      .string()
+      .transform((value) => Number(value))
+      .pipe(z.number().int().min(1).max(100))
+      .optional(),
+  });
+
+  try {
+    const params = schema.parse({
+      status: req.query.status,
+      limit: req.query.limit,
+    });
+
+    const opportunities = await opportunityBookService.list({
+      status: params.status,
+      limit: params.limit,
+    });
+
+    res.json({
+      success: true,
+      useCase: 'Persist unmatched buyer demand so providers can discover open opportunities later',
+      opportunities,
+    });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid query params', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to fetch opportunity book', details: (error as Error).message });
+    return;
+  }
+});
+
+// POST /api/v1/discovery/opportunities
+app.post('/api/v1/discovery/opportunities', async (req: Request, res: Response) => {
+  const schema = z.object({
+    requestText: z.string().min(3),
+    normalizedQuery: z.string().min(1),
+    maxBudgetUsdc: z.number().positive().nullable().optional(),
+    maxDeliveryHours: z.number().int().positive().nullable().optional(),
+    matchesAtCreate: z.number().int().min(0).optional(),
+    source: z.enum(['terminal', 'api']).optional(),
+  });
+
+  try {
+    const payload = schema.parse(req.body);
+    const opportunity = await opportunityBookService.create(payload);
+
+    res.status(201).json({
+      success: true,
+      opportunity,
+    });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid opportunity payload', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to create opportunity', details: (error as Error).message });
+    return;
+  }
 });
 
 // POST /api/v1/discovery/providers/import

@@ -72,6 +72,19 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     return match ? Number(match[1]) : undefined;
   }
 
+  function parseDeliveryHours(command: string) {
+    const match = command.toLowerCase().match(/(\d+)\s*(?:h|hr|hrs|hour|hours)/);
+    return match ? Number(match[1]) : undefined;
+  }
+
+  function normalizeBuyerQuery(command: string) {
+    return stripVerb(command, ['buy', 'buyer'])
+      .replace(/\bunder\s+\d+(?:\.\d+)?\s*usdc\b/gi, '')
+      .replace(/\bin\s+\d+\s*(?:h|hr|hrs|hour|hours)\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function stripVerb(command: string, verbs: string[]) {
     let next = command.trim();
     for (const verb of verbs) {
@@ -141,8 +154,9 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   }
 
   async function runBuy(command: string) {
-    const query = stripVerb(command, ['buy', 'buyer']);
+    const query = normalizeBuyerQuery(command);
     const maxBasePriceUsdc = parseBudget(command);
+    const maxDeliveryHours = parseDeliveryHours(command);
 
     prefillFlow(query || command);
 
@@ -159,6 +173,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
         { tone: 'ok', text: 'role=buyer' },
         { tone: 'ok', text: `objective=${query || 'service request'}` },
         ...(typeof maxBasePriceUsdc === 'number' ? [{ tone: 'ok' as LineTone, text: `budget ceiling=${maxBasePriceUsdc} USDC` }] : []),
+        ...(typeof maxDeliveryHours === 'number' ? [{ tone: 'ok' as LineTone, text: `delivery target=${maxDeliveryHours}h` }] : []),
         { tone: allMock ? 'warn' : 'ok', text: `supply posture=${allMock ? 'demo/mock' : 'mixed/live'}` },
         ...shortlist.map((provider) => ({
           tone: (provider.source === 'mock' ? 'warn' : 'ok') as LineTone,
@@ -167,7 +182,16 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       ]);
 
       if (shortlist.length === 0) {
-        append('warn', 'No matching supply yet. Import provider feeds or connect a live marketplace before running the auction.');
+        const queued = await integrationsApi.createOpportunity({
+          requestText: command,
+          normalizedQuery: query || command,
+          maxBudgetUsdc: typeof maxBasePriceUsdc === 'number' ? maxBasePriceUsdc : null,
+          maxDeliveryHours: typeof maxDeliveryHours === 'number' ? maxDeliveryHours : null,
+          matchesAtCreate: result.providers.length,
+          source: 'terminal',
+        });
+        append('warn', 'No matching supply yet. Demand was stored in the opportunity book instead of being dropped.');
+        append('ok', `opportunity=${queued.opportunity.id} | providers can pick this up later from the dashboard`);
       } else {
         append('ok', 'next: compare the shortlist, start reverse auction if enough competition exists, then confirm the escrow path');
       }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { healthCheck, jobsApi, Job } from '@/lib/api';
+import { DemandOpportunity, healthCheck, jobsApi, Job, integrationsApi } from '@/lib/api';
 import { listTerminalRuns, subscribeTerminalRuns, TerminalRunRecord } from '@/lib/terminalLedger';
 import { MarketPulsePanel } from '@/components/MarketPulsePanel';
 
@@ -17,16 +17,19 @@ function Stat({ label, value }: { label: string; value: string }) {
 export default function DashboardPage() {
   const [runs, setRuns] = useState<TerminalRunRecord[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [opportunities, setOpportunities] = useState<DemandOpportunity[]>([]);
   const [chainLabel, setChainLabel] = useState('Unknown');
 
   useEffect(() => {
     async function load() {
       setRuns(listTerminalRuns());
-      const [health, jobsRes] = await Promise.all([
+      const [health, jobsRes, opportunityRes] = await Promise.all([
         healthCheck().catch(() => null),
         jobsApi.list({ limit: 8 }).catch(() => ({ jobs: [] })),
+        integrationsApi.listOpportunities({ status: 'open', limit: 8 }).catch(() => ({ opportunities: [] })),
       ]);
       setJobs(jobsRes.jobs || []);
+      setOpportunities(opportunityRes.opportunities || []);
       if (health?.blockchain.chainId === 84532) setChainLabel('Base Sepolia');
       else if (health?.blockchain.chainId === 11142220) setChainLabel('Celo Sepolia');
       else setChainLabel(health?.blockchain.chainId ? `Chain ${health.blockchain.chainId}` : 'Unknown');
@@ -61,15 +64,17 @@ export default function DashboardPage() {
             <span className="terminal-chip">{chainLabel}</span>
             <span className="terminal-chip">{runs.length} terminal events</span>
             <span className="terminal-chip">{jobs.length} recent jobs</span>
+            <span className="terminal-chip">{opportunities.length} open opportunities</span>
           </div>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-3 md:grid-cols-4">
+      <section className="grid grid-cols-1 gap-3 md:grid-cols-5">
         <Stat label="Total Commands" value={String(runs.length)} />
         <Stat label="Flow Intents" value={String(flowCount)} />
         <Stat label="Ops Intents" value={String(opsCount)} />
         <Stat label="Integrations Intents" value={String(integrationsCount)} />
+        <Stat label="Open Demand" value={String(opportunities.length)} />
       </section>
 
       <MarketPulsePanel />
@@ -92,8 +97,28 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="terminal-panel rounded-[1.25rem] p-5 xl:col-span-5">
-          <div className="terminal-kicker">Recent Jobs</div>
+        <div className="space-y-4 xl:col-span-5">
+          <div className="terminal-panel rounded-[1.25rem] p-5">
+            <div className="terminal-kicker">Open Opportunities</div>
+            <div className="mt-4 space-y-3">
+              {opportunities.map((opportunity) => (
+                <div key={opportunity.id} className="rounded-2xl border border-[var(--terminal-border)] bg-black/15 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="terminal-mono text-[11px] text-[var(--terminal-accent)]">{opportunity.id}</div>
+                    <span className="terminal-chip">{opportunity.source}</span>
+                  </div>
+                  <div className="mt-2 text-sm text-[var(--terminal-muted)]">{opportunity.normalizedQuery}</div>
+                  <div className="mt-1 text-xs text-[var(--terminal-muted)]">
+                    Budget {opportunity.maxBudgetUsdc ?? 'n/a'} USDC | Delivery {opportunity.maxDeliveryHours ?? 'n/a'}h
+                  </div>
+                </div>
+              ))}
+              {opportunities.length === 0 && <div className="text-sm text-[var(--terminal-muted)]">No queued buyer demand yet.</div>}
+            </div>
+          </div>
+
+          <div className="terminal-panel rounded-[1.25rem] p-5">
+            <div className="terminal-kicker">Recent Jobs</div>
           <div className="mt-4 space-y-3">
             {jobs.map((job) => (
               <div key={job.jobId} className="rounded-2xl border border-[var(--terminal-border)] bg-black/15 p-3">
@@ -111,6 +136,7 @@ export default function DashboardPage() {
             ))}
             {jobs.length === 0 && <div className="text-sm text-[var(--terminal-muted)]">No recent job data returned yet.</div>}
           </div>
+        </div>
         </div>
       </section>
     </div>

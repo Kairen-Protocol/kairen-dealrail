@@ -176,6 +176,18 @@ export interface ProviderCandidate {
   erc8004Registered: boolean;
 }
 
+export interface DemandOpportunity {
+  id: string;
+  createdAt: string;
+  status: 'open' | 'matched' | 'archived';
+  source: 'terminal' | 'api';
+  requestText: string;
+  normalizedQuery: string;
+  maxBudgetUsdc: number | null;
+  maxDeliveryHours: number | null;
+  matchesAtCreate: number;
+}
+
 export interface CreateJobRequest {
   provider: string;
   evaluator: string;
@@ -419,6 +431,24 @@ export const integrationsApi = {
   },
   listDiscoverySources: async (): Promise<{ success: boolean; neutral: boolean; sources: Array<{ id: string; enabled: boolean }> }> => {
     const response = await api.get('/discovery/sources');
+    return response.data;
+  },
+  listOpportunities: async (params?: {
+    status?: 'open' | 'matched' | 'archived';
+    limit?: number;
+  }): Promise<{ success: boolean; useCase: string; opportunities: DemandOpportunity[] }> => {
+    const response = await api.get('/discovery/opportunities', { params });
+    return response.data;
+  },
+  createOpportunity: async (payload: {
+    requestText: string;
+    normalizedQuery: string;
+    maxBudgetUsdc?: number | null;
+    maxDeliveryHours?: number | null;
+    matchesAtCreate?: number;
+    source?: 'terminal' | 'api';
+  }): Promise<{ success: boolean; opportunity: DemandOpportunity }> => {
+    const response = await api.post('/discovery/opportunities', payload);
     return response.data;
   },
   listExecutionProviders: async (): Promise<{ success: boolean; neutral: boolean; providers: Array<{ id: string; mode: string; useCase: string }> }> => {
