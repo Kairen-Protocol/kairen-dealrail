@@ -1,0 +1,98 @@
+'use client';
+
+import { useState } from 'react';
+import { HomeCommandTerminal, TerminalAction } from '@/components/HomeCommandTerminal';
+import { listTerminalRuns } from '@/lib/terminalLedger';
+import { MarketPulsePanel } from '@/components/MarketPulsePanel';
+
+const stepMap: Record<string, string[]> = {
+  help: ['Read command map', 'Choose a role or rail'],
+  status: ['Check backend health', 'Confirm active chain and escrow'],
+  start_flow: ['Capture policy', 'Discover supply', 'Run reverse auction', 'Batch and confirm'],
+  start_ops: ['Create job', 'Fund escrow', 'Submit deliverable', 'Resolve settlement'],
+  open_integrations: ['Choose a settlement rail', 'Configure values', 'Execute or inspect output'],
+  market_scan: ['Read discovery sources', 'Compare available agents', 'Choose counterparties'],
+  role_buyer: ['Capture budget and delivery terms', 'Scan providers', 'Launch reverse auction'],
+  role_provider: ['Prepare service listing', 'Join active auctions', 'Submit winning deliverable'],
+  role_evaluator: ['Inspect deliverable', 'Complete or reject', 'Write outcome to reputation rail'],
+  clear: ['Reset terminal output'],
+  unknown: ['Refine command', 'Use help or role keywords'],
+};
+
+export default function TerminalPage() {
+  const [lastAction, setLastAction] = useState<TerminalAction | null>(null);
+  const [runs, setRuns] = useState(() => listTerminalRuns().slice(0, 12));
+
+  function handleAction(action: TerminalAction) {
+    setLastAction(action);
+    setRuns(listTerminalRuns().slice(0, 12));
+  }
+
+  const steps = lastAction ? stepMap[lastAction.kind] || ['Command received'] : ['Run your first command in terminal'];
+
+  return (
+    <div className="space-y-5">
+      <section className="hero-grid terminal-panel rounded-[1.5rem] p-6">
+        <div className="relative z-10 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div className="terminal-kicker">Terminal</div>
+            <h1 className="mt-2 text-3xl font-semibold">Cypherpunk execution desk</h1>
+            <p className="mt-2 max-w-2xl text-sm text-[var(--terminal-muted)]">
+              This is the primary operating surface. Type what you want, let the desk classify the role, and follow the
+              execution ladder without leaving the page.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="terminal-chip">No redirect flow</span>
+            <span className="terminal-chip">Live command ledger</span>
+            <span className="terminal-chip">Market-aware routing</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        <div className="xl:col-span-7">
+          <HomeCommandTerminal onAction={handleAction} />
+        </div>
+        <div className="space-y-4 xl:col-span-5">
+          <div className="terminal-panel rounded-[1.25rem] p-5">
+            <div className="terminal-kicker">Execution Ladder</div>
+            <div className="mt-4 space-y-3">
+              {steps.map((step, idx) => (
+                <div key={`${step}-${idx}`} className="flex items-start gap-3 text-sm">
+                  <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--terminal-border)] bg-black/15 terminal-mono text-[10px] text-[var(--terminal-accent)]">
+                    {idx + 1}
+                  </div>
+                  <div className="text-[var(--terminal-muted)]">{step}</div>
+                </div>
+              ))}
+            </div>
+            {lastAction && (
+              <div className="mt-5 rounded-2xl border border-[var(--terminal-border)] bg-black/20 p-4 text-xs text-[var(--terminal-muted)]">
+                <div className="terminal-label">Last command</div>
+                <div className="mt-2 terminal-mono text-[var(--terminal-fg)]">{lastAction.command}</div>
+                <div className="mt-1 text-[var(--terminal-good)]">{lastAction.note}</div>
+              </div>
+            )}
+          </div>
+
+          <div className="terminal-panel rounded-[1.25rem] p-5">
+            <div className="terminal-kicker">Recent Commands</div>
+            <div className="mt-4 max-h-80 space-y-2 overflow-auto">
+              {runs.map((run) => (
+                <div key={run.id} className="rounded-2xl border border-[var(--terminal-border)] bg-black/15 p-3 text-xs">
+                  <div className="terminal-mono text-[var(--terminal-muted)]">{new Date(run.at).toLocaleTimeString()}</div>
+                  <div className="mt-1 terminal-mono text-[var(--terminal-fg)]">{run.command}</div>
+                  <div className="mt-1 text-[var(--terminal-good)]">{run.note}</div>
+                </div>
+              ))}
+              {runs.length === 0 && <div className="text-xs text-[var(--terminal-muted)]">No runs yet.</div>}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <MarketPulsePanel />
+    </div>
+  );
+}

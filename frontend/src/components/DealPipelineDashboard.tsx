@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   DealConfirmation,
   Job,
@@ -38,6 +38,16 @@ function Step({ label, active }: { label: string; active: boolean }) {
   );
 }
 
+function FieldLabel({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {
+  return (
+    <label className="text-xs text-[var(--terminal-muted)]">
+      <span className="block">{title}</span>
+      <span className="mb-1 mt-0.5 block text-[10px]">{hint}</span>
+      {children}
+    </label>
+  );
+}
+
 export function DealPipelineDashboard() {
   const [serviceRequirement, setServiceRequirement] = useState(
     'Generate a verified benchmark report for model latency and cost.'
@@ -63,6 +73,16 @@ export function DealPipelineDashboard() {
   const [loading, setLoading] = useState(false);
   const [tracking, setTracking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const prefServiceRequirement = window.localStorage.getItem('dealrail.prefill.serviceRequirement');
+    const prefMaxBudget = window.localStorage.getItem('dealrail.prefill.maxBudgetUsdc');
+    const prefMaxHours = window.localStorage.getItem('dealrail.prefill.maxDeliveryHours');
+
+    if (prefServiceRequirement) setServiceRequirement(prefServiceRequirement);
+    if (prefMaxBudget) setMaxBudgetUsdc(prefMaxBudget);
+    if (prefMaxHours) setMaxDeliveryHours(prefMaxHours);
+  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -209,10 +229,10 @@ export function DealPipelineDashboard() {
   }
 
   return (
-    <section className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 p-6 space-y-6">
+    <section className="terminal-panel rounded-lg p-6 space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-white">Deal Pipeline (Reverse Auction + Confirmation)</h2>
-        <p className="text-sm text-gray-400 mt-1">
+        <h2 className="text-xl font-semibold">Deal Pipeline (Reverse Auction + Confirmation)</h2>
+        <p className="mt-1 text-sm text-[var(--terminal-muted)]">
           Human or agent defines policy. Agents run reverse-auction rounds, batch offers, confirm one deal, then settle
           onchain.
         </p>
@@ -223,10 +243,10 @@ export function DealPipelineDashboard() {
           <button
             key={mode}
             onClick={() => setNetworkMode(mode)}
-            className={`px-3 py-1 rounded text-sm border ${
+            className={`terminal-mono px-3 py-1 rounded text-xs border ${
               networkMode === mode
-                ? 'bg-blue-600/30 border-blue-500 text-blue-200'
-                : 'bg-gray-900/40 border-gray-700 text-gray-400'
+                ? 'border-[var(--terminal-accent)] bg-[var(--terminal-accent)]/15 text-[var(--terminal-accent)]'
+                : 'border-[var(--terminal-border)] bg-black/20 text-[var(--terminal-muted)]'
             }`}
           >
             {mode}
@@ -234,70 +254,84 @@ export function DealPipelineDashboard() {
         ))}
       </div>
 
-      <form onSubmit={handleCreateRfo} className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <input
-          value={serviceRequirement}
-          onChange={(e) => setServiceRequirement(e.target.value)}
-          className="md:col-span-4 bg-gray-900/60 border border-gray-600 rounded px-3 py-2 text-white"
-          placeholder="Service requirement"
-        />
-        <input
-          type="number"
-          step="0.01"
-          min="0.01"
-          value={maxBudgetUsdc}
-          onChange={(e) => setMaxBudgetUsdc(e.target.value)}
-          className="bg-gray-900/60 border border-gray-600 rounded px-3 py-2 text-white"
-          placeholder="Max budget (USDC)"
-        />
-        <input
-          type="number"
-          min="1"
-          value={maxDeliveryHours}
-          onChange={(e) => setMaxDeliveryHours(e.target.value)}
-          className="bg-gray-900/60 border border-gray-600 rounded px-3 py-2 text-white"
-          placeholder="Max delivery hours"
-        />
-        <input
-          type="number"
-          min="0"
-          max="1000"
-          value={minReputationScore}
-          onChange={(e) => setMinReputationScore(e.target.value)}
-          className="bg-gray-900/60 border border-gray-600 rounded px-3 py-2 text-white"
-          placeholder="Min reputation"
-        />
-        <input
-          type="number"
-          min="1"
-          max="10"
-          value={maxRounds}
-          onChange={(e) => setMaxRounds(e.target.value)}
-          className="bg-gray-900/60 border border-gray-600 rounded px-3 py-2 text-white"
-          placeholder="Max rounds"
-        />
-        <input
-          type="number"
-          min="1"
-          max="8"
-          value={batchSize}
-          onChange={(e) => setBatchSize(e.target.value)}
-          className="bg-gray-900/60 border border-gray-600 rounded px-3 py-2 text-white"
-          placeholder="Batch size"
-        />
-        <input
-          type="number"
-          min="50"
-          max="2000"
-          value={autoCounterStepBps}
-          onChange={(e) => setAutoCounterStepBps(e.target.value)}
-          className="bg-gray-900/60 border border-gray-600 rounded px-3 py-2 text-white"
-          placeholder="Counter step (bps)"
-        />
+      <form onSubmit={handleCreateRfo} className="grid grid-cols-1 gap-3 md:grid-cols-4">
+        <FieldLabel title="Service requirement" hint="Describe output you want from provider.">
+          <input
+            value={serviceRequirement}
+            onChange={(e) => setServiceRequirement(e.target.value)}
+            className="terminal-input md:col-span-4"
+            placeholder="Generate benchmark report for model latency and cost."
+          />
+        </FieldLabel>
+        <FieldLabel title="Max budget (USDC)" hint="Hard ceiling for accepted offers.">
+          <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            value={maxBudgetUsdc}
+            onChange={(e) => setMaxBudgetUsdc(e.target.value)}
+            className="terminal-input"
+            placeholder="0.12"
+          />
+        </FieldLabel>
+        <FieldLabel title="Max delivery (hours)" hint="Reject offers above this time.">
+          <input
+            type="number"
+            min="1"
+            value={maxDeliveryHours}
+            onChange={(e) => setMaxDeliveryHours(e.target.value)}
+            className="terminal-input"
+            placeholder="24"
+          />
+        </FieldLabel>
+        <FieldLabel title="Min reputation" hint="Filter weak providers (0-1000).">
+          <input
+            type="number"
+            min="0"
+            max="1000"
+            value={minReputationScore}
+            onChange={(e) => setMinReputationScore(e.target.value)}
+            className="terminal-input"
+            placeholder="700"
+          />
+        </FieldLabel>
+        <FieldLabel title="Max rounds" hint="How many counter rounds to run.">
+          <input
+            type="number"
+            min="1"
+            max="10"
+            value={maxRounds}
+            onChange={(e) => setMaxRounds(e.target.value)}
+            className="terminal-input"
+            placeholder="3"
+          />
+        </FieldLabel>
+        <FieldLabel title="Batch size" hint="Number of top offers to package.">
+          <input
+            type="number"
+            min="1"
+            max="8"
+            value={batchSize}
+            onChange={(e) => setBatchSize(e.target.value)}
+            className="terminal-input"
+            placeholder="2"
+          />
+        </FieldLabel>
+        <FieldLabel title="Counter step (bps)" hint="Auto price reduction per round (100 bps = 1%).">
+          <input
+            type="number"
+            min="50"
+            max="2000"
+            value={autoCounterStepBps}
+            onChange={(e) => setAutoCounterStepBps(e.target.value)}
+            className="terminal-input"
+            placeholder="500"
+          />
+        </FieldLabel>
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white font-semibold rounded px-4 py-2"
+          className="terminal-btn terminal-btn-accent mt-5"
         >
           {loading ? 'Negotiating...' : 'Start Reverse Auction'}
         </button>
@@ -311,29 +345,30 @@ export function DealPipelineDashboard() {
 
       {session && (
         <div className="space-y-3">
-          <div className="text-sm text-gray-400">
-            Negotiation ID: <span className="font-mono text-gray-200">{session.negotiationId}</span> ({session.mode} |{' '}
+          <div className="text-sm text-[var(--terminal-muted)]">
+            Negotiation ID (technical reference for API calls):{' '}
+            <span className="terminal-mono text-[var(--terminal-fg)]">{session.negotiationId}</span> ({session.mode} |{' '}
             {session.policy.networkMode})
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={handleCounterRound}
               disabled={loading || session.roundsCompleted >= session.maxRounds}
-              className="text-sm bg-amber-600 hover:bg-amber-700 disabled:bg-gray-700 text-white font-medium rounded px-3 py-2"
+              className="terminal-btn"
             >
               Run Counter Round ({session.roundsCompleted}/{session.maxRounds})
             </button>
             <button
               onClick={handleCreateBatch}
               disabled={loading || session.offers.length === 0}
-              className="text-sm bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 text-white font-medium rounded px-3 py-2"
+              className="terminal-btn"
             >
               Create Offer Batch
             </button>
             <button
               onClick={handleConfirmBatch}
               disabled={loading || !selectedBatch}
-              className="text-sm bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 text-white font-medium rounded px-3 py-2"
+              className="terminal-btn terminal-btn-good"
             >
               Confirm Deal
             </button>
@@ -341,30 +376,30 @@ export function DealPipelineDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {session.offers.map((offer) => (
-              <div key={offer.offerId} className="rounded border border-gray-600 p-3 bg-gray-900/40 space-y-2">
-                <div className="text-sm text-gray-300 font-semibold">{offer.offerId}</div>
-                <div className="text-sm text-gray-400">
-                  Price: <span className="text-gray-200">{offer.priceUsdc} USDC</span>
+              <div key={offer.offerId} className="rounded border border-[var(--terminal-border)] p-3 bg-black/15 space-y-2">
+                <div className="text-sm text-[var(--terminal-fg)] font-semibold">{offer.offerId}</div>
+                <div className="text-sm text-[var(--terminal-muted)]">
+                  Current Price: <span className="text-[var(--terminal-fg)]">{offer.priceUsdc} USDC</span>
                 </div>
-                <div className="text-sm text-gray-400">
+                <div className="text-sm text-[var(--terminal-muted)]">
                   Initial: <span className="text-gray-200">{offer.initialPriceUsdc} USDC</span>
                 </div>
-                <div className="text-sm text-gray-400">
-                  Round: <span className="text-gray-200">{offer.round}</span>
+                <div className="text-sm text-[var(--terminal-muted)]">
+                  Round: <span className="text-[var(--terminal-fg)]">{offer.round}</span>
                 </div>
-                <div className="text-sm text-gray-400">
-                  Delivery: <span className="text-gray-200">{offer.deliveryHours}h</span>
+                <div className="text-sm text-[var(--terminal-muted)]">
+                  Delivery: <span className="text-[var(--terminal-fg)]">{offer.deliveryHours}h</span>
                 </div>
-                <div className="text-sm text-gray-400">
-                  Rep: <span className="text-gray-200">{offer.reputationScore}</span>
+                <div className="text-sm text-[var(--terminal-muted)]">
+                  Reputation: <span className="text-[var(--terminal-fg)]">{offer.reputationScore}</span>
                 </div>
-                <div className="text-sm text-gray-400">
-                  Score: <span className="text-emerald-300">{offer.score}</span>
+                <div className="text-sm text-[var(--terminal-muted)]">
+                  Ranking Score: <span className="text-[var(--terminal-good)]">{offer.score}</span>
                 </div>
                 <button
                   onClick={() => handleAcceptOffer(offer.offerId)}
                   disabled={loading}
-                  className="w-full text-sm bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 text-white font-medium rounded px-3 py-2"
+                  className="terminal-btn terminal-btn-good w-full"
                 >
                   Select Offer
                 </button>
@@ -375,73 +410,73 @@ export function DealPipelineDashboard() {
       )}
 
       {selectedBatch && (
-        <div className="rounded border border-indigo-500/40 bg-indigo-500/10 p-4 space-y-2 text-sm">
-          <div className="text-indigo-300 font-semibold">Active Batch</div>
-          <div className="text-gray-300">Batch ID: <span className="font-mono">{selectedBatch.batchId}</span></div>
-          <div className="text-gray-300">Offers: {selectedBatch.offerIds.join(', ')}</div>
-          <div className="text-gray-300">Status: {selectedBatch.status}</div>
+        <div className="rounded border border-[var(--terminal-border)] bg-black/20 p-4 space-y-2 text-sm">
+          <div className="font-semibold text-[var(--terminal-accent)]">Active Batch</div>
+          <div className="text-[var(--terminal-muted)]">Batch ID (technical reference): <span className="terminal-mono text-[var(--terminal-fg)]">{selectedBatch.batchId}</span></div>
+          <div className="text-[var(--terminal-muted)]">Offers included: {selectedBatch.offerIds.join(', ')}</div>
+          <div className="text-[var(--terminal-muted)]">Status: {selectedBatch.status}</div>
         </div>
       )}
 
       {confirmation && (
-        <div className="rounded border border-emerald-500/40 bg-emerald-500/10 p-4 space-y-2 text-sm">
-          <div className="text-emerald-300 font-semibold">Deal Confirmation</div>
-          <div className="text-gray-300">Confirmation ID: <span className="font-mono">{confirmation.confirmationId}</span></div>
-          <div className="text-gray-300">Provider: <span className="font-mono">{confirmation.provider}</span></div>
-          <div className="text-gray-300">Evaluator: <span className="font-mono">{confirmation.evaluator}</span></div>
-          <div className="text-gray-300">Expected Delivery: {confirmation.expectedDeliveryHours}h</div>
+        <div className="rounded border border-[var(--terminal-border)] bg-black/20 p-4 space-y-2 text-sm">
+          <div className="font-semibold text-[var(--terminal-good)]">Deal Confirmation</div>
+          <div className="text-[var(--terminal-muted)]">Confirmation ID (technical reference): <span className="terminal-mono text-[var(--terminal-fg)]">{confirmation.confirmationId}</span></div>
+          <div className="text-[var(--terminal-muted)]">Provider: <span className="terminal-mono text-[var(--terminal-fg)]">{confirmation.provider}</span></div>
+          <div className="text-[var(--terminal-muted)]">Evaluator: <span className="terminal-mono text-[var(--terminal-fg)]">{confirmation.evaluator}</span></div>
+          <div className="text-[var(--terminal-muted)]">Expected Delivery: {confirmation.expectedDeliveryHours}h</div>
         </div>
       )}
 
       {receipt && (
-        <div className="rounded border border-cyan-500/40 bg-cyan-500/10 p-4 space-y-2 text-sm">
-          <div className="text-cyan-300 font-semibold">Savings Receipt</div>
-          <div className="text-gray-300">Receipt ID: <span className="font-mono">{receipt.receiptId}</span></div>
-          <div className="text-gray-300">Baseline: {receipt.baselinePriceUsdc} USDC</div>
-          <div className="text-gray-300">Settled: {receipt.settledPriceUsdc} USDC</div>
-          <div className="text-gray-300">Saved: {receipt.savedUsdc} USDC ({receipt.savedPct}%)</div>
-          <div className="text-gray-300">Mode: {receipt.networkMode}</div>
+        <div className="rounded border border-[var(--terminal-border)] bg-black/20 p-4 space-y-2 text-sm">
+          <div className="font-semibold text-[var(--terminal-good)]">Savings Receipt</div>
+          <div className="text-[var(--terminal-muted)]">Receipt ID (technical reference): <span className="terminal-mono text-[var(--terminal-fg)]">{receipt.receiptId}</span></div>
+          <div className="text-[var(--terminal-muted)]">Baseline: {receipt.baselinePriceUsdc} USDC</div>
+          <div className="text-[var(--terminal-muted)]">Settled: {receipt.settledPriceUsdc} USDC</div>
+          <div className="text-[var(--terminal-muted)]">Saved: {receipt.savedUsdc} USDC ({receipt.savedPct}%)</div>
+          <div className="text-[var(--terminal-muted)]">Mode: {receipt.networkMode}</div>
         </div>
       )}
 
       <div className="space-y-2">
-        <div className="text-sm text-gray-300 font-medium">Live Activity Feed</div>
+        <div className="text-sm font-medium">Live Activity Feed</div>
         <div className="max-h-48 overflow-auto space-y-2">
           {activities.map((activity) => (
-            <div key={activity.id} className="rounded border border-gray-700 bg-gray-900/40 p-2 text-xs">
-              <div className="text-gray-200">{activity.message}</div>
-              <div className="text-gray-500">{new Date(activity.timestamp).toLocaleTimeString()}</div>
+            <div key={activity.id} className="rounded border border-[var(--terminal-border)] bg-black/15 p-2 text-xs">
+              <div>{activity.message}</div>
+              <div className="text-[var(--terminal-muted)]">{new Date(activity.timestamp).toLocaleTimeString()}</div>
             </div>
           ))}
-          {activities.length === 0 && <div className="text-xs text-gray-500">No activity yet.</div>}
+          {activities.length === 0 && <div className="text-xs text-[var(--terminal-muted)]">No activity yet.</div>}
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <input
           type="number"
           min="1"
           value={trackedJobId}
           onChange={(e) => setTrackedJobId(e.target.value)}
-          placeholder="Track Job ID"
-          className="bg-gray-900/60 border border-gray-600 rounded px-3 py-2 text-white w-44"
+          placeholder="Job ID from createJob event"
+          className="terminal-input w-56"
         />
         <button
           onClick={trackJob}
           disabled={tracking}
-          className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white rounded px-4 py-2"
+          className="terminal-btn"
         >
           {tracking ? 'Tracking...' : 'Track'}
         </button>
         {trackedJob && (
-          <div className="text-sm text-gray-300 self-center">
+          <div className="self-center text-sm text-[var(--terminal-muted)]">
             State: <span className="font-semibold">{trackedJob.state}</span>
           </div>
         )}
       </div>
 
       {error && (
-        <div className="rounded border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">{error}</div>
+        <div className="rounded border p-3 text-sm text-[var(--terminal-danger)]" style={{ borderColor: 'color-mix(in srgb, var(--terminal-danger) 50%, transparent)', background: 'color-mix(in srgb, var(--terminal-danger) 10%, transparent)' }}>{error}</div>
       )}
     </section>
   );
