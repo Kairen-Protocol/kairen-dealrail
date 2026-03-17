@@ -2,7 +2,7 @@
 
 **Agentic Commerce Escrow Protocol** implementing EIP-8183 for machine-native deal execution on Base Sepolia and Celo Alfajores.
 
-**Status:** ✅ Phase 1 Complete - Full Integration Live
+**Status:** 🚧 P0 Pipeline In Progress (updated March 17, 2026)
 **Hackathon:** The Synthesis (March 13-22, 2026)
 **Networks:** Base Sepolia (deployed), Celo Alfajores (pending)
 
@@ -56,6 +56,23 @@ npm run dev
 - **[AGENT.md](AGENT.md)** - AI agent collaboration guide
 - **[docs/](docs/)** - Comprehensive documentation
 
+## ✅ Hackathon P0 Scope (Must Ship)
+
+- [x] EscrowRail smart contract flow on Base Sepolia (`createJob`, `fund`, `submit`, `complete`, `reject`, `claimRefund`)
+- [x] One end-to-end happy path onchain (create → fund → submit → complete)
+- [x] One failure path onchain (submit → reject; refund path available via `claimRefund`)
+- [x] Dashboard UI for deal lifecycle (visual pipeline + job state)
+- [ ] 3 ERC-8004 agent registrations on Base Mainnet (pending final wallet ops)
+- [ ] Final demo video (2-4 min with onchain evidence)
+
+## 🧩 Standards Coverage
+
+| Standard | Status | Where |
+|----------|--------|-------|
+| ERC-8183 (Agentic Commerce) | Implemented | `contracts/src/EscrowRail.sol`, `contracts/src/EscrowRailERC20.sol` |
+| ERC-8004 (Agent Identity/Reputation hooks) | Integrated via verifier/hook | `contracts/src/identity/ERC8004Verifier.sol`, `contracts/src/DealRailHook.sol` |
+| ERC-7710 (MetaMask Delegation) | Planned (P1) | Tracked in PRD + roadmap |
+
 ### Key Guides
 - **[Frontend Integration](docs/FRONTEND_INTEGRATION.md)** - Wallet integration guide
 - **[API Reference](backend/API_REFERENCE.md)** - Backend API docs
@@ -96,7 +113,10 @@ npm run dev
 | **ERC8004Verifier** | `0x668Dcc3a039CBef0054AAF244763db419BE6A521` |
 | **USDC (Test)** | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
 
-[View on BaseScan](https://sepolia.basescan.org/address/0x53d368b5467524F7d674B70F00138a283e1533ce)
+Explorer links:
+- EscrowRailERC20: https://sepolia.basescan.org/address/0x53d368b5467524F7d674B70F00138a283e1533ce
+- DealRailHook: https://sepolia.basescan.org/address/0x61B73b679E3BE2256dAa90A3c37E10AEacD8a9Cc
+- ERC8004Verifier: https://sepolia.basescan.org/address/0x668Dcc3a039CBef0054AAF244763db419BE6A521
 
 ---
 
@@ -116,11 +136,13 @@ npm run dev
 
 ### ⏳ Phase 2 (Upcoming)
 - [ ] IPFS deliverable storage (Pinata)
-- [ ] x402n negotiation protocol
-- [ ] MetaMask delegation (ERC-7710)
+- [x] x402n-style negotiation bridge endpoints + policy-to-offer pipeline UI
+- [x] MetaMask delegation payload builder (ERC-7710 caveat structure)
 - [ ] WebSocket real-time updates
 - [ ] Analytics dashboard
 - [ ] Celo Alfajores deployment
+- [x] Uniswap quote + tx builder endpoints (Base Mainnet QuoterV2 + SwapRouter02)
+- [x] Locus MCP payment bridge endpoint (mock/live modes)
 
 ---
 

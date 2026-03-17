@@ -32,6 +32,42 @@ export interface Job {
   explorerUrl: string; // BaseScan URL
 }
 
+export interface JobsListResponse {
+  jobs: Job[];
+  pagination: {
+    limit: number;
+    totalOnchain: number;
+  };
+}
+
+export interface NegotiationPolicy {
+  serviceRequirement: string;
+  maxBudgetUsdc: number;
+  maxDeliveryHours: number;
+  minReputationScore: number;
+}
+
+export interface NegotiationOffer {
+  offerId: string;
+  provider: string;
+  evaluator: string;
+  priceUsdc: number;
+  deliveryHours: number;
+  reputationScore: number;
+  confidence: number;
+  score: number;
+  terms: string;
+}
+
+export interface NegotiationSession {
+  negotiationId: string;
+  createdAt: string;
+  mode: 'mock' | 'live';
+  policy: NegotiationPolicy;
+  offers: NegotiationOffer[];
+  acceptedOfferId: string | null;
+}
+
 export interface CreateJobRequest {
   provider: string;
   evaluator: string;
@@ -65,6 +101,14 @@ export interface HealthCheckResponse {
 // ============ API Functions ============
 
 export const jobsApi = {
+  /**
+   * List recent jobs from chain
+   */
+  list: async (params?: { limit?: number }): Promise<JobsListResponse> => {
+    const response = await api.get('/jobs', { params });
+    return response.data;
+  },
+
   /**
    * Get job details by on-chain job ID
    * Reads directly from blockchain via backend
@@ -122,6 +166,72 @@ export const jobsApi = {
    */
   completeJob: async (jobId: number, data: CompleteJobRequest): Promise<{ txHash: string }> => {
     const response = await api.post(`/jobs/${jobId}/complete`, data);
+    return response.data;
+  },
+};
+
+export const x402nApi = {
+  createRfo: async (policy: NegotiationPolicy): Promise<NegotiationSession> => {
+    const response = await api.post('/x402n/rfos', policy);
+    return response.data;
+  },
+  getRfo: async (negotiationId: string): Promise<NegotiationSession> => {
+    const response = await api.get(`/x402n/rfos/${negotiationId}`);
+    return response.data;
+  },
+  acceptOffer: async (
+    negotiationId: string,
+    offerId: string
+  ): Promise<{
+    negotiation: NegotiationSession;
+    acceptedOffer: NegotiationOffer | null;
+    dealBlueprint: {
+      provider: string;
+      evaluator: string;
+      budgetUsdc: number;
+      expectedDeliveryHours: number;
+    } | null;
+  }> => {
+    const response = await api.post(`/x402n/offers/${offerId}/accept`, { negotiationId });
+    return response.data;
+  },
+};
+
+export const integrationsApi = {
+  buildUniswapApproveTx: async (payload: { token: 'USDC' | 'WETH'; amount: string }) => {
+    const response = await api.post('/integrations/uniswap/build-approve-tx', payload);
+    return response.data;
+  },
+  buildUniswapSwapTx: async (payload: {
+    tokenIn: 'USDC' | 'WETH';
+    tokenOut: 'USDC' | 'WETH';
+    amountIn: string;
+    amountOutMinimum: string;
+    fee: number;
+    recipient: string;
+  }) => {
+    const response = await api.post('/integrations/uniswap/build-swap-tx', payload);
+    return response.data;
+  },
+  sendLocusUsdc: async (payload: {
+    fromAgentId: string;
+    toAddress: string;
+    amountUsdc: string;
+    chain: 'base' | 'base-sepolia' | 'celo' | 'celo-alfajores';
+    memo?: string;
+  }) => {
+    const response = await api.post('/integrations/locus/send-usdc', payload);
+    return response.data;
+  },
+  buildDelegation: async (payload: {
+    delegator: string;
+    delegate: string;
+    escrowTarget: string;
+    maxUsdc: string;
+    expiryUnix: number;
+    allowedMethods: string[];
+  }) => {
+    const response = await api.post('/integrations/metamask/delegation/build', payload);
     return response.data;
   },
 };

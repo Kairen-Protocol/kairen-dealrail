@@ -1,0 +1,234 @@
+import { randomUUID } from 'crypto';
+import { config } from '../config';
+
+export interface NegotiationPolicy {
+  serviceRequirement: string;
+  maxBudgetUsdc: number;
+  maxDeliveryHours: number;
+  minReputationScore: number;
+}
+
+export interface ProviderOffer {
+  offerId: string;
+  provider: string;
+  evaluator: string;
+  priceUsdc: number;
+  deliveryHours: number;
+  reputationScore: number;
+  confidence: number;
+  score: number;
+  terms: string;
+}
+
+export interface NegotiationSession {
+  negotiationId: string;
+  createdAt: string;
+  mode: 'mock' | 'live';
+  policy: NegotiationPolicy;
+  offers: ProviderOffer[];
+  acceptedOfferId: string | null;
+}
+
+const DEMO_PROVIDERS: Array<{
+  provider: string;
+  evaluator: string;
+  basePrice: number;
+  baseHours: number;
+  reputation: number;
+}> = [
+  {
+    provider: '0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF',
+    evaluator: '0xe872Bd6d99452C87BA54c7618FEc71f0DB23d4f2',
+    basePrice: 0.09,
+    baseHours: 20,
+    reputation: 835,
+  },
+  {
+    provider: '0x9f2B0f8d8A3f52f8444A9fc4b6c67Aaa4a84F26a',
+    evaluator: '0x782D2a5fD77d001865fA425d995E7fd5Ce880332',
+    basePrice: 0.11,
+    baseHours: 14,
+    reputation: 902,
+  },
+  {
+    provider: '0x2365DBD6f08F3049f643F6385D0f0B6Ff14E0A1f',
+    evaluator: '0xAc5E2f0E2E6f66F8f02E8A53b8D4d367a28d9f80',
+    basePrice: 0.08,
+    baseHours: 28,
+    reputation: 768,
+  },
+];
+
+class X402nService {
+  private sessions = new Map<string, NegotiationSession>();
+
+  async createNegotiation(policy: NegotiationPolicy): Promise<NegotiationSession> {
+    if (!config.x402n.mockMode) {
+      const liveSession = await this.tryCreateLiveNegotiation(policy);
+      if (liveSession) {
+        this.sessions.set(liveSession.negotiationId, liveSession);
+        return liveSession;
+      }
+    }
+
+    const mockSession = this.createMockNegotiation(policy);
+    this.sessions.set(mockSession.negotiationId, mockSession);
+    return mockSession;
+  }
+
+  getNegotiation(negotiationId: string): NegotiationSession | null {
+    return this.sessions.get(negotiationId) ?? null;
+  }
+
+  acceptOffer(negotiationId: string, offerId: string): NegotiationSession | null {
+    const session = this.sessions.get(negotiationId);
+    if (!session) {
+      return null;
+    }
+
+    const offerExists = session.offers.some((offer) => offer.offerId === offerId);
+    if (!offerExists) {
+      return null;
+    }
+
+    const updated: NegotiationSession = {
+      ...session,
+      acceptedOfferId: offerId,
+    };
+
+    this.sessions.set(negotiationId, updated);
+    return updated;
+  }
+
+  private createMockNegotiation(policy: NegotiationPolicy): NegotiationSession {
+    const negotiationId = `neg_${randomUUID().slice(0, 8)}`;
+
+    const offers = DEMO_PROVIDERS
+      .map((provider, idx) => {
+        const price = Number((provider.basePrice + idx * 0.005).toFixed(3));
+        const delivery = provider.baseHours + idx * 2;
+        const reputation = provider.reputation;
+        const confidence = Number((0.78 + idx * 0.06).toFixed(2));
+
+        const budgetScore = Math.max(0, 1 - price / Math.max(policy.maxBudgetUsdc, 0.01));
+        const latencyScore = Math.max(0, 1 - delivery / Math.max(policy.maxDeliveryHours, 1));
+        const reputationScore = Math.max(0, reputation / 1000);
+        const composite = Number(
+          (budgetScore * 0.45 + latencyScore * 0.25 + reputationScore * 0.3).toFixed(3)
+        );
+
+        return {
+          offerId: `offer_${idx + 1}`,
+          provider: provider.provider,
+          evaluator: provider.evaluator,
+          priceUsdc: price,
+          deliveryHours: delivery,
+          reputationScore: reputation,
+          confidence,
+          score: composite,
+          terms: `${policy.serviceRequirement} | ${delivery}h SLA | dispute via evaluator`,
+        } satisfies ProviderOffer;
+      })
+      .filter((offer) => offer.reputationScore >= policy.minReputationScore)
+      .sort((a, b) => b.score - a.score);
+
+    return {
+      negotiationId,
+      createdAt: new Date().toISOString(),
+      mode: 'mock',
+      policy,
+      offers,
+      acceptedOfferId: null,
+    };
+  }
+
+  private async tryCreateLiveNegotiation(
+    policy: NegotiationPolicy
+  ): Promise<NegotiationSession | null> {
+    // DealRail only uses this path when x402n auth/context is explicitly configured.
+    // If missing, we intentionally fail closed and fall back to mock mode.
+    if (!config.x402n.apiKey) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${config.x402n.baseUrl}/rfos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `ApiKey ${config.x402n.apiKey}`,
+        },
+        body: JSON.stringify({
+          title: `DealRail RFO: ${policy.serviceRequirement.slice(0, 40)}`,
+          description: `${policy.serviceRequirement}. Generated by DealRail bridge.`,
+          category_id: process.env.X402N_CATEGORY_ID,
+          requirements: { summary: policy.serviceRequirement },
+          expected_deliverables: { type: 'digital-deliverable' },
+          max_price_usdc: policy.maxBudgetUsdc.toFixed(8),
+          preferred_delivery_time: policy.maxDeliveryHours * 3600,
+          deadline_hours: Math.min(Math.max(policy.maxDeliveryHours, 1), 168),
+          preferred_chains: ['base'],
+          allow_counter_offers: true,
+          auto_accept_lowest: false,
+          min_provider_reputation: (policy.minReputationScore / 1000).toFixed(8),
+          metadata: { source: 'dealrail' },
+        }),
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const body = (await response.json()) as {
+        id?: string;
+      };
+      if (!body.id) {
+        return null;
+      }
+
+      const offersResponse = await fetch(`${config.x402n.baseUrl}/rfos/${body.id}/offers/ranked`, {
+        headers: {
+          Authorization: `ApiKey ${config.x402n.apiKey}`,
+        },
+      });
+
+      if (!offersResponse.ok) {
+        return null;
+      }
+
+      const offersBody = (await offersResponse.json()) as Array<{
+        id: string;
+        provider_name?: string;
+        proposed_price_usdc?: string;
+        proposed_delivery_time?: number;
+        provider_reputation?: number;
+        rank_score?: number;
+      }>;
+
+      const offers: ProviderOffer[] = offersBody.map((offer, idx) => ({
+        offerId: offer.id,
+        provider: offer.provider_name ?? `provider-${idx + 1}`,
+        evaluator: '0xe872Bd6d99452C87BA54c7618FEc71f0DB23d4f2',
+        priceUsdc: Number(offer.proposed_price_usdc ?? '0'),
+        deliveryHours: Math.ceil((offer.proposed_delivery_time ?? 3600) / 3600),
+        reputationScore: Math.round((offer.provider_reputation ?? 0.75) * 1000),
+        confidence: 0.8,
+        score: Number(offer.rank_score ?? 0),
+        terms: 'Live offer from x402n ranked endpoint',
+      }));
+
+      return {
+        negotiationId: body.id,
+        createdAt: new Date().toISOString(),
+        mode: 'live',
+        policy,
+        offers,
+        acceptedOfferId: null,
+      };
+    } catch {
+      return null;
+    }
+  }
+}
+
+export const x402nService = new X402nService();

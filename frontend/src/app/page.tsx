@@ -5,6 +5,8 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { JobsList } from '@/components/JobsList';
 import { CreateJobButton } from '@/components/CreateJobButton';
+import { DealPipelineDashboard } from '@/components/DealPipelineDashboard';
+import { IntegrationsWorkbench } from '@/components/IntegrationsWorkbench';
 import { healthCheck, HealthCheckResponse } from '@/lib/api';
 
 export default function Home() {
@@ -245,6 +247,9 @@ export default function Home() {
                 View Contract
               </a>
             </div>
+
+            <DealPipelineDashboard />
+            <IntegrationsWorkbench />
 
             {/* Jobs List */}
             <JobsList address={address} />

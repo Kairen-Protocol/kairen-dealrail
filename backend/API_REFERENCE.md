@@ -62,6 +62,14 @@ curl http://localhost:3001/api/v1/jobs/5
 
 ---
 
+## List Recent Jobs
+
+**Endpoint:** `GET /api/v1/jobs?limit=24`
+
+Returns recent onchain jobs in descending order by job ID.
+
+---
+
 ## Create Job
 
 **Endpoint:** `POST /api/v1/jobs`
@@ -193,9 +201,144 @@ curl -X POST http://localhost:3001/api/v1/jobs/6/complete \
 {
   "success": true,
   "jobId": 6,
-  "reasonHash": "0x...",
+  "reason": "Approved",
   "txHash": "0x...",
   "explorerUrl": "https://sepolia.basescan.org/tx/0x..."
+}
+```
+
+---
+
+## Reject Job
+
+**Endpoint:** `POST /api/v1/jobs/:jobId/reject`
+
+**Request Body:**
+```json
+{
+  "reason": "Quality mismatch",
+  "evaluatorPrivateKey": "0x..."
+}
+```
+
+---
+
+## Claim Refund
+
+**Endpoint:** `POST /api/v1/jobs/:jobId/claim-refund`
+
+**Request Body:**
+```json
+{
+  "callerPrivateKey": "0x..."
+}
+```
+
+---
+
+## x402n Negotiation Bridge
+
+### Create RFO
+**Endpoint:** `POST /api/v1/x402n/rfos`
+
+```json
+{
+  "serviceRequirement": "Generate benchmark report",
+  "maxBudgetUsdc": 0.12,
+  "maxDeliveryHours": 24,
+  "minReputationScore": 700
+}
+```
+
+### Get Negotiation
+**Endpoint:** `GET /api/v1/x402n/rfos/:negotiationId`
+
+### Accept Offer
+**Endpoint:** `POST /api/v1/x402n/offers/:offerId/accept`
+
+```json
+{
+  "negotiationId": "neg_1234abcd"
+}
+```
+
+---
+
+## Uniswap Quote (Base Mainnet)
+
+**Endpoint:** `GET /api/v1/integrations/uniswap/quote`
+
+**Query params:**
+- `tokenIn`: `USDC` or `WETH` (default `USDC`)
+- `tokenOut`: `USDC` or `WETH` (default `WETH`)
+- `amountIn`: human amount string (default `1`)
+- `fee`: pool fee tier (default `3000`)
+
+**Example:**
+```bash
+curl "http://localhost:3001/api/v1/integrations/uniswap/quote?tokenIn=USDC&tokenOut=WETH&amountIn=10&fee=3000"
+```
+
+---
+
+## Uniswap Tx Builders
+
+### Build Approve Tx
+**Endpoint:** `POST /api/v1/integrations/uniswap/build-approve-tx`
+
+```json
+{
+  "token": "USDC",
+  "amount": "10"
+}
+```
+
+### Build Swap Tx (exactInputSingle)
+**Endpoint:** `POST /api/v1/integrations/uniswap/build-swap-tx`
+
+```json
+{
+  "tokenIn": "USDC",
+  "tokenOut": "WETH",
+  "amountIn": "10",
+  "amountOutMinimum": "0.001",
+  "fee": 3000,
+  "recipient": "0x77712e28F7A4a2EeD0bd7f9F8B8486332a38892e"
+}
+```
+
+---
+
+## Locus MCP Bridge
+
+### Send USDC
+**Endpoint:** `POST /api/v1/integrations/locus/send-usdc`
+
+```json
+{
+  "fromAgentId": "buyer-agent",
+  "toAddress": "0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF",
+  "amountUsdc": "1",
+  "chain": "base-sepolia",
+  "memo": "DealRail hackathon payment"
+}
+```
+
+---
+
+## MetaMask Delegation (ERC-7710) Builder
+
+### Build Delegation Payload
+**Endpoint:** `POST /api/v1/integrations/metamask/delegation/build`
+
+```json
+{
+  "delegator": "0x77712e28F7A4a2EeD0bd7f9F8B8486332a38892e",
+  "delegate": "0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF",
+  "escrowTarget": "0x53d368b5467524F7d674B70F00138a283e1533ce",
+  "maxUsdc": "25",
+  "expiryUnix": 1773780000,
+  "allowedMethods": ["fund(uint256,uint256)", "createJob(address,address,uint256,address)"]
 }
 ```
 

@@ -4,6 +4,11 @@ import cors from 'cors';
 import { config } from './config';
 import { contractService } from './services/contract.service';
 import { ethers } from 'ethers';
+import { z } from 'zod';
+import { x402nService } from './services/x402n.service';
+import { uniswapService } from './services/uniswap.service';
+import { locusService } from './services/locus.service';
+import { delegationService } from './services/delegation.service';
 
 const app: Express = express();
 
@@ -11,8 +16,39 @@ const app: Express = express();
 app.use(cors());
 app.use(express.json());
 
+const stateNames = ['Open', 'Funded', 'Submitted', 'Completed', 'Rejected', 'Expired'];
+
+function getExplorerBaseUrl(): string {
+  return config.activeChainConfig.chainId === 44787
+    ? 'https://alfajores.celoscan.io'
+    : 'https://sepolia.basescan.org';
+}
+
+function formatJobResponse(jobId: number, job: Awaited<ReturnType<typeof contractService.getJob>>) {
+  const explorerBase = getExplorerBaseUrl();
+  return {
+    jobId,
+    client: job.client,
+    provider: job.provider,
+    evaluator: job.evaluator,
+    budget: ethers.formatUnits(job.budget, 6) + ' USDC',
+    budgetRaw: job.budget.toString(),
+    expiry: new Date(Number(job.expiry) * 1000).toISOString(),
+    state: stateNames[Number(job.state)],
+    stateCode: Number(job.state),
+    deliverable: job.deliverable,
+    hook: job.hook,
+    explorerUrl: `${explorerBase}/address/${config.activeChainConfig.contracts.escrowRailERC20}`,
+  };
+}
+
 // Health check
 app.get('/health', async (_req: Request, res: Response) => {
+  const stablecoinAddress =
+    'usdcAddress' in config.activeChainConfig
+      ? config.activeChainConfig.usdcAddress
+      : config.activeChainConfig.cusdAddress;
+
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -20,9 +56,52 @@ app.get('/health', async (_req: Request, res: Response) => {
       network: config.blockchain.activeChain,
       chainId: config.activeChainConfig.chainId,
       escrowAddress: config.activeChainConfig.contracts.escrowRailERC20,
-      usdcAddress: config.activeChainConfig.usdcAddress,
+      usdcAddress: stablecoinAddress,
+    },
+    integrations: {
+      x402nMockMode: config.x402n.mockMode,
+      x402nBaseUrl: config.x402n.baseUrl,
     },
   });
+});
+
+// GET /api/v1/jobs - List recent jobs from chain
+app.get('/api/v1/jobs', async (req: Request, res: Response) => {
+  try {
+    const limitRaw = Number(req.query.limit ?? 20);
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 100) : 20;
+
+    const nextJobId = await contractService.getNextJobId();
+    const maxJobId = Math.max(nextJobId - 1, 0);
+    const minJobId = Math.max(1, maxJobId - limit + 1);
+
+    const jobIds: number[] = [];
+    for (let id = maxJobId; id >= minJobId; id -= 1) {
+      jobIds.push(id);
+    }
+
+    const jobs = await Promise.all(
+      jobIds.map(async (jobId) => {
+        try {
+          const job = await contractService.getJob(jobId);
+          return formatJobResponse(jobId, job);
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    res.json({
+      jobs: jobs.filter((job) => job !== null),
+      pagination: {
+        limit,
+        totalOnchain: maxJobId,
+      },
+    });
+  } catch (error) {
+    console.error('Error listing jobs:', error);
+    res.status(500).json({ error: 'Failed to list jobs' });
+  }
 });
 
 // GET /api/v1/jobs/:jobId - Get job details from blockchain
@@ -30,27 +109,12 @@ app.get('/api/v1/jobs/:jobId', async (req: Request, res: Response) => {
   try {
     const jobId = parseInt(req.params.jobId, 10);
     if (isNaN(jobId)) {
-      return res.status(400).json({ error: 'Invalid job ID' });
+      res.status(400).json({ error: 'Invalid job ID' });
+      return;
     }
 
     const job = await contractService.getJob(jobId);
-
-    const stateNames = ['Open', 'Funded', 'Submitted', 'Completed', 'Rejected', 'Expired'];
-
-    res.json({
-      jobId,
-      client: job.client,
-      provider: job.provider,
-      evaluator: job.evaluator,
-      budget: ethers.formatUnits(job.budget, 6) + ' USDC',
-      budgetRaw: job.budget.toString(),
-      expiry: new Date(Number(job.expiry) * 1000).toISOString(),
-      state: stateNames[Number(job.state)],
-      stateCode: Number(job.state),
-      deliverable: job.deliverable,
-      hook: job.hook,
-      explorerUrl: `https://sepolia.basescan.org/address/${config.activeChainConfig.contracts.escrowRailERC20}`,
-    });
+    res.json(formatJobResponse(jobId, job));
   } catch (error) {
     console.error(`Error getting job ${req.params.jobId}:`, error);
     res.status(500).json({ error: 'Failed to get job' });
@@ -63,7 +127,8 @@ app.post('/api/v1/jobs', async (req: Request, res: Response) => {
     const { provider, evaluator, expiryDays } = req.body;
 
     if (!provider || !evaluator) {
-      return res.status(400).json({ error: 'Missing provider or evaluator address' });
+      res.status(400).json({ error: 'Missing provider or evaluator address' });
+      return;
     }
 
     const days = expiryDays || 7;
@@ -80,11 +145,11 @@ app.post('/api/v1/jobs', async (req: Request, res: Response) => {
       success: true,
       jobId: result.jobId,
       txHash: result.txHash,
-      explorerUrl: `https://sepolia.basescan.org/tx/${result.txHash}`,
+      explorerUrl: `${getExplorerBaseUrl()}/tx/${result.txHash}`,
     });
   } catch (error) {
     console.error('Error creating job:', error);
-    res.status(500).json({ error: 'Failed to create job', details: error.message });
+    res.status(500).json({ error: 'Failed to create job', details: (error as Error).message });
   }
 });
 
@@ -95,7 +160,8 @@ app.post('/api/v1/jobs/:jobId/fund', async (req: Request, res: Response) => {
     const { amount } = req.body; // Amount in USDC (e.g., "0.1")
 
     if (isNaN(jobId) || !amount) {
-      return res.status(400).json({ error: 'Invalid jobId or amount' });
+      res.status(400).json({ error: 'Invalid jobId or amount' });
+      return;
     }
 
     const amountWei = ethers.parseUnits(amount, 6);
@@ -111,11 +177,11 @@ app.post('/api/v1/jobs/:jobId/fund', async (req: Request, res: Response) => {
       jobId,
       amount: amount + ' USDC',
       txHash: result.txHash,
-      explorerUrl: `https://sepolia.basescan.org/tx/${result.txHash}`,
+      explorerUrl: `${getExplorerBaseUrl()}/tx/${result.txHash}`,
     });
   } catch (error) {
     console.error('Error funding job:', error);
-    res.status(500).json({ error: 'Failed to fund job', details: error.message });
+    res.status(500).json({ error: 'Failed to fund job', details: (error as Error).message });
   }
 });
 
@@ -126,7 +192,8 @@ app.post('/api/v1/jobs/:jobId/submit', async (req: Request, res: Response) => {
     const { deliverable, providerPrivateKey } = req.body;
 
     if (isNaN(jobId) || !deliverable || !providerPrivateKey) {
-      return res.status(400).json({ error: 'Missing jobId, deliverable, or providerPrivateKey' });
+      res.status(400).json({ error: 'Missing jobId, deliverable, or providerPrivateKey' });
+      return;
     }
 
     const deliverableHash = ethers.keccak256(ethers.toUtf8Bytes(deliverable));
@@ -142,11 +209,11 @@ app.post('/api/v1/jobs/:jobId/submit', async (req: Request, res: Response) => {
       jobId,
       deliverableHash,
       txHash: result.txHash,
-      explorerUrl: `https://sepolia.basescan.org/tx/${result.txHash}`,
+      explorerUrl: `${getExplorerBaseUrl()}/tx/${result.txHash}`,
     });
   } catch (error) {
     console.error('Error submitting deliverable:', error);
-    res.status(500).json({ error: 'Failed to submit deliverable', details: error.message });
+    res.status(500).json({ error: 'Failed to submit deliverable', details: (error as Error).message });
   }
 });
 
@@ -157,27 +224,318 @@ app.post('/api/v1/jobs/:jobId/complete', async (req: Request, res: Response) => 
     const { reason, evaluatorPrivateKey } = req.body;
 
     if (isNaN(jobId) || !evaluatorPrivateKey) {
-      return res.status(400).json({ error: 'Missing jobId or evaluatorPrivateKey' });
+      res.status(400).json({ error: 'Missing jobId or evaluatorPrivateKey' });
+      return;
     }
-
-    const reasonHash = ethers.keccak256(ethers.toUtf8Bytes(reason || 'Approved'));
 
     const result = await contractService.completeJob({
       jobId,
-      reasonHash,
+      reason: reason || 'Approved',
       evaluatorPrivateKey,
     });
 
     res.json({
       success: true,
       jobId,
-      reasonHash,
+      reason: reason || 'Approved',
       txHash: result.txHash,
-      explorerUrl: `https://sepolia.basescan.org/tx/${result.txHash}`,
+      explorerUrl: `${getExplorerBaseUrl()}/tx/${result.txHash}`,
     });
   } catch (error) {
     console.error('Error completing job:', error);
-    res.status(500).json({ error: 'Failed to complete job', details: error.message });
+    res.status(500).json({ error: 'Failed to complete job', details: (error as Error).message });
+  }
+});
+
+// POST /api/v1/jobs/:jobId/reject - Reject job (evaluator)
+app.post('/api/v1/jobs/:jobId/reject', async (req: Request, res: Response) => {
+  try {
+    const jobId = parseInt(req.params.jobId, 10);
+    const { reason, evaluatorPrivateKey } = req.body;
+
+    if (isNaN(jobId) || !evaluatorPrivateKey) {
+      res.status(400).json({ error: 'Missing jobId or evaluatorPrivateKey' });
+      return;
+    }
+
+    const result = await contractService.rejectJob({
+      jobId,
+      reason: reason || 'Rejected',
+      evaluatorPrivateKey,
+    });
+
+    res.json({
+      success: true,
+      jobId,
+      reason: reason || 'Rejected',
+      txHash: result.txHash,
+      explorerUrl: `${getExplorerBaseUrl()}/tx/${result.txHash}`,
+    });
+    return;
+  } catch (error) {
+    console.error('Error rejecting job:', error);
+    res.status(500).json({ error: 'Failed to reject job', details: (error as Error).message });
+    return;
+  }
+});
+
+// POST /api/v1/jobs/:jobId/claim-refund - Claim refund after expiry
+app.post('/api/v1/jobs/:jobId/claim-refund', async (req: Request, res: Response) => {
+  try {
+    const jobId = parseInt(req.params.jobId, 10);
+    const { callerPrivateKey } = req.body;
+
+    if (isNaN(jobId) || !callerPrivateKey) {
+      res.status(400).json({ error: 'Missing jobId or callerPrivateKey' });
+      return;
+    }
+
+    const result = await contractService.claimRefund({
+      jobId,
+      callerPrivateKey,
+    });
+
+    res.json({
+      success: true,
+      jobId,
+      txHash: result.txHash,
+      explorerUrl: `${getExplorerBaseUrl()}/tx/${result.txHash}`,
+    });
+    return;
+  } catch (error) {
+    console.error('Error claiming refund:', error);
+    res.status(500).json({ error: 'Failed to claim refund', details: (error as Error).message });
+    return;
+  }
+});
+
+const createNegotiationSchema = z.object({
+  serviceRequirement: z.string().min(5),
+  maxBudgetUsdc: z.number().positive(),
+  maxDeliveryHours: z.number().int().positive(),
+  minReputationScore: z.number().int().min(0).max(1000),
+});
+
+// POST /api/v1/x402n/rfos - Create negotiation from policy
+app.post('/api/v1/x402n/rfos', async (req: Request, res: Response) => {
+  try {
+    const policy = createNegotiationSchema.parse(req.body);
+    const session = await x402nService.createNegotiation(policy);
+    res.status(201).json(session);
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid policy payload', details: error.issues });
+      return;
+    }
+    console.error('Error creating x402n negotiation:', error);
+    res.status(500).json({ error: 'Failed to create negotiation' });
+    return;
+  }
+});
+
+// GET /api/v1/x402n/rfos/:negotiationId - Get negotiation state
+app.get('/api/v1/x402n/rfos/:negotiationId', async (req: Request, res: Response) => {
+  const session = x402nService.getNegotiation(req.params.negotiationId);
+  if (!session) {
+    res.status(404).json({ error: 'Negotiation not found' });
+    return;
+  }
+  res.json(session);
+  return;
+});
+
+// POST /api/v1/x402n/offers/:offerId/accept - Accept offer in negotiation
+app.post('/api/v1/x402n/offers/:offerId/accept', async (req: Request, res: Response) => {
+  const schema = z.object({ negotiationId: z.string().min(1) });
+
+  try {
+    const { negotiationId } = schema.parse(req.body);
+    const offerId = req.params.offerId;
+
+    const updated = x402nService.acceptOffer(negotiationId, offerId);
+    if (!updated) {
+      res.status(404).json({ error: 'Negotiation or offer not found' });
+      return;
+    }
+
+    const acceptedOffer = updated.offers.find((offer) => offer.offerId === offerId);
+    res.json({
+      negotiation: updated,
+      acceptedOffer,
+      dealBlueprint: acceptedOffer
+        ? {
+            provider: acceptedOffer.provider,
+            evaluator: acceptedOffer.evaluator,
+            budgetUsdc: acceptedOffer.priceUsdc,
+            expectedDeliveryHours: acceptedOffer.deliveryHours,
+          }
+        : null,
+    });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid accept payload', details: error.issues });
+      return;
+    }
+    console.error('Error accepting x402n offer:', error);
+    res.status(500).json({ error: 'Failed to accept offer' });
+    return;
+  }
+});
+
+// GET /api/v1/integrations/uniswap/quote - Quote USDC/WETH route on Base Mainnet
+app.get('/api/v1/integrations/uniswap/quote', async (req: Request, res: Response) => {
+  const schema = z.object({
+    tokenIn: z.enum(['USDC', 'WETH']).default('USDC'),
+    tokenOut: z.enum(['USDC', 'WETH']).default('WETH'),
+    amountIn: z.string().default('1'),
+    fee: z
+      .string()
+      .transform((value) => Number(value))
+      .pipe(z.number().int().positive())
+      .default('3000'),
+  });
+
+  try {
+    const parsed = schema.parse({
+      tokenIn: req.query.tokenIn ?? 'USDC',
+      tokenOut: req.query.tokenOut ?? 'WETH',
+      amountIn: req.query.amountIn ?? '1',
+      fee: req.query.fee ?? '3000',
+    });
+
+    if (parsed.tokenIn === parsed.tokenOut) {
+      res.status(400).json({ error: 'tokenIn and tokenOut must be different' });
+      return;
+    }
+
+    const quote = await uniswapService.quoteExactInputSingle({
+      tokenIn: parsed.tokenIn,
+      tokenOut: parsed.tokenOut,
+      amountIn: parsed.amountIn,
+      fee: parsed.fee,
+    });
+
+    res.json({
+      success: true,
+      network: 'base-mainnet',
+      ...quote,
+    });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid quote params', details: error.issues });
+      return;
+    }
+    console.error('Error fetching Uniswap quote:', error);
+    res.status(500).json({ error: 'Failed to fetch Uniswap quote', details: (error as Error).message });
+    return;
+  }
+});
+
+// POST /api/v1/integrations/uniswap/build-approve-tx
+app.post('/api/v1/integrations/uniswap/build-approve-tx', async (req: Request, res: Response) => {
+  const schema = z.object({
+    token: z.enum(['USDC', 'WETH']),
+    amount: z.string().min(1),
+  });
+
+  try {
+    const payload = schema.parse(req.body);
+    const tx = uniswapService.buildApproveTx(payload);
+    res.json({ success: true, tx });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid approve payload', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to build approve tx', details: (error as Error).message });
+    return;
+  }
+});
+
+// POST /api/v1/integrations/uniswap/build-swap-tx
+app.post('/api/v1/integrations/uniswap/build-swap-tx', async (req: Request, res: Response) => {
+  const schema = z.object({
+    tokenIn: z.enum(['USDC', 'WETH']),
+    tokenOut: z.enum(['USDC', 'WETH']),
+    amountIn: z.string().min(1),
+    amountOutMinimum: z.string().min(1),
+    fee: z.number().int().positive().default(3000),
+    recipient: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  });
+
+  try {
+    const payload = schema.parse(req.body);
+
+    if (payload.tokenIn === payload.tokenOut) {
+      res.status(400).json({ error: 'tokenIn and tokenOut must differ' });
+      return;
+    }
+
+    const tx = uniswapService.buildExactInputSingleTx(payload);
+    res.json({ success: true, tx });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid swap payload', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to build swap tx', details: (error as Error).message });
+    return;
+  }
+});
+
+// POST /api/v1/integrations/locus/send-usdc
+app.post('/api/v1/integrations/locus/send-usdc', async (req: Request, res: Response) => {
+  const schema = z.object({
+    fromAgentId: z.string().min(1),
+    toAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+    amountUsdc: z.string().min(1),
+    chain: z.enum(['base', 'base-sepolia', 'celo', 'celo-alfajores']),
+    memo: z.string().max(200).optional(),
+  });
+
+  try {
+    const payload = schema.parse(req.body);
+    const result = await locusService.sendUsdc(payload);
+    res.json({ success: true, ...result });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid Locus payload', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to call Locus bridge', details: (error as Error).message });
+    return;
+  }
+});
+
+// POST /api/v1/integrations/metamask/delegation/build
+app.post('/api/v1/integrations/metamask/delegation/build', async (req: Request, res: Response) => {
+  const schema = z.object({
+    delegator: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+    delegate: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+    escrowTarget: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+    maxUsdc: z.string().min(1),
+    expiryUnix: z.number().int().positive(),
+    allowedMethods: z.array(z.string().min(3)).min(1),
+  });
+
+  try {
+    const payload = schema.parse(req.body);
+    const delegation = delegationService.buildDelegation(payload);
+    res.json({ success: true, delegation });
+    return;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid delegation payload', details: error.issues });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to build delegation payload', details: (error as Error).message });
+    return;
   }
 });
 

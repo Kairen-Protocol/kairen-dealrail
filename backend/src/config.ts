@@ -46,6 +46,18 @@ export const config = {
     },
     // Default active chain
     activeChain: (getEnv('ACTIVE_CHAIN', 'baseSepolia')) as 'baseSepolia' | 'celoAlfajores',
+    get activeChainConfig() {
+      return this.activeChain === 'baseSepolia' ? this.baseSepolia : this.celoAlfajores;
+    },
+    get chainId() {
+      return this.activeChainConfig.chainId;
+    },
+    get rpcUrl() {
+      return this.activeChainConfig.rpcUrl;
+    },
+    get escrowAddress() {
+      return this.activeChainConfig.contracts.escrowRailERC20;
+    },
     // Wallet keys
     deployerPrivateKey: getEnv('DEPLOYER_PRIVATE_KEY'),
     agentPrivateKey: getEnv('AGENT_PRIVATE_KEY'),
@@ -61,6 +73,25 @@ export const config = {
   ipfs: {
     pinataJwt: getEnv('PINATA_JWT', ''),
     gateway: getEnv('PINATA_GATEWAY', 'https://gateway.pinata.cloud'),
+  },
+  integrations: {
+    uniswap: {
+      baseMainnetRpc: getEnv('BASE_MAINNET_RPC', 'https://mainnet.base.org'),
+      quoterV2: getEnv('UNISWAP_QUOTER_V2_BASE', '0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a'),
+      swapRouter02: getEnv('UNISWAP_SWAP_ROUTER_02_BASE', '0x2626664c2603336E57B271c5C0b26F421741e481'),
+      universalRouter: getEnv('UNISWAP_UNIVERSAL_ROUTER_BASE', '0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD'),
+    },
+    locus: {
+      mcpUrl: getEnv('LOCUS_MCP_URL', 'https://mcp.paywithlocus.com/mcp'),
+      apiKey: getEnv('LOCUS_API_KEY', ''),
+      mockMode: getEnv('LOCUS_MOCK_MODE', 'true').toLowerCase() !== 'false',
+    },
+  },
+  x402n: {
+    baseUrl: getEnv('X402N_BASE_URL', 'https://x402n.kairen.xyz/api/v1'),
+    apiKey: getEnv('X402N_API_KEY', ''),
+    // Default to mock mode for deterministic hackathon demos.
+    mockMode: getEnv('X402N_MOCK_MODE', 'true').toLowerCase() !== 'false',
   },
   // Helper getters
   get activeChainConfig() {

@@ -8,9 +8,6 @@ interface JobsListProps {
   address?: string;
 }
 
-// Known job IDs on chain - update this as new jobs are created
-const KNOWN_JOB_IDS = [1, 2, 3, 4, 5];
-
 export function JobsList({ address }: JobsListProps) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,9 +23,8 @@ export function JobsList({ address }: JobsListProps) {
       setLoading(true);
       setError(null);
 
-      // Fetch all known jobs from the blockchain
-      const fetchedJobs = await jobsApi.getMultipleJobs(KNOWN_JOB_IDS);
-      setJobs(fetchedJobs);
+      const response = await jobsApi.list({ limit: 24 });
+      setJobs(response.jobs);
     } catch (error) {
       console.error('Failed to load jobs:', error);
       setError('Failed to load jobs. Make sure the backend is running on port 3001.');
@@ -128,7 +124,7 @@ export function JobsList({ address }: JobsListProps) {
           </h3>
           <p className="mt-2 text-sm text-gray-500">
             {filter === 'all'
-              ? `Found ${jobs.length} total jobs on chain.`
+              ? `Found ${jobs.length} recent jobs on chain.`
               : `You don't have any jobs as ${filter}.`}
           </p>
         </div>

@@ -57,8 +57,8 @@ export interface Job {
 
 class ContractService {
   private provider: ethers.JsonRpcProvider;
-  private escrowContract: ethers.Contract;
-  private usdcContract: ethers.Contract;
+  private escrowContract: any;
+  private usdcContract: any;
 
   constructor() {
     const chainConfig = config.activeChainConfig;
@@ -73,8 +73,11 @@ class ContractService {
       this.provider
     );
 
+    const stablecoinAddress =
+      'usdcAddress' in chainConfig ? chainConfig.usdcAddress : chainConfig.cusdAddress;
+
     this.usdcContract = new ethers.Contract(
-      chainConfig.usdcAddress || chainConfig.cusdAddress,
+      stablecoinAddress,
       ERC20_ABI,
       this.provider
     );
