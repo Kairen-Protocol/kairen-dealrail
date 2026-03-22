@@ -846,7 +846,7 @@ app.get('/api/v1/x402n/rfos/:negotiationId/activities', (req: Request, res: Resp
   }
 });
 
-// GET /api/v1/integrations/uniswap/quote - Quote USDC/WETH route on Base Mainnet
+// GET /api/v1/integrations/uniswap/quote - Preview USDC/WETH route on Base
 app.get('/api/v1/integrations/uniswap/quote', async (req: Request, res: Response) => {
   const schema = z.object({
     tokenIn: z.enum(['USDC', 'WETH']).default('USDC'),
@@ -881,7 +881,12 @@ app.get('/api/v1/integrations/uniswap/quote', async (req: Request, res: Response
 
     res.json({
       success: true,
+      previewOnly: true,
       network: 'base-mainnet',
+      notes: [
+        'Base treasury routing is preview-only in the current repo state.',
+        'Use this output to inspect payload shape, not to claim a live swap proof.',
+      ],
       ...quote,
     });
     return;
@@ -906,7 +911,12 @@ app.post('/api/v1/integrations/uniswap/build-approve-tx', async (req: Request, r
   try {
     const payload = schema.parse(req.body);
     const tx = uniswapService.buildApproveTx(payload);
-    res.json({ success: true, tx });
+    res.json({
+      success: true,
+      previewOnly: true,
+      notes: ['This payload is for Base treasury-routing preview only.'],
+      tx,
+    });
     return;
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -938,7 +948,12 @@ app.post('/api/v1/integrations/uniswap/build-swap-tx', async (req: Request, res:
     }
 
     const tx = uniswapService.buildExactInputSingleTx(payload);
-    res.json({ success: true, tx });
+    res.json({
+      success: true,
+      previewOnly: true,
+      notes: ['This payload is for Base treasury-routing preview only.'],
+      tx,
+    });
     return;
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -969,8 +984,17 @@ app.get('/api/v1/integrations/uniswap/post-settlement/:jobId', async (req: Reque
 
   try {
     const jobId = parseInt(req.params.jobId, 10);
+    const requestedChain = parseChain(req.query.chain);
+    const settlementChain: SupportedChain = requestedChain ?? 'baseSepolia';
     if (Number.isNaN(jobId)) {
       res.status(400).json({ error: 'Invalid jobId' });
+      return;
+    }
+    if (settlementChain !== 'baseSepolia') {
+      res.status(400).json({
+        error: 'Base treasury routing preview is only available for Base Sepolia jobs right now',
+        requestedChain: settlementChain,
+      });
       return;
     }
 
@@ -980,7 +1004,7 @@ app.get('/api/v1/integrations/uniswap/post-settlement/:jobId', async (req: Reque
       slippageBps: req.query.slippageBps ?? '300',
     });
 
-    const job = await contractService.getJob(jobId);
+    const job = await contractService.getJob(jobId, settlementChain);
     const stateCode = Number(job.state);
     if (stateCode !== 3) {
       res.status(400).json({
@@ -1027,7 +1051,18 @@ app.get('/api/v1/integrations/uniswap/post-settlement/:jobId', async (req: Reque
 
     res.json({
       success: true,
+      previewOnly: true,
       jobId,
+      routePolicy: {
+        settlementChain,
+        executionChain: 'base',
+        executionChainId: 8453,
+        mode: 'preview',
+      },
+      notes: [
+        'This is a Base-first treasury-routing preview built from a completed Base Sepolia job.',
+        'Execution is intentionally disabled in the current UI until the live Base trading path is wired.',
+      ],
       source: {
         provider: job.provider,
         budgetRaw: amountInRaw,
