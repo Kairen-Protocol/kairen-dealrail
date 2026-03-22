@@ -216,8 +216,14 @@ app.get('/api/v1/jobs/:jobId', async (req: Request, res: Response) => {
       return;
     }
 
-    const job = await contractService.getJob(jobId, requestedChain);
-    res.json(formatJobResponse(jobId, job, requestedChain));
+    try {
+      const job = await contractService.getJob(jobId, requestedChain);
+      res.json(formatJobResponse(jobId, job, requestedChain));
+      return;
+    } catch {
+      res.status(404).json({ error: 'Job not found' });
+      return;
+    }
   } catch (error) {
     console.error(`Error getting job ${req.params.jobId}:`, error);
     res.status(500).json({ error: 'Failed to get job' });
