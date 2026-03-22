@@ -1,32 +1,18 @@
 # Virtuals: ERC-8183 Open Build
 
-## Current Readiness
+## Readiness
 
-92%
+High
 
-## Why The Fit Is Strong
+## Why It Fits
 
-DealRail is directly inside the ERC-8183 design space:
-- negotiated machine commerce
-- onchain escrow
-- evaluator-mediated settlement
-- recorded receipt flow
+DealRail is already an ERC-8183-style commerce desk:
+- buyer intent becomes a scoped job
+- evaluator role is explicit
+- settlement produces receipts
+- post-settlement state can feed trust
 
-This is not an adjacent fit or a sponsor-name stretch.
+## Honest Boundary
 
-## Core Files
-
-- [`contracts/src/EscrowRail.sol`](../../../contracts/src/EscrowRail.sol)
-- [`contracts/src/EscrowRailERC20.sol`](../../../contracts/src/EscrowRailERC20.sol)
-- [`backend/src/index-simple.ts`](../../../backend/src/index-simple.ts)
-- [`backend/TRANSACTION_LEDGER.md`](../../../backend/TRANSACTION_LEDGER.md)
-- [`docs/submission/02_ARCHITECTURE.md`](../02_ARCHITECTURE.md)
-
-## Main Blocker
-
-The remaining gap is mostly judge packaging:
-- one tighter explanation of how the current state machine maps to ERC-8183-style commerce objects
-
-## Fastest Resolution
-
-Keep the ERC-8183 mapping explicit in the final demo and roadmap docs.
+The system is strongest as a real escrow-and-receipts rail.
+It should not be described as a fully live open provider market yet.

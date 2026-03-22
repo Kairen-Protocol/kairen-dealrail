@@ -1,22 +1,19 @@
 # Locus
 
-## Current Readiness
+## Readiness
 
-45%
+Low
 
-## Current State
+## What Exists
 
-The bridge exists, but the canonical evidence pack does not include a live Locus payment artifact and the default posture remains mock-first.
+- payout adapter surface
+- workbench integration point
 
-## Core Files
+## What Is Missing
 
-- [`backend/src/services/locus.service.ts`](../../../backend/src/services/locus.service.ts)
-- [`backend/src/services/execution.service.ts`](../../../backend/src/services/execution.service.ts)
+- canonical live proof
+- strong reason to present it as a core load-bearing part of the demo
 
-## Main Blocker
+## Honest Read
 
-No live operation proof is recorded, and the current demo does not depend on Locus.
-
-## Fastest Resolution
-
-Only upgrade this track if a real Locus operation is executed and logged with a durable proof artifact.
+Keep Locus as a low-confidence extension unless a real operation is recorded.

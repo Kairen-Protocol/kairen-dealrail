@@ -1,22 +1,20 @@
 # MetaMask Delegations
 
-## Current Readiness
+## Readiness
 
-60%
+Low
 
-## Current State
+## What Exists
 
-The repo includes a real delegation payload builder and frontend signing path, but not canonical proof of live delegated execution.
+- delegation payload builder
+- typed-data signing path in the frontend
+- explicit place in the integrations workbench
 
-## Core Files
+## What Is Missing
 
-- [`backend/src/services/delegation.service.ts`](../../../backend/src/services/delegation.service.ts)
-- [`frontend/src/components/IntegrationsWorkbench.tsx`](../../../frontend/src/components/IntegrationsWorkbench.tsx)
+- delegated transaction hash
+- sponsor-grade proof
 
-## Main Blocker
+## Honest Read
 
-No delegated transaction hash is recorded in the ledger.
-
-## Fastest Resolution
-
-Execute one delegated funding or settlement flow and add the tx hash plus signature artifact to the ledger.
+This is a builder/signing surface, not a completed sponsor proof.

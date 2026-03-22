@@ -1,30 +1,18 @@
 # Celo
 
-## Current Readiness
+## Readiness
 
-90%
+High
 
-## Why This Is Strong
+## Why It Fits
 
-DealRail is actually deployed and tested on Celo Sepolia.
+DealRail has real Celo Sepolia evidence for:
+- happy-path completion
+- reject-path handling
+- stable-token settlement posture
 
-That matters because the Celo story is not hypothetical:
-- stable-token settlement path exists
-- happy path exists
-- reject path exists
-- tx hashes are recorded
+## Proof
 
-## Core Files
-
-- [`contracts/script/DeployCeloSepolia.s.sol`](../../../contracts/script/DeployCeloSepolia.s.sol)
-- [`backend/tests/test-lifecycle-celo-sepolia.ts`](../../../backend/tests/test-lifecycle-celo-sepolia.ts)
-- [`backend/TRANSACTION_LEDGER.md`](../../../backend/TRANSACTION_LEDGER.md)
-- [`frontend/src/lib/contracts.ts`](../../../frontend/src/lib/contracts.ts)
-
-## Main Blocker
-
-This is mostly a packaging blocker, not an implementation blocker.
-
-## Fastest Resolution
-
-Show the Celo happy and reject flows clearly in the final demo and submission.
+Use:
+- [`../../backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md)
+- [`../../docs/progress/DEMO_VALIDATION_2026-03-22.md`](../../docs/progress/DEMO_VALIDATION_2026-03-22.md)
