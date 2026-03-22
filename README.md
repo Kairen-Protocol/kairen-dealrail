@@ -14,6 +14,7 @@ Live product:
 - Browser desk: `https://dealrail.kairen.xyz/`
 - Backend API: `https://kairen-dealrail-production.up.railway.app/`
 - Agent package: `@kairenxyz/dealrail`
+- Agent entry point: `https://dealrail.kairen.xyz/SKILL.md`
 - Base service directory: `https://dealrail.kairen.xyz/base`
 
 ## What This Repo Really Is
@@ -38,6 +39,8 @@ Human:
 - or run `npx @kairenxyz/dealrail doctor`
 
 Agent:
+- if you started in this GitHub repo, open `https://dealrail.kairen.xyz/SKILL.md` first
+- then return here for the repo thesis and `docs/submission` for the canonical proof path
 
 ```bash
 npx @kairenxyz/dealrail doctor --json
@@ -51,6 +54,22 @@ Explicit live backend:
 ```bash
 DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
 ```
+
+## Reviewer Routing
+
+If you started from GitHub:
+
+1. Open `https://dealrail.kairen.xyz/SKILL.md`
+2. Return to this README for the repo thesis and live surface map
+3. Open `docs/README.md` for the docs index
+4. Open `docs/submission/00_START_HERE.md` for the canonical submission entry
+5. Open `docs/progress/DEMO_VALIDATION_2026-03-22.md` for the latest end-to-end validation log
+
+If you started from the live skill URL:
+
+1. Return to this README for the repo overview
+2. Open `docs/README.md` for the docs map
+3. Open `docs/submission/00_JUDGE_PROOF_PATH.md` for the fastest claim-to-proof route
 
 ## Judge Fast Path
 

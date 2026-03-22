@@ -12,6 +12,11 @@ Live surfaces:
 
 If a statement in this repo conflicts with `docs/submission`, trust `docs/submission`.
 
+If you are reviewing this repository from GitHub, start with the live public skill index first when possible:
+- `https://dealrail.kairen.xyz/SKILL.md`
+
+Then return to the repo for the canonical proof path and source references.
+
 Start here:
 1. [`docs/submission/00_START_HERE.md`](docs/submission/00_START_HERE.md)
 2. [`docs/submission/00_JUDGE_PROOF_PATH.md`](docs/submission/00_JUDGE_PROOF_PATH.md)
@@ -87,6 +92,7 @@ If you edit product behavior:
 - prefer scenario-first explanations over generic protocol slogans
 
 If you need operating guidance:
-- start with `frontend/public/SKILL.md`
+- start with the live `https://dealrail.kairen.xyz/SKILL.md`
+- use `frontend/public/SKILL.md` as the repo copy of that public entrypoint
 - use `./skills.sh features` for the feature map
 - load the matching repo-local skill before acting on discovery, negotiation, escrow, Base, routing, or delegation
