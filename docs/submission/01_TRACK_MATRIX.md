@@ -37,7 +37,7 @@ Keep out of the main pitch:
 | Virtuals: ERC-8183 Open Build | High | Real commerce rail and clean protocol mapping | Escrow-backed commerce loop is the product core | mostly packaging | keep ERC-8183 mapping explicit |
 | Celo: Best Agent on Celo | High | Real utility on Celo rails | Celo Sepolia happy and reject proofs are recorded | none beyond packaging | include Celo in final demo |
 | AgentCash / x402 | High | Real machine payment proof | Base Sepolia paid-request proof plus x402 adapter surface | only one canonical proof so far | add another proof only if it is quick |
-| Base: Agent Services on Base | Medium | Paid service discoverability on Base | Base Sepolia evidence exists and discovery is coherent | provider market is still curated in mock mode | wire public market-backed supply or a public paid endpoint |
+| Base: Agent Services on Base | Medium | Paid service discoverability on Base | Base Sepolia evidence exists, discovery is coherent, and a public Base service directory is exposed | provider market is still curated in mock mode | wire public market-backed supply behind the exposed Base directory |
 | MetaMask Delegations | Low | Real delegated authorization and execution | payload builder and typed-data signing path | no delegated tx hash | add a real delegated tx or keep low |
 | Uniswap | Low | Real API-backed swap depth and tx proof | Base-only routing preview exists | no recorded swap tx and no sponsor-grade proof | add a real swap proof or keep low |
 | Locus | Low | Locus must be load-bearing and live | adapter exists | no canonical live proof | keep as roadmap unless a real run lands |

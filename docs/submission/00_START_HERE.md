@@ -27,7 +27,7 @@ Live surfaces:
 | Virtuals: ERC-8183 Open Build | High | Direct product-thesis fit |
 | Celo: Best Agent on Celo | High | Real deployment and proofs |
 | AgentCash / x402 | High | Real paid-request proof on testnet |
-| Base: Agent Services on Base | Medium | Good fit, but not yet a fully live open market |
+| Base: Agent Services on Base | Medium | Public Base service directory exists, but it is not yet a fully live open market |
 | MetaMask Delegations | Low | Payload builder only |
 | Uniswap | Low | Base-only preview, no swap proof |
 | Locus | Low | Adapter exists, proof weak |

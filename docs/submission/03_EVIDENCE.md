@@ -72,7 +72,7 @@ The strongest Let the Agent Cook proof is:
 | Virtuals ERC-8183 | High | commerce loop is the core product | mostly explanatory polish |
 | Celo | High | happy and reject tx sets | none beyond demo emphasis |
 | AgentCash / x402 | High | paid-request tx proof | more proofs optional |
-| Base Agent Services on Base | Medium | Base evidence plus coherent discovery | public open-market proof |
+| Base Agent Services on Base | Medium | Base evidence plus public Base service directory | public open-market proof |
 | MetaMask | Low | builder/signing path | delegated tx hash |
 | Uniswap | Low | Base-only preview payload builder | swap tx hash |
 | Locus | Low | adapter exists | live proof |

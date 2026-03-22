@@ -56,6 +56,19 @@ See:
 Why it matters:
 - this is the truthful x402 story
 
+## Scenario E: Base-facing public service surface
+
+Claim:
+- DealRail exposes a public Base-facing service directory with visible supply, public endpoints, and Base settlement posture.
+
+See:
+1. [`docs/submission/tracks/BASE_AGENT_SERVICES.md`](tracks/BASE_AGENT_SERVICES.md)
+2. `GET /api/v1/base/agent-services`
+3. `/base`
+
+Why it matters:
+- this is the truthful Base track surface without overstating market openness
+
 ## What Not To Over-Read
 
 - MetaMask is a builder/signing path, not a delegated tx proof yet.
