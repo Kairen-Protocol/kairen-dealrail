@@ -1,11 +1,15 @@
 // Complete the lifecycle for Job #1
 import { ethers } from 'ethers';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
 
-const BASE_SEPOLIA_RPC = 'https://base-sepolia.g.alchemy.com/v2/JB7IYC9GSIzz-JMoQcnq2';
-const ESCROW_ADDRESS = '0x53d368b5467524F7d674B70F00138a283e1533ce';
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
-const AGENT_KEY = '0xbc4d780784d2bcda1043ad58272aab996d19cc7e0aa3dc025c0cdbde7a01bad8';
-const EVALUATOR_KEY = '0x3e59deaa1b4eae55932c3c245d389bc7c0bbfb3836810202ad3098db21205e33';
+const BASE_SEPOLIA_RPC = process.env.BASE_SEPOLIA_RPC || 'https://sepolia.base.org';
+const ESCROW_ADDRESS = process.env.ESCROW_RAIL_ERC20_BASE_SEPOLIA || '';
+
+const AGENT_KEY = process.env.AGENT_PRIVATE_KEY || '';
+const EVALUATOR_KEY = process.env.EVALUATOR_PRIVATE_KEY || '';
 
 const ESCROW_ABI = [
   'function submit(uint256 jobId, bytes32 deliverable)',
@@ -14,6 +18,12 @@ const ESCROW_ABI = [
 ];
 
 async function main() {
+  if (!ESCROW_ADDRESS || !AGENT_KEY || !EVALUATOR_KEY) {
+    throw new Error(
+      'Missing required env values. Expected ESCROW_RAIL_ERC20_BASE_SEPOLIA, AGENT_PRIVATE_KEY, EVALUATOR_PRIVATE_KEY.'
+    );
+  }
+
   console.log('🔄 Completing Job #1 Lifecycle\n');
 
   const provider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);

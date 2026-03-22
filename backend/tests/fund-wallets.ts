@@ -1,13 +1,21 @@
 // Transfer ETH from deployer to agent and evaluator for gas
 import { ethers } from 'ethers';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
 
-const BASE_SEPOLIA_RPC = 'https://base-sepolia.g.alchemy.com/v2/JB7IYC9GSIzz-JMoQcnq2';
-const DEPLOYER_KEY = '0xece73f45df44cc1748e06cf3762d895ba6878085081c685e03fd2bbc46efea4d';
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
-const AGENT_ADDRESS = '0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF';
-const EVALUATOR_ADDRESS = '0xe872Bd6d99452C87BA54c7618FEc71f0DB23d4f2';
+const BASE_SEPOLIA_RPC = process.env.BASE_SEPOLIA_RPC || 'https://sepolia.base.org';
+const DEPLOYER_KEY = process.env.DEPLOYER_PRIVATE_KEY || '';
+
+const AGENT_ADDRESS = process.env.AGENT_ADDRESS || '0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF';
+const EVALUATOR_ADDRESS = process.env.EVALUATOR_ADDRESS || '0xe872Bd6d99452C87BA54c7618FEc71f0DB23d4f2';
 
 async function main() {
+  if (!DEPLOYER_KEY) {
+    throw new Error('Missing required env value DEPLOYER_PRIVATE_KEY.');
+  }
+
   console.log('💸 Funding Agent and Evaluator Wallets for Gas\n');
 
   const provider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);

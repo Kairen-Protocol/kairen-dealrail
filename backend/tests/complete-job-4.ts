@@ -1,12 +1,22 @@
 import { ethers } from 'ethers';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
 
-const BASE_SEPOLIA_RPC = 'https://base-sepolia.g.alchemy.com/v2/JB7IYC9GSIzz-JMoQcnq2';
-const ESCROW_ADDRESS = '0x53d368b5467524F7d674B70F00138a283e1533ce';
-const EVALUATOR_KEY = '0x3e59deaa1b4eae55932c3c245d389bc7c0bbfb3836810202ad3098db21205e33';
+dotenv.config({ path: resolve(__dirname, '../../.env') });
+
+const BASE_SEPOLIA_RPC = process.env.BASE_SEPOLIA_RPC || 'https://sepolia.base.org';
+const ESCROW_ADDRESS = process.env.ESCROW_RAIL_ERC20_BASE_SEPOLIA || '';
+const EVALUATOR_KEY = process.env.EVALUATOR_PRIVATE_KEY || '';
 
 const ESCROW_ABI = ['function complete(uint256 jobId, bytes32 reason)'];
 
 async function main() {
+  if (!ESCROW_ADDRESS || !EVALUATOR_KEY) {
+    throw new Error(
+      'Missing required env values. Expected ESCROW_RAIL_ERC20_BASE_SEPOLIA and EVALUATOR_PRIVATE_KEY.'
+    );
+  }
+
   const provider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);
   const evaluator = new ethers.Wallet(EVALUATOR_KEY, provider);
   const escrow = new ethers.Contract(ESCROW_ADDRESS, ESCROW_ABI, evaluator);

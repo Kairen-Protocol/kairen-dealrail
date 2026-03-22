@@ -157,7 +157,7 @@ curl -X POST http://localhost:3001/api/v1/jobs/6/submit \
   -H "Content-Type: application/json" \
   -d '{
     "deliverable": "Completed deliverable for job #6",
-    "providerPrivateKey": "0xbc4d780784d2bcda1043ad58272aab996d19cc7e0aa3dc025c0cdbde7a01bad8"
+    "providerPrivateKey": "0xYOUR_PROVIDER_PRIVATE_KEY"
   }'
 ```
 
@@ -192,7 +192,7 @@ curl -X POST http://localhost:3001/api/v1/jobs/6/complete \
   -H "Content-Type: application/json" \
   -d '{
     "reason": "Excellent work, approved!",
-    "evaluatorPrivateKey": "0x3e59deaa1b4eae55932c3c245d389bc7c0bbfb3836810202ad3098db21205e33"
+    "evaluatorPrivateKey": "0xYOUR_EVALUATOR_PRIVATE_KEY"
   }'
 ```
 
@@ -504,14 +504,14 @@ curl -X POST http://localhost:3001/api/v1/jobs/6/fund \
 sleep 3
 curl -X POST http://localhost:3001/api/v1/jobs/6/submit \
   -H "Content-Type: application/json" \
-  -d '{"deliverable":"Test deliverable","providerPrivateKey":"0xbc4d780784d2bcda1043ad58272aab996d19cc7e0aa3dc025c0cdbde7a01bad8"}' \
+  -d '{"deliverable":"Test deliverable","providerPrivateKey":"0xYOUR_PROVIDER_PRIVATE_KEY"}' \
   | jq .
 
 # 6. Complete job (wait 3 seconds after submit)
 sleep 3
 curl -X POST http://localhost:3001/api/v1/jobs/6/complete \
   -H "Content-Type: application/json" \
-  -d '{"reason":"Approved","evaluatorPrivateKey":"0x3e59deaa1b4eae55932c3c245d389bc7c0bbfb3836810202ad3098db21205e33"}' \
+  -d '{"reason":"Approved","evaluatorPrivateKey":"0xYOUR_EVALUATOR_PRIVATE_KEY"}' \
   | jq .
 
 # 7. Verify completion

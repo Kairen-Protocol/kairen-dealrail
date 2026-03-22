@@ -1,11 +1,15 @@
 // Transfer USDC from Agent back to Deployer (recycling)
 import { ethers } from 'ethers';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
 
-const BASE_SEPOLIA_RPC = 'https://base-sepolia.g.alchemy.com/v2/JB7IYC9GSIzz-JMoQcnq2';
-const USDC_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
-const AGENT_KEY = '0xbc4d780784d2bcda1043ad58272aab996d19cc7e0aa3dc025c0cdbde7a01bad8';
-const DEPLOYER_ADDRESS = '0x77712e28F7A4a2EeD0bd7f9F8B8486332a38892e';
+const BASE_SEPOLIA_RPC = process.env.BASE_SEPOLIA_RPC || 'https://sepolia.base.org';
+const USDC_ADDRESS = process.env.BASE_SEPOLIA_USDC || '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+
+const AGENT_KEY = process.env.AGENT_PRIVATE_KEY || '';
+const DEPLOYER_ADDRESS = process.env.DEPLOYER_ADDRESS || '0x77712e28F7A4a2EeD0bd7f9F8B8486332a38892e';
 
 const ERC20_ABI = [
   'function balanceOf(address account) view returns (uint256)',
@@ -13,6 +17,10 @@ const ERC20_ABI = [
 ];
 
 async function main() {
+  if (!AGENT_KEY) {
+    throw new Error('Missing required env value AGENT_PRIVATE_KEY.');
+  }
+
   console.log('♻️  USDC Recycling: Agent → Deployer\n');
 
   const provider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);
