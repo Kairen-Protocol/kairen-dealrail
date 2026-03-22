@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans, Oxanium } from 'next/font/google';
+import { IBM_Plex_Mono, Instrument_Serif, Manrope } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { AppShell } from '@/components/AppShell';
 
-const plexSans = IBM_Plex_Sans({
+const manrope = Manrope({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-plex-sans',
 });
 const plexMono = IBM_Plex_Mono({
@@ -14,15 +14,16 @@ const plexMono = IBM_Plex_Mono({
   weight: ['400', '500', '600'],
   variable: '--font-plex-mono',
 });
-const oxanium = Oxanium({
+const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: ['400'],
+  style: ['normal', 'italic'],
   variable: '--font-display',
 });
 
 export const metadata: Metadata = {
-  title: 'DealRail - Agentic Commerce Platform',
-  description: 'EIP-8183 compliant autonomous agent work execution with escrow',
+  title: 'DealRail | Kairen',
+  description: 'Ethereum machine-commerce desk for agent and human operators',
 };
 
 export default function RootLayout({
@@ -32,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${plexSans.variable} ${plexMono.variable} ${oxanium.variable}`}>
+      <body className={`${manrope.variable} ${plexMono.variable} ${instrumentSerif.variable}`}>
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

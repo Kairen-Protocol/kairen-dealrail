@@ -24,11 +24,8 @@ type Props = {
 
 const EXAMPLES = [
   'doctor',
-  'scan automation',
   'vend benchmark report under 0.12 usdc in 24h',
-  'buy api integration sprint under 0.10 usdc in 24h',
   'providers compliance checks',
-  'sell workflow automation from 0.12 usdc',
   'rails',
   'status',
 ];
@@ -39,9 +36,9 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [lines, setLines] = useState<TerminalLine[]>([
-    { tone: 'system', text: 'DEALRAIL DESK READY' },
-    { tone: 'system', text: 'verbs: doctor | scan/providers <need> | buy/vend <need> under <budget> usdc in <hours>h | sell <service> from <price> usdc | rails | status' },
-    { tone: 'system', text: 'goal: route one Ethereum machine-commerce request from supply discovery to payment, escrow, and receipt' },
+    { tone: 'system', text: 'DEALRAIL READY' },
+    { tone: 'system', text: 'start: doctor | vend <need> under <budget> usdc in <hours>h | providers <need> | rails' },
+    { tone: 'system', text: 'agent path: npx @kairenxyz/dealrail doctor --json' },
   ]);
 
   const statusLabel = useMemo(() => (running ? 'RUNNING' : 'IDLE'), [running]);
@@ -318,9 +315,9 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
       if (normalized === 'clear') {
         setLines([
-          { tone: 'system', text: 'DEALRAIL DESK READY' },
-          { tone: 'system', text: 'verbs: doctor | scan/providers <need> | buy/vend <need> under <budget> usdc in <hours>h | sell <service> from <price> usdc | rails | status' },
-          { tone: 'system', text: 'goal: route one machine-payable request from supply discovery to escrow and receipt' },
+          { tone: 'system', text: 'DEALRAIL READY' },
+          { tone: 'system', text: 'start: doctor | vend <need> under <budget> usdc in <hours>h | providers <need> | rails' },
+          { tone: 'system', text: 'agent path: npx @kairenxyz/dealrail doctor --json' },
         ]);
         emit('clear', command, 'Terminal output cleared');
         return;
@@ -406,102 +403,80 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-good)]/85" />
           </div>
           <div>
-            <div className="terminal-kicker">Terminal Desk</div>
-            <div className="terminal-mono text-[11px] text-[var(--terminal-muted)]">doctor / scan / providers / buy / vend / rails / status</div>
+            <div className="terminal-kicker">Command Desk</div>
+            <div className="terminal-mono text-[11px] text-[var(--terminal-muted)]">doctor / vend / providers / rails / status</div>
           </div>
         </div>
         <div className="terminal-mono text-[11px] text-[var(--terminal-muted)]">{statusLabel}</div>
       </div>
 
-      <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 xl:grid-cols-[148px,1fr]'}`}>
-        {!compact && (
-          <aside className="hidden border-r border-[var(--terminal-border)] px-4 py-5 xl:block">
-            <div className="terminal-label">Desk Modes</div>
-            <div className="mt-4 space-y-3 text-xs text-[var(--terminal-muted)]">
-              <div>01 Doctor the desk</div>
-              <div>02 Route request</div>
-              <div>03 Scan providers</div>
-              <div>04 Lock escrow</div>
-              <div>05 Emit receipt</div>
+      <div className="p-4">
+        <div className="terminal-console terminal-screen overflow-hidden rounded-[1.2rem]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--terminal-border)] px-4 py-3">
+            <div className="terminal-mono text-[11px] uppercase tracking-[0.24em] text-[var(--terminal-accent)]">
+              DealRail / operator terminal
             </div>
-            <div className="mt-6 terminal-label">Operator Lanes</div>
-            <div className="mt-3 space-y-3 text-[11px] leading-5 text-[var(--terminal-muted)]">
-              <button type="button" onClick={() => setInput('doctor')} className="block w-full rounded-2xl border border-[var(--terminal-border)] bg-black/10 px-3 py-3 text-left transition hover:border-[var(--terminal-accent)]/60 hover:text-[var(--terminal-fg)]">
-                <div className="terminal-label">Human lane</div>
-                <div className="mt-1 font-semibold text-[var(--terminal-fg)]">doctor -&gt; vend -&gt; jobs</div>
-                <div className="mt-1">Use the desk interactively, then inspect the board and settlement record.</div>
-              </button>
-              <button type="button" onClick={() => setInput('status')} className="block w-full rounded-2xl border border-[var(--terminal-border)] bg-black/10 px-3 py-3 text-left transition hover:border-[var(--terminal-accent)]/60 hover:text-[var(--terminal-fg)]">
-                <div className="terminal-label">Agent lane</div>
-                <div className="mt-1 font-semibold text-[var(--terminal-fg)]">CLI doctor --json -&gt; vend --json</div>
-                <div className="mt-1">Use machine-readable checks before dispatching autonomous requests.</div>
-              </button>
+            <div className="terminal-mono text-[10px] text-[var(--terminal-muted)]">
+              Human: `doctor` -&gt; `vend` | Agent: `doctor --json` -&gt; `vend --json`
             </div>
-            <div className="mt-6 terminal-label">Examples</div>
-            <div className="mt-3 space-y-2">
-              {EXAMPLES.slice(0, 4).map((example) => (
-                <button
-                  key={example}
-                  type="button"
-                  onClick={() => setInput(example)}
-                  className="block w-full text-left text-[11px] text-[var(--terminal-muted)] transition hover:text-[var(--terminal-fg)]"
+          </div>
+
+          <div className="p-4">
+            <div className={`terminal-mono overflow-auto space-y-2 text-xs leading-6 ${compact ? 'h-64' : 'h-[25rem]'}`}>
+              {lines.map((line, idx) => (
+                <div
+                  key={`${line.text}-${idx}`}
+                  className={
+                    line.tone === 'system'
+                      ? 'break-words whitespace-pre-wrap text-[var(--terminal-muted)]'
+                      : line.tone === 'ok'
+                        ? 'break-words whitespace-pre-wrap text-[var(--terminal-good)]'
+                        : line.tone === 'warn'
+                          ? 'break-words whitespace-pre-wrap text-[var(--terminal-warn)]'
+                          : 'break-words whitespace-pre-wrap text-[var(--terminal-fg)]'
+                  }
                 >
+                  {line.text}
+                </div>
+              ))}
+            </div>
+
+            <form onSubmit={onSubmit} className="mt-4 flex items-center gap-2">
+              <span className="terminal-mono text-xs text-[var(--terminal-accent)]">dealrail$</span>
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={onKeyDown}
+                className="terminal-input terminal-mono"
+                placeholder='Try: vend benchmark report under 0.12 usdc in 24h'
+              />
+              <button type="submit" className="terminal-btn terminal-btn-accent" disabled={running}>
+                Run
+              </button>
+            </form>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {EXAMPLES.map((example) => (
+                <button key={example} type="button" onClick={() => setInput(example)} className="terminal-command">
                   {example}
                 </button>
               ))}
             </div>
-          </aside>
-        )}
 
-        <div className="p-4">
-          <div className="terminal-console terminal-screen overflow-hidden rounded-[1.2rem]">
-            <div className="flex items-center justify-between border-b border-[var(--terminal-border)] px-4 py-3">
-              <div className="terminal-mono text-[11px] uppercase tracking-[0.24em] text-[var(--terminal-accent)]">
-                DealRail / Procurement Console
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="rounded-[1rem] border border-[var(--terminal-border)] bg-black/10 px-4 py-3">
+                <div className="terminal-label">Human path</div>
+                <div className="mt-2 text-sm text-[var(--terminal-muted)]">
+                  Run the desk interactively, inspect live posture, then choose whether the request should stay as a
+                  machine-paid call or move into escrow.
+                </div>
               </div>
-              <div className="terminal-mono text-[10px] text-[var(--terminal-muted)]">Start with `doctor`, then move to `scan` or `vend`</div>
-            </div>
-
-            <div className="p-4">
-              <div className={`terminal-mono overflow-auto space-y-2 text-xs leading-6 ${compact ? 'h-56' : 'h-[26rem]'}`}>
-                {lines.map((line, idx) => (
-                  <div
-                    key={`${line.text}-${idx}`}
-                    className={
-                      line.tone === 'system'
-                        ? 'break-words whitespace-pre-wrap text-[var(--terminal-muted)]'
-                        : line.tone === 'ok'
-                          ? 'break-words whitespace-pre-wrap text-[var(--terminal-good)]'
-                          : line.tone === 'warn'
-                            ? 'break-words whitespace-pre-wrap text-[var(--terminal-warn)]'
-                            : 'break-words whitespace-pre-wrap text-[var(--terminal-fg)]'
-                    }
-                  >
-                    {line.text}
-                  </div>
-                ))}
-              </div>
-
-              <form onSubmit={onSubmit} className="mt-4 flex items-center gap-2">
-                <span className="terminal-mono text-xs text-[var(--terminal-accent)]">dealrail$</span>
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={onKeyDown}
-                  className="terminal-input terminal-mono"
-                  placeholder='Try: vend benchmark report under 0.12 usdc in 24h'
-                />
-                <button type="submit" className="terminal-btn terminal-btn-accent" disabled={running}>
-                  Run
-                </button>
-              </form>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {EXAMPLES.map((example) => (
-                  <button key={example} type="button" onClick={() => setInput(example)} className="terminal-command">
-                    {example}
-                  </button>
-                ))}
+              <div className="rounded-[1rem] border border-[var(--terminal-border)] bg-black/10 px-4 py-3">
+                <div className="terminal-label">Agent path</div>
+                <div className="mt-2 text-sm text-[var(--terminal-muted)]">
+                  Use the same verbs from the published CLI in JSON mode when another service needs deterministic
+                  posture and receipt output.
+                </div>
               </div>
             </div>
           </div>

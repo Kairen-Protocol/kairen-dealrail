@@ -34,20 +34,19 @@ export default function TerminalPage() {
 
   return (
     <div className="space-y-6">
-      <section className="hero-grid terminal-panel rounded-[1.75rem] p-6">
+      <section className="hero-grid editorial-card p-6">
         <div className="relative z-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="terminal-kicker">Terminal</div>
-            <h1 className="mt-2 text-3xl font-semibold">Procurement desk for machine-payable services</h1>
+            <h1 className="hero-display mt-3 text-5xl md:text-6xl">A simpler command surface for DealRail.</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--terminal-muted)]">
-              Start with `scan`, `providers`, `buy`, `vend`, `sell`, `rails`, or `status`. The desk should make the
-              market legible before it asks you to settle anything.
+              Start with `doctor`, then move to `vend`, `providers`, or `rails`. This page should read like an operator
+              tool, not a dashboard trying to do everything at once.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <span className="terminal-chip">No redirects</span>
-            <span className="terminal-chip">Supply-aware</span>
-            <span className="terminal-chip">Receipt-first</span>
+            <span className="inline-command">npx @kairenxyz/dealrail doctor</span>
+            <span className="inline-command">npx @kairenxyz/dealrail doctor --json</span>
           </div>
         </div>
       </section>
@@ -58,36 +57,35 @@ export default function TerminalPage() {
         </div>
         <div className="space-y-5 xl:col-span-4">
           <div className="terminal-panel rounded-[1.5rem] p-6">
-            <div className="terminal-kicker">Desk Guide</div>
+            <div className="terminal-kicker">Operator Paths</div>
             <div className="mt-5 space-y-4 text-sm leading-6 text-[var(--terminal-muted)]">
               <div>
                 <div className="terminal-label">`doctor`</div>
                 Run this first. It tells you what is live, what is still mock, how much supply the desk can see, and what command to run next.
               </div>
               <div>
-                <div className="terminal-label">`scan`</div>
-                Use this before buying. It answers whether the desk actually has supply for your request.
-              </div>
-              <div>
                 <div className="terminal-label">`vend`</div>
-                Use this when you want the procurement-style path: state the need, budget, and delivery target, then
-                let the desk shortlist providers.
+                Use this when you want the procurement-style path: state the need, budget, and delivery target, then let the desk shortlist providers.
               </div>
               <div>
-                <div className="terminal-label">`sell`</div>
-                Use this when you are bringing provider inventory into the desk.
+                <div className="terminal-label">`providers`</div>
+                Use this before settlement when you want proof that the desk can actually see supply for the category.
+              </div>
+              <div>
+                <div className="terminal-label">`rails`</div>
+                Use this only after the request is clear and you need to inspect the execution or payout posture.
               </div>
             </div>
           </div>
 
           <div className="terminal-panel rounded-[1.5rem] p-6">
-            <div className="terminal-kicker">Operator Lanes</div>
+            <div className="terminal-kicker">Human And Agent</div>
             <div className="mt-4 space-y-3">
               <div className="rounded-[1.2rem] border border-[var(--terminal-border)] bg-black/10 p-4">
                 <div className="terminal-label">Human</div>
                 <div className="mt-2 text-sm font-semibold">Doctor, inspect, decide, then settle.</div>
                 <div className="mt-2 text-xs leading-5 text-[var(--terminal-muted)]">
-                  Use the browser terminal to understand market posture before you commit to a job.
+                  Use the browser terminal when you want a guided flow and visible output before recording a demo or settlement step.
                 </div>
                 <div className="mt-3 terminal-mono text-[11px] text-[var(--terminal-accent)]">doctor -&gt; vend benchmark report under 0.12 usdc in 24h</div>
               </div>
@@ -103,7 +101,7 @@ export default function TerminalPage() {
           </div>
 
           <div className="terminal-panel rounded-[1.5rem] p-6">
-            <div className="terminal-kicker">Execution Ladder</div>
+            <div className="terminal-kicker">Last Command</div>
             <div className="mt-4 space-y-3">
               {steps.map((step, idx) => (
                 <div key={`${step}-${idx}`} className="flex items-start gap-3 text-sm">
@@ -122,20 +120,20 @@ export default function TerminalPage() {
               </div>
             )}
           </div>
+        </div>
+      </section>
 
-          <div className="terminal-panel rounded-[1.5rem] p-6">
-            <div className="terminal-kicker">Recent Commands</div>
-            <div className="mt-4 max-h-80 space-y-2 overflow-auto">
-              {runs.map((run) => (
-                <div key={run.id} className="rounded-2xl border border-[var(--terminal-border)] bg-black/15 p-3 text-xs">
-                  <div className="terminal-mono text-[var(--terminal-muted)]">{new Date(run.at).toLocaleTimeString()}</div>
-                  <div className="mt-1 break-words terminal-mono text-[var(--terminal-fg)]">{run.command}</div>
-                  <div className="mt-1 text-[var(--terminal-good)]">{run.note}</div>
-                </div>
-              ))}
-              {runs.length === 0 && <div className="text-xs text-[var(--terminal-muted)]">No runs yet.</div>}
+      <section className="terminal-panel rounded-[1.5rem] p-6">
+        <div className="terminal-kicker">Recent Commands</div>
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {runs.slice(0, 4).map((run) => (
+            <div key={run.id} className="rounded-2xl border border-[var(--terminal-border)] bg-black/10 p-4 text-xs">
+              <div className="terminal-mono text-[var(--terminal-muted)]">{new Date(run.at).toLocaleTimeString()}</div>
+              <div className="mt-2 break-words terminal-mono text-[var(--terminal-fg)]">{run.command}</div>
+              <div className="mt-1 text-[var(--terminal-good)]">{run.note}</div>
             </div>
-          </div>
+          ))}
+          {runs.length === 0 && <div className="text-xs text-[var(--terminal-muted)]">No runs yet.</div>}
         </div>
       </section>
 

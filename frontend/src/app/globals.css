@@ -3,46 +3,73 @@
 @tailwind utilities;
 
 :root {
-  --terminal-bg: #071118;
-  --terminal-panel: #0b161f;
-  --terminal-panel-2: #101d28;
-  --terminal-border: #22384a;
-  --terminal-fg: #e2edf3;
-  --terminal-muted: #84a0b3;
-  --terminal-accent: #8dfcc4;
-  --terminal-good: #63f3b0;
-  --terminal-warn: #ffbf69;
-  --terminal-danger: #ff6f83;
-  --terminal-ice: #78c7f5;
-  --terminal-grid: rgba(120, 199, 245, 0.06);
+  --terminal-bg: #0f0c0a;
+  --terminal-panel: rgba(22, 18, 14, 0.92);
+  --terminal-panel-2: rgba(30, 24, 19, 0.94);
+  --terminal-border: rgba(239, 231, 218, 0.12);
+  --terminal-fg: #efe7da;
+  --terminal-muted: #b9ad9d;
+  --terminal-accent: #ff8b4c;
+  --terminal-good: #79d2a5;
+  --terminal-warn: #f8cf62;
+  --terminal-danger: #ea7588;
+  --terminal-ice: #63c6cf;
+  --terminal-grid: rgba(239, 231, 218, 0.05);
+  --terminal-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  --terminal-glow: rgba(255, 139, 76, 0.18);
 }
 
 :root[data-theme='light'] {
-  --terminal-bg: #f4f6f1;
-  --terminal-panel: #fffdf8;
-  --terminal-panel-2: #eef2ed;
-  --terminal-border: #d0d9d2;
-  --terminal-fg: #10201b;
-  --terminal-muted: #5e7269;
-  --terminal-accent: #0b765b;
-  --terminal-good: #0b765b;
-  --terminal-warn: #9e5b07;
-  --terminal-danger: #a53046;
-  --terminal-ice: #2b82a8;
-  --terminal-grid: rgba(11, 118, 91, 0.05);
+  --terminal-bg: #f6f1e7;
+  --terminal-panel: rgba(255, 251, 245, 0.88);
+  --terminal-panel-2: rgba(255, 247, 239, 0.92);
+  --terminal-border: rgba(18, 17, 15, 0.1);
+  --terminal-fg: #17120e;
+  --terminal-muted: #6d655d;
+  --terminal-accent: #b74f2a;
+  --terminal-good: #2f7d66;
+  --terminal-warn: #8a6b00;
+  --terminal-danger: #b6435d;
+  --terminal-ice: #265d63;
+  --terminal-grid: rgba(18, 17, 15, 0.045);
+  --terminal-shadow: 0 22px 48px rgba(16, 20, 27, 0.12);
+  --terminal-glow: rgba(183, 79, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-plex-sans), sans-serif;
   color: var(--terminal-fg);
   background:
-    linear-gradient(to right, transparent 0, transparent calc(100% - 1px), var(--terminal-grid) calc(100% - 1px)),
-    linear-gradient(to bottom, transparent 0, transparent calc(100% - 1px), var(--terminal-grid) calc(100% - 1px)),
-    radial-gradient(920px 500px at 8% -8%, color-mix(in srgb, var(--terminal-accent) 15%, transparent), transparent 70%),
-    radial-gradient(860px 420px at 92% 0%, color-mix(in srgb, var(--terminal-ice) 10%, transparent), transparent 72%),
+    linear-gradient(var(--terminal-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--terminal-grid) 1px, transparent 1px),
+    radial-gradient(900px 520px at 8% -8%, color-mix(in srgb, var(--terminal-accent) 18%, transparent), transparent 70%),
+    radial-gradient(820px 420px at 92% 0%, color-mix(in srgb, var(--terminal-ice) 16%, transparent), transparent 72%),
+    linear-gradient(180deg, color-mix(in srgb, var(--terminal-bg) 96%, black 4%), var(--terminal-bg)),
     var(--terminal-bg);
-  background-size: 48px 48px, 48px 48px, auto, auto, auto;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  background-size: 28px 28px, 28px 28px, auto, auto, auto, auto;
+  transition: color 0.2s ease, background 0.2s ease;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.012), transparent 18%),
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 0px, rgba(255, 255, 255, 0.018) 1px, transparent 2px, transparent 4px);
+  opacity: 0.38;
+  mix-blend-mode: soft-light;
+  z-index: 0;
 }
 
 body,
@@ -61,49 +88,53 @@ textarea {
   .terminal-panel {
     min-width: 0;
     border: 1px solid var(--terminal-border);
-    background: linear-gradient(180deg, var(--terminal-panel), var(--terminal-panel-2));
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--terminal-panel) 96%, white 4%), var(--terminal-panel-2));
+    backdrop-filter: blur(14px);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.03),
-      0 18px 60px rgba(0, 0, 0, 0.08);
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      var(--terminal-shadow);
   }
 
   .terminal-frame {
     min-width: 0;
     border: 1px solid var(--terminal-border);
     background:
-      radial-gradient(circle at top, color-mix(in srgb, var(--terminal-accent) 8%, transparent), transparent 42%),
-      linear-gradient(180deg, var(--terminal-panel), color-mix(in srgb, var(--terminal-panel-2) 92%, black 8%));
+      radial-gradient(circle at top left, color-mix(in srgb, var(--terminal-accent) 12%, transparent), transparent 34%),
+      radial-gradient(circle at top right, color-mix(in srgb, var(--terminal-ice) 10%, transparent), transparent 36%),
+      linear-gradient(180deg, var(--terminal-panel), color-mix(in srgb, var(--terminal-panel-2) 94%, black 6%));
+    backdrop-filter: blur(14px);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.04),
-      0 24px 90px rgba(0, 0, 0, 0.16);
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      var(--terminal-shadow);
   }
 
   .terminal-console {
     min-width: 0;
     border: 1px solid color-mix(in srgb, var(--terminal-border) 82%, black 18%);
     background:
-      linear-gradient(180deg, rgba(3, 8, 12, 0.94), rgba(4, 12, 18, 0.98));
+      linear-gradient(180deg, rgba(13, 10, 8, 0.96), rgba(18, 14, 11, 0.98));
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.03),
-      inset 0 0 0 1px rgba(141, 252, 196, 0.02);
+      inset 0 1px 0 rgba(255, 255, 255, 0.025),
+      inset 0 0 0 1px color-mix(in srgb, var(--terminal-accent) 8%, transparent);
   }
 
   :root[data-theme='light'] .terminal-console {
     background:
-      linear-gradient(180deg, rgba(248, 250, 247, 0.98), rgba(240, 244, 239, 0.98));
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 241, 232, 0.98));
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.7),
-      inset 0 0 0 1px rgba(11, 118, 91, 0.03);
+      inset 0 0 0 1px rgba(183, 79, 42, 0.03);
   }
 
   .terminal-input {
     min-width: 0;
     width: 100%;
     border: 1px solid var(--terminal-border);
-    background: color-mix(in srgb, var(--terminal-panel) 82%, black 18%);
+    background: color-mix(in srgb, var(--terminal-panel) 92%, black 8%);
     color: var(--terminal-fg);
-    border-radius: 0.9rem;
-    padding: 0.7rem 0.9rem;
+    border-radius: 1rem;
+    padding: 0.78rem 0.95rem;
     font-size: 0.875rem;
   }
 
@@ -121,27 +152,28 @@ textarea {
     min-width: 0;
     border: 1px solid var(--terminal-border);
     border-radius: 9999px;
-    padding: 0.65rem 0.9rem;
+    padding: 0.68rem 1rem;
     font-size: 0.85rem;
     font-weight: 600;
     transition: 0.15s ease;
-    background: color-mix(in srgb, var(--terminal-panel) 88%, black 12%);
+    background: color-mix(in srgb, var(--terminal-panel) 90%, black 10%);
     color: var(--terminal-fg);
   }
 
   .terminal-btn:hover {
-    border-color: var(--terminal-accent);
+    border-color: color-mix(in srgb, var(--terminal-accent) 70%, var(--terminal-border) 30%);
     transform: translateY(-1px);
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--terminal-glow) 70%, transparent);
   }
 
   .terminal-btn-accent {
     background: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--terminal-accent) 35%, var(--terminal-panel) 65%),
-      color-mix(in srgb, var(--terminal-ice) 16%, var(--terminal-panel) 84%)
+      color-mix(in srgb, var(--terminal-accent) 78%, var(--terminal-panel) 22%),
+      color-mix(in srgb, var(--terminal-warn) 28%, var(--terminal-accent) 72%)
     );
     border-color: color-mix(in srgb, var(--terminal-accent) 72%, var(--terminal-border) 28%);
-    color: #041019;
+    color: #1a130d;
   }
 
   .terminal-btn-good {
@@ -154,7 +186,7 @@ textarea {
     min-width: 0;
     border: 1px solid var(--terminal-border);
     border-radius: 1rem;
-    background: color-mix(in srgb, var(--terminal-panel) 84%, black 16%);
+    background: color-mix(in srgb, var(--terminal-panel) 90%, black 10%);
     padding: 0.85rem;
   }
 
@@ -181,7 +213,8 @@ textarea {
   .hero-display {
     font-family: var(--font-display), var(--font-plex-sans), sans-serif;
     letter-spacing: -0.04em;
-    font-variation-settings: 'wght' 650;
+    font-weight: 400;
+    line-height: 0.94;
   }
 
   .hero-subtle {
@@ -195,7 +228,7 @@ textarea {
     max-width: 100%;
     border-radius: 9999px;
     border: 1px solid var(--terminal-border);
-    background: color-mix(in srgb, var(--terminal-panel) 86%, black 14%);
+    background: color-mix(in srgb, var(--terminal-panel) 92%, black 8%);
     padding: 0.28rem 0.55rem;
     font-family: var(--font-plex-mono), monospace;
     font-size: 0.68rem;
@@ -209,7 +242,7 @@ textarea {
     min-width: 0;
     border: 1px solid var(--terminal-border);
     border-radius: 9999px;
-    background: color-mix(in srgb, var(--terminal-panel) 84%, black 16%);
+    background: color-mix(in srgb, var(--terminal-panel) 92%, black 8%);
     padding: 0.45rem 0.75rem;
     font-family: var(--font-plex-mono), monospace;
     font-size: 0.72rem;
@@ -237,9 +270,136 @@ textarea {
     background:
       linear-gradient(to right, transparent 0, transparent calc(100% - 1px), var(--terminal-grid) calc(100% - 1px)),
       linear-gradient(to bottom, transparent 0, transparent calc(100% - 1px), var(--terminal-grid) calc(100% - 1px));
-    background-size: 40px 40px;
-    opacity: 0.45;
+    background-size: 36px 36px;
+    opacity: 0.28;
     pointer-events: none;
+  }
+
+  .shell-header {
+    background: color-mix(in srgb, var(--terminal-panel) 72%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .shell-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: fit-content;
+  }
+
+  .shell-brandmark {
+    font-family: var(--font-display), var(--font-plex-sans), sans-serif;
+    font-size: 2rem;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: var(--terminal-fg);
+  }
+
+  .shell-brand-compact {
+    gap: 0.02rem;
+  }
+
+  .shell-brandmark-compact {
+    font-size: 1.7rem;
+  }
+
+  .shell-nav-link {
+    border-radius: 9999px;
+    border: 1px solid var(--terminal-border);
+    background: color-mix(in srgb, var(--terminal-panel) 90%, black 10%);
+    padding: 0.5rem 0.85rem;
+    font-family: var(--font-plex-mono), monospace;
+    font-size: 0.69rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--terminal-muted);
+    transition: 0.15s ease;
+  }
+
+  .shell-nav-link:hover {
+    border-color: color-mix(in srgb, var(--terminal-accent) 60%, var(--terminal-border) 40%);
+    color: var(--terminal-fg);
+    transform: translateY(-1px);
+  }
+
+  .shell-nav-link-active {
+    border-color: color-mix(in srgb, var(--terminal-accent) 72%, var(--terminal-border) 28%);
+    background: color-mix(in srgb, var(--terminal-accent) 12%, var(--terminal-panel) 88%);
+    color: var(--terminal-accent);
+  }
+
+  .shell-nav-link-minimal {
+    border-color: transparent;
+    background: transparent;
+    padding: 0.4rem 0.65rem;
+    color: var(--terminal-muted);
+  }
+
+  .shell-nav-link-minimal:hover {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .shell-nav-link-minimal.shell-nav-link-active {
+    border-color: transparent;
+    background: transparent;
+    color: var(--terminal-fg);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--terminal-accent) 70%, transparent);
+    text-underline-offset: 0.32rem;
+    text-decoration-thickness: 1px;
+  }
+
+  .shell-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid var(--terminal-border);
+    background: color-mix(in srgb, var(--terminal-panel) 90%, black 10%);
+    padding: 0.4rem 0.65rem;
+  }
+
+  .inline-command {
+    border-radius: 9999px;
+    border: 1px solid var(--terminal-border);
+    background: color-mix(in srgb, var(--terminal-panel) 90%, black 10%);
+    padding: 0.38rem 0.7rem;
+    font-family: var(--font-plex-mono), monospace;
+    font-size: 0.7rem;
+    color: var(--terminal-accent);
+  }
+
+  .editorial-card {
+    border: 1px solid var(--terminal-border);
+    border-radius: 1.5rem;
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--terminal-accent) 9%, transparent), transparent 36%),
+      linear-gradient(180deg, color-mix(in srgb, var(--terminal-panel) 98%, white 2%), var(--terminal-panel-2));
+    box-shadow: var(--terminal-shadow);
+  }
+
+  .shell-divider {
+    height: 1.5rem;
+    width: 1px;
+    background: var(--terminal-border);
+  }
+
+  .shell-theme-toggle {
+    border: 0;
+    background: transparent;
+    padding: 0.35rem 0.45rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--terminal-muted);
+    transition: color 0.15s ease;
+  }
+
+  .shell-theme-toggle:hover {
+    color: var(--terminal-fg);
   }
 }
 
@@ -284,8 +444,8 @@ textarea {
   pointer-events: none;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.02) 0px,
-    rgba(255, 255, 255, 0.02) 1px,
+    rgba(255, 255, 255, 0.014) 0px,
+    rgba(255, 255, 255, 0.014) 1px,
     transparent 2px,
     transparent 4px
   );
@@ -311,8 +471,8 @@ textarea {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(141, 252, 196, 0.12), transparent);
-  animation: terminalSweep 8s linear infinite;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--terminal-accent) 12%, transparent), transparent);
+  animation: terminalSweep 10s linear infinite;
 }
 
 @keyframes heroWordRise {
@@ -347,12 +507,13 @@ textarea {
   display: inline-block;
   max-width: 100%;
   font-family: var(--font-display), var(--font-plex-mono), monospace;
-  font-variation-settings: 'wght' 700;
-  letter-spacing: 0.03em;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.01em;
   line-height: 0.95;
   overflow-wrap: anywhere;
   text-shadow:
-    0 0 24px color-mix(in srgb, var(--terminal-accent) 24%, transparent),
+    0 0 24px color-mix(in srgb, var(--terminal-accent) 16%, transparent),
     0 0 1px rgba(255, 255, 255, 0.18);
   animation: heroWordRise 2.2s ease both;
 }
