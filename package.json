@@ -15,7 +15,7 @@
     "check:node": "npm run check:backend && npm run check:frontend && npm run check:cli",
     "check:backend": "npm --prefix backend test",
     "check:frontend": "npm --prefix frontend run lint && npm --prefix frontend run type-check && npm --prefix frontend run build",
-    "test:contracts": "forge test -vvv --root contracts",
+    "test:contracts": "bash scripts/forgew.sh test -vvv --root contracts",
     "typecheck:frontend": "npm --prefix frontend run type-check",
     "check:cli": "npm --prefix cli run check && npm --prefix cli run build",
     "dev:backend": "npm --prefix backend run dev:simple",

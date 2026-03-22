@@ -1113,12 +1113,13 @@ app.use((err: Error, _req: Request, res: Response, _next: any) => {
 });
 
 // Start server
+const HOST = config.server.host;
 const PORT = config.server.port;
 
-app.listen(PORT, () => {
-  console.log('✅ DealRail API server running (Simplified - No Database)');
-  console.log(`   Health: http://localhost:${PORT}/health`);
-  console.log(`   API: http://localhost:${PORT}/api/v1`);
+app.listen(PORT, HOST, () => {
+  console.log(`✅ DealRail API server running (Simplified - No Database) on ${HOST}:${PORT}`);
+  console.log(`   Health: http://${HOST}:${PORT}/health`);
+  console.log(`   API: http://${HOST}:${PORT}/api/v1`);
   console.log(`   Network: ${config.blockchain.activeChain}`);
   console.log(`   Chain ID: ${config.activeChainConfig.chainId}`);
   console.log(`   Escrow: ${config.activeChainConfig.contracts.escrowRailERC20}`);
