@@ -90,14 +90,14 @@ Human mode run order:
 1) Run Deal Pipeline (set policy, counter rounds, confirm deal).
 2) Create/fund job and track status.
 3) Open Jobs List and verify state transitions.
-4) Use Docs for the human toggle and `/skill.md` for the agent index.
+4) Use Docs for the human toggle and `/SKILL.md` for the agent index.
 5) Use Advanced section only when needed.
 EOF
     ;;
   agent-flow)
     cat <<'EOF'
 Agent mode run order:
-1) Start with `/skill.md` or `dealrail services --json`.
+1) Start with `/SKILL.md` or `dealrail services --json`.
 2) Provider Discovery (select counterparties).
 3) Negotiation / vend flow if a provider is not fixed.
 4) Escrow or x402 path depending on posture.
