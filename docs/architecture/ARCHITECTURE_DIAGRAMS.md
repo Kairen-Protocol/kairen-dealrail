@@ -353,12 +353,12 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Production Environment"
-        subgraph "Vercel"
-            FE[Next.js Frontend<br/>dealrail.xyz]
+        subgraph "Cloudflare Workers"
+            FE[Next.js Frontend<br/>dealrail.kairen.xyz]
         end
 
-        subgraph "Railway/Render"
-            BE[Express Backend<br/>api.dealrail.xyz]
+        subgraph "Railway"
+            BE[Express Backend<br/>kairen-dealrail-production.up.railway.app]
             EL[Event Listener<br/>Background Worker]
             DB[(PostgreSQL<br/>Addon)]
         end
@@ -384,10 +384,10 @@ graph TB
 
 **Environment Variables**:
 ```bash
-# Frontend (Vercel)
+# Frontend (Cloudflare)
 NEXT_PUBLIC_RPC_URL=https://sepolia.base.org
 NEXT_PUBLIC_ESCROW_ADDRESS=0x...
-NEXT_PUBLIC_API_URL=https://api.dealrail.xyz/v1
+NEXT_PUBLIC_API_URL=https://kairen-dealrail-production.up.railway.app
 
 # Backend (Railway)
 DATABASE_URL=postgresql://...
