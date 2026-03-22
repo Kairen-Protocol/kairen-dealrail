@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, KeyboardEvent, useMemo, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
 import { Address, isAddress, keccak256, parseEther, parseUnits, toBytes } from 'viem';
 import { healthCheck, integrationsApi, jobsApi } from '@/lib/api';
@@ -108,6 +108,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [lines, setLines] = useState<TerminalLine[]>(INITIAL_LINES);
+  const outputRef = useRef<HTMLDivElement | null>(null);
 
   const statusLabel = useMemo(() => (running ? 'RUNNING' : 'IDLE'), [running]);
   const walletLabel = useMemo(() => {
@@ -117,12 +118,46 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   const visibleExamples = compact ? EXAMPLES.slice(0, 3) : EXAMPLES;
   const visibleLines = compact ? lines.slice(-4) : lines;
 
+  useEffect(() => {
+    const node = outputRef.current;
+    if (!node) return;
+    node.scrollTop = node.scrollHeight;
+  }, [lines]);
+
   function append(tone: LineTone, text: string) {
     setLines((prev) => [...prev, { tone, text }]);
   }
 
-  function appendMany(entries: TerminalLine[]) {
-    setLines((prev) => [...prev, ...entries]);
+  function wait(ms: number) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  function getLineDelay(entry: TerminalLine) {
+    if (/^(tx=|explorer=|receipt=|sim approve tx=|sim settle tx=)/i.test(entry.text)) {
+      return compact ? 180 : 320;
+    }
+
+    if (entry.tone === 'warn') {
+      return compact ? 150 : 240;
+    }
+
+    if (entry.tone === 'ok') {
+      return compact ? 130 : 210;
+    }
+
+    return compact ? 120 : 180;
+  }
+
+  async function appendStep(tone: LineTone, text: string) {
+    const entry = { tone, text };
+    append(tone, text);
+    await wait(getLineDelay(entry));
+  }
+
+  async function appendMany(entries: TerminalLine[]) {
+    for (const entry of entries) {
+      await appendStep(entry.tone, entry.text);
+    }
   }
 
   function emit(kind: TerminalActionKind, command: string, note: string) {
@@ -247,12 +282,12 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     }
   }
 
-  function appendSimulationReceipt(service: (typeof DEMO_SERVICES)[number], command: string) {
+  async function appendSimulationReceipt(service: (typeof DEMO_SERVICES)[number], command: string) {
     const approveTx = mockTxHash(`${command}:approve:${service.id}`);
     const fundTx = mockTxHash(`${command}:fund:${service.id}`);
     const receiptId = `sim_${service.id}_${Date.now().toString(36)}`;
 
-    appendMany([
+    await appendMany([
       { tone: 'ok', text: `demo service=${service.name} | price=${service.startingPriceUsdc.toFixed(2)} USDC | eta=${service.deliveryHours}h` },
       { tone: 'ok', text: `settlement rail=${service.settlementRail} | provider=${service.providerAddress}` },
       { tone: 'system', text: `sim approve tx=${approveTx}` },
@@ -263,7 +298,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   }
 
   async function showHelp(command: string) {
-    appendMany([
+    await appendMany([
       { tone: 'system', text: 'GRAMMAR' },
       { tone: 'system', text: 'doctor' },
       { tone: 'system', text: 'services' },
@@ -288,7 +323,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
           ? 'Base service directory loaded with curated demo supply'
           : 'Base service directory loaded';
 
-      appendMany([
+      await appendMany([
         { tone: directory.catalogMode === 'curated_demo' ? 'warn' : 'ok', text: `base service directory | chain=${directory.chainId} | mode=${directory.catalogMode}` },
         { tone: 'ok', text: `public surfaces=${directory.publicSurfaces.length} | visible supply=${directory.discovery.providerCount}` },
         ...directory.publicSurfaces.slice(0, 4).map((surface) => ({
@@ -304,7 +339,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       emit('market_scan', command, note);
       return;
     } catch {
-      appendMany([
+      await appendMany([
         { tone: 'warn', text: 'base service directory is unavailable; showing fallback demo catalog' },
         ...DEMO_SERVICES.map((service) => ({
           tone: 'system' as LineTone,
@@ -333,7 +368,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
         ? 'Doctor complete: desk is reachable and the demo catalog is active'
         : 'Doctor complete: desk is reachable and routing is live';
 
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: `api=reachable | chain=${health.blockchain.chainId} | escrow=${health.blockchain.escrowAddress}` },
         { tone: health.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market posture=${health.integrations?.x402nMockMode ? 'curated demo' : 'live routing'}` },
         { tone: 'ok', text: `machine payments=${health.integrations?.machinePaymentsPrimary ?? 'x402'}` },
@@ -347,7 +382,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
       emit('doctor', command, note);
     } catch {
-      appendMany([
+      await appendMany([
         { tone: 'warn', text: 'Doctor failed: backend is unreachable' },
         { tone: 'warn', text: 'check NEXT_PUBLIC_API_URL and backend deployment before recording flows' },
       ]);
@@ -358,7 +393,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   async function runStatus(command: string) {
     try {
       const health = await healthCheck();
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: `backend online on ${getChainLabel(health.blockchain.chainId)}` },
         { tone: 'ok', text: `escrow=${health.blockchain.escrowAddress}` },
         { tone: health.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market posture=${health.integrations?.x402nMockMode ? 'curated demo' : 'live routing'}` },
@@ -366,7 +401,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       ]);
       emit('status', command, `Backend online on chain ${health.blockchain.chainId}`);
     } catch {
-      append('warn', 'Backend offline or miswired. Check NEXT_PUBLIC_API_URL and redeploy the frontend if needed.');
+      await appendStep('warn', 'Backend offline or miswired. Check NEXT_PUBLIC_API_URL and redeploy the frontend if needed.');
       emit('status', command, 'Backend offline or miswired');
     }
   }
@@ -376,7 +411,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     const demoMatches = findDemoServices(query);
 
     if (demoMatches.length > 0) {
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: `scan query=${query || 'all demo services'}` },
         { tone: 'ok', text: 'source posture=frontend demo catalog' },
         ...demoMatches.slice(0, 4).map((service) => ({
@@ -393,7 +428,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       const top = result.providers.slice(0, 4);
       const allMock = result.providers.length > 0 && result.providers.every((provider) => provider.source === 'mock');
 
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: `scan query=${query || 'all supply'}` },
         { tone: allMock ? 'warn' : 'ok', text: `source posture=${allMock ? 'curated demo only' : 'mixed/live'}` },
         ...top.map((provider) => ({
@@ -403,12 +438,12 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       ]);
 
       if (top.length === 0) {
-        append('warn', 'No provider supply matched. Keep the demo on the hardcoded catalog unless a live feed is available.');
+        await appendStep('warn', 'No provider supply matched. Keep the demo on the hardcoded catalog unless a live feed is available.');
       }
 
       emit('market_scan', command, `Supply scan returned ${result.providers.length} providers`);
     } catch {
-      append('warn', 'Supply scan failed. Discovery endpoint did not respond.');
+      await appendStep('warn', 'Supply scan failed. Discovery endpoint did not respond.');
       emit('market_scan', command, 'Supply scan failed');
     }
   }
@@ -423,7 +458,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
     if (demoMatches.length > 0) {
       const service = demoMatches[0];
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: 'role=buyer' },
         { tone: 'ok', text: `objective=${query || service.name}` },
         ...(typeof maxBasePriceUsdc === 'number' ? [{ tone: 'ok' as LineTone, text: `budget ceiling=${maxBasePriceUsdc} USDC` }] : []),
@@ -431,7 +466,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
         { tone: 'ok', text: 'supply posture=frontend demo simulation' },
         { tone: 'ok', text: `candidate=${service.name} | price=${service.startingPriceUsdc.toFixed(2)} | eta=${service.deliveryHours}h | demo catalog` },
       ]);
-      appendSimulationReceipt(service, command);
+      await appendSimulationReceipt(service, command);
       emit('role_buyer', command, `Frontend simulation staged for ${service.name}`);
       return;
     }
@@ -444,7 +479,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       const shortlist = result.providers.slice(0, 3);
       const allMock = result.providers.length > 0 && result.providers.every((provider) => provider.source === 'mock');
 
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: 'role=buyer' },
         { tone: 'ok', text: `objective=${query || 'service request'}` },
         ...(typeof maxBasePriceUsdc === 'number' ? [{ tone: 'ok' as LineTone, text: `budget ceiling=${maxBasePriceUsdc} USDC` }] : []),
@@ -465,15 +500,15 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
           matchesAtCreate: result.providers.length,
           source: 'terminal',
         });
-        append('warn', 'No matching supply yet. Demand was stored in the opportunity book instead of being dropped.');
-        append('ok', `opportunity=${queued.opportunity.id} | providers can pick this up later from the dashboard`);
+        await appendStep('warn', 'No matching supply yet. Demand was stored in the opportunity book instead of being dropped.');
+        await appendStep('ok', `opportunity=${queued.opportunity.id} | providers can pick this up later from the dashboard`);
       } else {
-        append('ok', 'next: compare the shortlist, then choose sample demo or a real settlement path');
+        await appendStep('ok', 'next: compare the shortlist, then choose sample demo or a real settlement path');
       }
 
       emit('role_buyer', command, `Buyer flow staged with ${result.providers.length} candidate providers`);
     } catch {
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: 'role=buyer' },
         { tone: 'warn', text: 'Buyer flow staged but supply lookup failed' },
       ]);
@@ -483,7 +518,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
   async function runSell(command: string) {
     const query = stripVerb(command, ['sell', 'provider', 'offer']);
-    appendMany([
+    await appendMany([
       { tone: 'ok', text: 'role=provider' },
       { tone: 'ok', text: `service=${query || 'unspecified service'}` },
       { tone: 'ok', text: 'to appear in scans: publish to a market adapter or import your provider feed into DealRail discovery' },
@@ -502,7 +537,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
       const discoveryMode = discovery.providers.every((provider) => provider.source === 'mock') ? 'curated demo' : 'mixed/live';
 
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: 'desk capabilities loaded' },
         { tone: health?.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market competition=${health?.integrations?.x402nMockMode ? 'curated demo' : 'live'}` },
         { tone: 'ok', text: `machine payments=${health?.integrations?.machinePaymentsPrimary ?? 'x402'}` },
@@ -513,7 +548,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
       emit('open_integrations', command, 'Rail status loaded');
     } catch {
-      append('warn', 'Rail status failed to load');
+      await appendStep('warn', 'Rail status failed to load');
       emit('open_integrations', command, 'Rail status failed to load');
     }
   }
@@ -522,7 +557,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     const parsed = parseSendCommand(command);
 
     if (!parsed) {
-      append('warn', 'Send syntax: send <amount> usdc|eth|native to 0x... on base sepolia');
+      await appendStep('warn', 'Send syntax: send <amount> usdc|eth|native to 0x... on base sepolia');
       emit('wallet_send', command, 'Wallet send syntax error');
       return;
     }
@@ -544,7 +579,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
             chainId: parsed.chainId,
           });
 
-      appendMany([
+      await appendMany([
         { tone: 'ok', text: `wallet send submitted | asset=${parsed.assetLabel} | amount=${parsed.amount} | chain=${getChainLabel(parsed.chainId)}` },
         { tone: 'ok', text: `to=${parsed.recipient}` },
         { tone: 'system', text: `tx=${hash}` },
@@ -552,7 +587,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       ]);
       emit('wallet_send', command, `${parsed.assetLabel} send submitted on ${getChainLabel(parsed.chainId)}`);
     } catch (error) {
-      append('warn', error instanceof Error ? error.message : 'Wallet send failed.');
+      await appendStep('warn', error instanceof Error ? error.message : 'Wallet send failed.');
       emit('wallet_send', command, 'Wallet send failed');
     }
   }
@@ -561,12 +596,12 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     const parsed = parseSwapCommand(command);
 
     if (!parsed) {
-      append('warn', 'Swap syntax: swap <amount> usdc|weth to usdc|weth on base sepolia');
+      await appendStep('warn', 'Swap syntax: swap <amount> usdc|weth to usdc|weth on base sepolia');
       emit('swap_preview', command, 'Swap syntax error');
       return;
     }
 
-    appendMany([
+    await appendMany([
       { tone: 'ok', text: `swap sample | chain=${getChainLabel(parsed.chainId)} | route=${parsed.tokenIn} -> ${parsed.tokenOut}` },
       { tone: 'ok', text: `amount in=${parsed.amountIn} ${parsed.tokenIn}` },
       { tone: 'system', text: `sample route id=${mockTxHash(`swap:${command}`)}` },
@@ -644,12 +679,12 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
       if (/^(auction|flow)\b/i.test(command)) {
         prefillFlow(command);
-        append('ok', 'Auction path staged. Use `buy ...` first so the desk knows what supply it is comparing.');
+        await appendStep('ok', 'Auction path staged. Use `buy ...` first so the desk knows what supply it is comparing.');
         emit('start_flow', command, 'Auction path staged');
         return;
       }
 
-      append('warn', 'Unknown command. Use `help`, `services`, `send`, `swap`, `scan`, `providers`, `buy`, `vend`, or `status`.');
+      await appendStep('warn', 'Unknown command. Use `help`, `services`, `send`, `swap`, `scan`, `providers`, `buy`, `vend`, or `status`.');
       emit('unknown', command, 'Command not mapped');
     } finally {
       setRunning(false);
@@ -713,7 +748,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
           </div>
 
           <div className="p-4">
-            <div className={`terminal-mono overflow-auto space-y-2 text-xs leading-6 ${compact ? 'h-36' : 'h-[25rem]'}`}>
+            <div ref={outputRef} className={`terminal-mono overflow-auto space-y-2 text-xs leading-6 ${compact ? 'h-36' : 'h-[25rem]'}`}>
               {visibleLines.map((line, idx) => (
                 <div
                   key={`${line.text}-${idx}`}
