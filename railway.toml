@@ -1,0 +1,11 @@
+[build]
+builder = "RAILPACK"
+buildCommand = "cd backend && npm install --include=dev && npm run build"
+watchPatterns = ["/backend/**", "/package.json", "/.nvmrc", "/railway.toml"]
+
+[deploy]
+startCommand = "cd backend && node dist/index-simple.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
