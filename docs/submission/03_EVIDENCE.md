@@ -25,9 +25,9 @@ This file points judges to the strongest proof artifacts in the repository.
 - EscrowRailERC20: `0xB9dfa53326016415ca6fb9eb16A0f050c8d15C74`
 - DealRailHook: `0x04B0D16f790A5F83dc48c7e4D05467ff2eA57519`
 
-## Best Transaction Proofs
+## Strongest Transaction Proofs
 
-### Base Sepolia
+### Base Sepolia Escrow Flow
 
 Canonical run recorded in [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md):
 - createJob: `0xc88a6bcef436cad6fefb0e012bf7ccf57ea991905f6b22615287701692952430`
@@ -60,8 +60,6 @@ Canonical run recorded in [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSA
 - settlement tx: `0x8dfabc6a77205b0740aa7bc48e230b7516acc76295536d18a6a30db19476940c`
 - network: `eip155:84532`
 - price: `0.01 USDC`
-- payer: `0x77712e28F7A4a2EeD0bd7f9F8B8486332a38892e`
-- payTo: `0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF`
 - proof script: [`backend/tests/proof-x402-testnet.ts`](../../backend/tests/proof-x402-testnet.ts)
 - human-readable note: [`docs/progress/X402_TESTNET_PROOF_2026-03-22.md`](../progress/X402_TESTNET_PROOF_2026-03-22.md)
 
@@ -74,7 +72,10 @@ Canonical test references:
 - [`backend/tests/test-lifecycle-celo-sepolia.ts`](../../backend/tests/test-lifecycle-celo-sepolia.ts)
 
 Reported status in [`STATUS.md`](../../STATUS.md):
-- `forge test -vvv`: 22/22 passing
+- root `npm run check`
+- backend `npm test`
+- frontend `npm run build`
+- CLI `npm run build`
 
 ## Strongest Trust Evidence
 
@@ -88,11 +89,16 @@ This is strong because ERC-8004 affects behavior, not just labeling:
 - reputation reads influence acceptance criteria
 - reputation writes happen after successful settlement
 
-## Partial Evidence Zones
+## Evidence Upgrade Zones
 
-These integrations are coded but not yet evidenced with sponsor-specific live artifacts in the canonical ledger:
-- MetaMask delegation execution
-- Uniswap swaps
-- Locus live calls
+These integrations are implemented, but their sponsor-grade evidence is still incomplete:
 
-Those should be treated as partial until new proof is recorded.
+| Track | Readiness | Missing artifact |
+|------|-----------|------------------|
+| Let the Agent Cook | 70% | `agent.json`, `agent_log.json`, structured autonomous run |
+| Base Agent Services on Base | 75% | discoverable public paid service proof |
+| MetaMask Delegations | 60% | delegated tx hash |
+| Uniswap | 55% | executed swap tx hash |
+| Locus | 45% | live operation proof |
+
+Those should stay out of the primary claim set until new proof is recorded.

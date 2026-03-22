@@ -1,3 +1,13 @@
+# Historical Note
+
+This is a planning-era summary.
+Do not use it as the canonical current-state doc.
+
+Use instead:
+- [`../submission/00_START_HERE.md`](../submission/00_START_HERE.md)
+- [`../submission/01_TRACK_MATRIX.md`](../submission/01_TRACK_MATRIX.md)
+- [`../submission/05_WINNING_STRATEGY.md`](../submission/05_WINNING_STRATEGY.md)
+
 # Kairen DealRail — Executive Summary
 
 > Research, Planning, and Architecture Phase Complete ✅

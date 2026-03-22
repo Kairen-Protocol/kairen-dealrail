@@ -1,10 +1,17 @@
 # Kairen DealRail
 
 DealRail is an Ethereum-first machine-commerce execution desk for agent-to-agent and human-assisted service deals.
-It combines market competition, machine payments, onchain escrow, evaluator-mediated settlement, and ERC-8004 reputation hooks.
 
-Humans can operate it from the browser desk.
-Agents can operate it from the published npm package and stable JSON CLI mode.
+It combines:
+- service request intake
+- provider competition
+- machine payments
+- onchain escrow
+- evaluator-mediated settlement
+- ERC-8004-aware trust hooks
+
+Humans use the browser desk.
+Agents use the published npm package and JSON CLI mode.
 
 Live browser desk:
 - `https://dealrail.kairen.xyz/`
@@ -14,16 +21,10 @@ Live backend API:
 
 Published package:
 - `@kairenxyz/dealrail`
-- current verified npm release in this repo: `0.1.1`
-
-Hackathon context:
-- Event: The Synthesis
-- Submission deadline: March 22, 2026 at 11:59 PM PST
-- Judging model: AI agents plus humans
 
 ## AI Judge Fast Path
 
-If you are evaluating this repository, read these files in order:
+Read these files in order:
 
 1. [`docs/submission/00_START_HERE.md`](docs/submission/00_START_HERE.md)
 2. [`docs/submission/01_TRACK_MATRIX.md`](docs/submission/01_TRACK_MATRIX.md)
@@ -32,213 +33,98 @@ If you are evaluating this repository, read these files in order:
 5. [`docs/submission/03_EVIDENCE.md`](docs/submission/03_EVIDENCE.md)
 6. [`docs/submission/04_CHECKLIST.md`](docs/submission/04_CHECKLIST.md)
 7. [`docs/submission/05_WINNING_STRATEGY.md`](docs/submission/05_WINNING_STRATEGY.md)
+8. [`docs/submission/07_ROADMAP.md`](docs/submission/07_ROADMAP.md)
 
-Track-specific briefs:
+Track briefs:
 - [`docs/submission/tracks/OPEN_TRACK.md`](docs/submission/tracks/OPEN_TRACK.md)
 - [`docs/submission/tracks/PROTOCOL_LABS_ERC8004.md`](docs/submission/tracks/PROTOCOL_LABS_ERC8004.md)
+- [`docs/submission/tracks/PROTOCOL_LABS_AGENT_COOK.md`](docs/submission/tracks/PROTOCOL_LABS_AGENT_COOK.md)
 - [`docs/submission/tracks/VIRTUALS_ERC8183.md`](docs/submission/tracks/VIRTUALS_ERC8183.md)
 - [`docs/submission/tracks/CELO.md`](docs/submission/tracks/CELO.md)
-- [`docs/submission/tracks/METAMASK_DELEGATIONS.md`](docs/submission/tracks/METAMASK_DELEGATIONS.md)
-- [`docs/submission/tracks/UNISWAP.md`](docs/submission/tracks/UNISWAP.md)
-- [`docs/submission/tracks/LOCUS.md`](docs/submission/tracks/LOCUS.md)
 - [`docs/submission/tracks/AGENTCASH_X402.md`](docs/submission/tracks/AGENTCASH_X402.md)
 
 ## Start In 60 Seconds
 
-### Human Operator
-
-Open the live browser desk first:
-- `https://dealrail.kairen.xyz/`
-
-Or use the source routes:
-- home overview: [`frontend/src/app/page.tsx`](frontend/src/app/page.tsx)
-- terminal desk: [`frontend/src/app/terminal/page.tsx`](frontend/src/app/terminal/page.tsx)
-- docs desk: [`frontend/src/app/docs/page.tsx`](frontend/src/app/docs/page.tsx)
-
-Or use the terminal package:
+Human path:
 
 ```bash
-npx @kairenxyz/dealrail help
 npx @kairenxyz/dealrail doctor
-npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24
+npx @kairenxyz/dealrail help
 ```
 
-### Agent Runtime
-
-Use the same package in JSON mode:
+Agent path:
 
 ```bash
 npx @kairenxyz/dealrail doctor --json
-npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
+npx @kairenxyz/dealrail status --json
 ```
 
-Or point explicitly at the live deployed backend:
+Live deployed backend:
 
 ```bash
 DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
-DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail status --json
-```
-
-### Backend Integrator
-
-Live production API:
-
-```bash
-DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
-```
-
-Local development API:
-
-```bash
-cd backend
-npm run build
-node dist/index-simple.js
-DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
 ```
 
 ## Operator Surfaces
 
-DealRail now has three first-class entry surfaces:
-
 | Surface | Audience | Why it exists |
 |---------|----------|---------------|
-| Browser desk | Humans, judges, mixed operator teams | Explains the product, shows the terminal UX, and gives the fastest evaluation path |
-| npm CLI package | Agents and terminal-native humans | Gives a stable command surface, `--json` mode, and a lightweight install story |
-| Backend API | Integrators and automation | Exposes negotiation, discovery, machine-payment, delegation, and escrow lifecycle endpoints |
-
-The published package is:
-- package: `@kairenxyz/dealrail`
-- binary: `dealrail`
-- SDK entry: `import { DealRailClient } from '@kairenxyz/dealrail'`
-
-## Local Agent Skills
-
-The repo also includes a local skill pack under [`.agents/skills`](.agents/skills) for agent collaborators and AI judges inspecting implementation patterns.
-
-Most relevant skills:
-- [`viem-integration`](.agents/skills/viem-integration/SKILL.md): EVM reads, writes, wallet clients, and wagmi patterns
-- [`swap-integration`](.agents/skills/swap-integration/SKILL.md): Uniswap quote, approval, and swap integration patterns
-- [`swap-planner`](.agents/skills/swap-planner/SKILL.md): swap planning and token discovery workflows
-- [`pay-with-any-token`](.agents/skills/pay-with-any-token/SKILL.md): HTTP 402 / machine-payment handling with Tempo and Uniswap funding paths
-
-These skills are part of the repo's agent UX, not evidence. They improve how future agents navigate and extend the project, but they do not upgrade sponsor-track claims unless backed by recorded transactions in the ledger.
+| Browser desk | Humans, judges, mixed operator teams | Fastest way to understand and demo the product |
+| npm CLI package | Agents and terminal-native humans | Stable command surface with `--json` mode |
+| Backend API | Integrators and automation | Canonical execution, discovery, trust, and settlement surface |
 
 ## What Is Real Today
 
-### Contracts
-- ERC-8183-style escrow lifecycle is implemented in [`contracts/src/EscrowRail.sol`](contracts/src/EscrowRail.sol) and [`contracts/src/EscrowRailERC20.sol`](contracts/src/EscrowRailERC20.sol)
-- ERC-8004 identity and reputation integration is implemented in [`contracts/src/identity/ERC8004Verifier.sol`](contracts/src/identity/ERC8004Verifier.sol) and [`contracts/src/DealRailHook.sol`](contracts/src/DealRailHook.sol)
-- Hook safety tests exist in [`contracts/test/EscrowRailERC20Hook.t.sol`](contracts/test/EscrowRailERC20Hook.t.sol)
+- live browser desk on Cloudflare
+- live backend on Railway
+- published npm CLI / SDK package
+- Base Sepolia escrow evidence
+- Celo Sepolia happy and reject evidence
+- ERC-8004 verifier and hook integration
+- x402 paid-request proof on Base Sepolia testnet
 
-### Deployments
-- Base Sepolia and Celo Sepolia canonical addresses are recorded in [`STATUS.md`](STATUS.md) and [`backend/TRANSACTION_LEDGER.md`](backend/TRANSACTION_LEDGER.md)
-- Backend defaults now point to the March 17, 2026 canonical deployment set in [`backend/src/config.ts`](backend/src/config.ts)
+## Track Readiness
 
-### Backend
-- Live job lifecycle API exists in [`backend/src/index-simple.ts`](backend/src/index-simple.ts)
-- Negotiation bridge, discovery, execution adapters, delegation builder, Uniswap payload builder, and Locus bridge are implemented in [`backend/src/services`](backend/src/services)
+These are submission-readiness estimates, not code coverage.
 
-### Frontend
-- Next.js operator UI exists in [`frontend/src/app`](frontend/src/app)
-- live deployment exists at `https://dealrail.kairen.xyz/`
-- Canonical contract addresses for frontend reads/writes are in [`frontend/src/lib/contracts.ts`](frontend/src/lib/contracts.ts)
-- Browser demo terminal and operator docs exist in [`frontend/src/app/terminal/page.tsx`](frontend/src/app/terminal/page.tsx) and [`frontend/src/app/docs/page.tsx`](frontend/src/app/docs/page.tsx)
+| Track | Readiness | Note |
+|-------|-----------|------|
+| Open Track | 95% | Primary narrative |
+| Protocol Labs ERC-8004 | 90% | Strongest sponsor fit |
+| Virtuals ERC-8183 | 92% | Direct product-thesis fit |
+| Celo | 90% | Real deployment and evidence |
+| AgentCash / x402 | 85% | Real testnet paid-request proof |
+| Let the Agent Cook | 70% | Needs autonomy packaging |
+| Base Agent Services on Base | 75% | Needs discoverable service proof |
+| MetaMask | 60% | Needs delegated tx proof |
+| Uniswap | 55% | Needs swap tx proof |
+| Locus | 45% | Needs live proof |
 
-### CLI / SDK
-- Published npm package exists at `@kairenxyz/dealrail`
-- Human-readable CLI lives in [`cli/src/cli.ts`](cli/src/cli.ts)
-- Stable agent JSON shapes live in [`cli/src/types.ts`](cli/src/types.ts)
-- Recordable walkthrough lives in [`cli/demo/dealrail-demo.sh`](cli/demo/dealrail-demo.sh)
-
-### Evidence
-- Canonical smoke-test transactions are recorded in [`backend/TRANSACTION_LEDGER.md`](backend/TRANSACTION_LEDGER.md)
-- Current build status and deployment set are summarized in [`STATUS.md`](STATUS.md)
-
-## Track Coverage Summary
-
-This repo intentionally separates strong claims from partial claims.
-
-| Track | Status | Claim Level |
-|-------|--------|-------------|
-| Synthesis Open Track | End-to-end product with real testnet evidence | Strong |
-| Protocol Labs: Agents With Receipts / ERC-8004 | Implemented and evidenced onchain hooks + verifier | Strong |
-| Virtuals: ERC-8183 Open Build | Direct ERC-8183-style commerce fit with real testnet evidence | Strong |
-| Celo: Best Agent on Celo | Deployed and smoke-tested on Celo Sepolia | Strong |
-| Merit / AgentCash / x402 | Real Base Sepolia paid-request proof now exists in the ledger, alongside the x402-first adapter surface | Strong on testnet |
-| Protocol Labs: Let the Agent Cook | Architecture fits, but manifest and structured execution logs are not yet canonical | Conditional |
-| Base: Agent Services on Base | Base settlement plus x402 proof exist, but discoverable paid-service proof is not yet canonical | Partial |
-| MetaMask: Best Use of Delegations | Delegation payload builder implemented, live delegated execution not evidenced | Partial |
-| Uniswap: Agentic Finance | Quote + transaction builders implemented, no swap tx evidence in ledger | Partial |
-| Locus: Best Use of Locus | Bridge implemented, mock-first by default, live evidence not included | Partial |
-| Bankr, Venice, ENS, Slice, Status, Self, Arkhai, others | Not submission targets in current repo state | Do not claim |
-
-Full matrix:
+Canonical track file:
 - [`docs/submission/01_TRACK_MATRIX.md`](docs/submission/01_TRACK_MATRIX.md)
 
-## Architecture In One Pass
+## Kairen Protocol Direction
 
-1. A buyer defines constraints and requests offers through the market competition bridge.
-2. Candidate providers are ranked and enriched with ERC-8004 trust data when available.
-3. The desk chooses machine payment for immediate calls or commits the selected deal onchain through the ERC-8183 escrow contract.
-4. Funds are locked in escrow until the provider submits a deliverable.
-5. An evaluator completes or rejects the job.
-6. DealRailHook can enforce trust gates before actions and write ERC-8004 reputation after settlement.
-7. Optional execution adapters prepare downstream operations such as Uniswap, Locus, and delegation payloads.
+DealRail is not meant to stay a standalone demo forever.
+Inside the broader Kairen protocol, it is the execution desk that can connect:
+- `kairen.xyz` as the protocol shell
+- `x402n` as the negotiation router
+- `market` as the provider and service discovery surface
+- `ForgeID / SIGNET` as the identity, prestige, and access layer
 
-The same loop has two operator entry paths:
+Canonical roadmap:
+- [`docs/submission/07_ROADMAP.md`](docs/submission/07_ROADMAP.md)
+- [`docs/strategy/ROADMAP.md`](docs/strategy/ROADMAP.md)
 
-```text
-human -> browser desk -> backend -> machine payment or escrow -> receipt
-agent -> npm cli / sdk -> backend -> machine payment or escrow -> receipt
-```
+## Canonical Evidence
 
-Canonical architecture doc:
-- [`docs/submission/02_ARCHITECTURE.md`](docs/submission/02_ARCHITECTURE.md)
-
-## Canonical Deployments
-
-### Base Sepolia
-- NullVerifier: `0xA61a57fF5570bF989a3a565B87b6421413995317`
-- ERC8004Verifier: `0xDB23657606957B32B385eC0A917d2818156668AC`
-- EscrowRail: `0x8c55C2BB6A396D3654f214726230D81e6fa22b69`
-- EscrowRailERC20: `0xE25B10057556e9714d2ac60992b68f4E61481cF9`
-- DealRailHook: `0x5fA109A74a688a49D254a21C2F3ab238E2A7F62e`
-
-### Celo Sepolia
-- NullVerifier: `0x8728dDDD3c1D7B901c62E9D6a232F17462a931E2`
-- ERC8004Verifier: `0x2700e5B26909301967DFeECE9cb931B9bA3bA2df`
-- EscrowRail: `0x684D32E03642870B88134A3722B0b094666EF42e`
-- EscrowRailERC20: `0xB9dfa53326016415ca6fb9eb16A0f050c8d15C74`
-- DealRailHook: `0x04B0D16f790A5F83dc48c7e4D05467ff2eA57519`
-
-## Repository Map
-
-- [`AGENT.md`](AGENT.md): AI-judge and collaborator navigation
-- [`docs/submission`](docs/submission): canonical submission pack
-- [`docs/strategy`](docs/strategy): planning and historical track strategy
-- [`cli`](cli): published npm CLI and lightweight SDK surface
-- [`contracts`](contracts): Solidity contracts and tests
-- [`backend`](backend): Express API, integrations, smoke tests, ledger
-- [`frontend`](frontend): Next.js UI
-- [`skills`](skills): role-based operational prompts for agents
-
-## Submission Readiness
-
-Ready:
-- Base Sepolia happy-path evidence
-- Celo Sepolia happy-path and reject-path evidence
-- ERC-8004 verifier and reputation hook integration
-- Hook hardening tests and canonical deployment ledger
-- AI-agent-friendly submission docs in `docs/submission`
-
-Still pending:
-- final demo video packaging
-- any sponsor-track claim that requires live third-party API execution beyond the evidence already recorded
-- any additional evidence needed to move partial integrations into the strong-claim set
+- [`STATUS.md`](STATUS.md)
+- [`backend/TRANSACTION_LEDGER.md`](backend/TRANSACTION_LEDGER.md)
+- [`docs/submission/03_EVIDENCE.md`](docs/submission/03_EVIDENCE.md)
 
 ## Local Verification
 
-Root commands:
+Root:
 
 ```bash
 npm run check
@@ -246,13 +132,12 @@ npm run build
 npm run test:contracts
 ```
 
-Package-local commands:
-
-Contracts:
+Frontend:
 
 ```bash
-cd contracts
-forge test -vvv
+cd frontend
+npm run lint
+npm run build
 ```
 
 Backend:
@@ -260,54 +145,12 @@ Backend:
 ```bash
 cd backend
 npm test
-npm run build
-```
-
-Frontend:
-
-```bash
-cd frontend
-npm run lint
-npm run type-check
-npm run build
 ```
 
 CLI:
 
 ```bash
 cd cli
-npm run check
 npm run build
 npx @kairenxyz/dealrail help
 ```
-
-Live API preflight:
-
-```bash
-DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
-```
-
-## Honest Runtime Posture
-
-This repo is working, but it is still disciplined about what is live and what is mock-first.
-
-Live and verified:
-- npm package install and CLI command surface
-- browser desk, docs desk, and demo terminal
-- backend lifecycle API
-- Base Sepolia and Celo Sepolia escrow flows
-- ERC-8004 hook and verifier integration
-
-Present but still mock-first or partial:
-- competition layer posture
-- provider discovery supply
-- Locus live payout proof in the ledger
-- Uniswap swap execution proof in the ledger
-
-## Important Claim Discipline
-
-This repository is submission-oriented, not marketing-oriented.
-
-- If a feature has onchain evidence or passing tests, we say it is implemented.
-- If a feature only prepares payloads or runs in mock mode by default, we label it partial.
-- If sponsor infrastructure is not load-bearing in the demonstrated path, we do not claim that track as a strong submission target.

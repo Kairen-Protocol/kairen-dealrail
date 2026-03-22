@@ -1,9 +1,10 @@
 # Kairen DealRail PRD
 
-**Version:** 3.0
+**Version:** 4.0
 **Date:** 2026-03-22
 **Status:** Current product record
 **Live frontend:** `https://dealrail.kairen.xyz/`
+**Live backend:** `https://kairen-dealrail-production.up.railway.app/`
 **Published package:** `@kairenxyz/dealrail`
 
 ## Product Summary
@@ -24,13 +25,14 @@ request -> compete -> pay or escrow -> deliver -> evaluate -> receipt
 
 Machine payments alone are not enough for real service transactions.
 
-A useful operator surface also needs:
+Useful agent commerce also needs:
 - structured request intake
 - provider competition
 - stablecoin-oriented settlement rails
 - escrow for non-instant work
 - evaluator-mediated completion or rejection
 - a clear receipt and audit trail
+- portable trust signals
 
 ## Product Goals
 
@@ -38,18 +40,20 @@ A useful operator surface also needs:
 - Let a human or agent request a service from a clean command surface
 - Return ranked or simulated provider options quickly
 - Support escrow-backed settlement on Ethereum testnets
-- Present a demoable, credible operator experience for both judges and builders
+- Present a credible operator experience for both judges and builders
+- Keep the browser path and agent path equally first-class
 
 ### Secondary
 - Expose a stable CLI/SDK surface for agent runtimes
 - Keep demo mode usable without forcing wallet connection
-- Preserve a path to real wallet-driven settlement when needed
+- Preserve a path to real wallet-driven execution when needed
+- Make the product legible to AI judges as well as humans
 
-### Non-goals for the current repo state
-- production-grade dispute resolution
-- live multi-provider discovery at internet scale
-- guaranteed live x402 settlement evidence across third-party providers
-- overstating sponsor integrations that are still mock-first or partial
+### Non-goals in the current repo state
+- production-grade dispute operations
+- global live provider supply
+- overstated sponsor integrations without proof
+- pretending roadmap layers are already live
 
 ## Target Users
 
@@ -63,9 +67,9 @@ A useful operator surface also needs:
 - wants machine-readable JSON output
 - wants a small number of reliable commands
 
-### Backend integrator
+### Integrator
 - wants a simple API and chain-aware settlement services
-- wants Base Sepolia and Celo Sepolia support without pulling in a heavy data layer
+- wants a path from hackathon demo into a larger protocol stack
 
 ## Operator Surfaces
 
@@ -114,34 +118,46 @@ Current token posture:
 
 ### Verified
 - frontend deployed to Cloudflare Workers at `dealrail.kairen.xyz`
+- backend deployed to Railway
 - published CLI package on npm
 - Base Sepolia escrow evidence
 - Celo Sepolia happy path evidence
 - Celo Sepolia reject path evidence
 - ERC-8004 verifier and hook integration
 - frontend-only simulation path for demo use
+- x402 paid-request proof on Base Sepolia testnet
 
-### Partial or mock-first
-- market competition supply
-- x402 machine-payment execution against third-party services
-- Locus live payout flow
-- delegation execution beyond payload construction
+### Still upgrade zones
+- market competition supply depth
+- x402n live negotiation routing
+- discoverable Base-facing public paid service proof
+- delegated execution beyond payload construction
+- Uniswap and Locus sponsor-grade proof
 
-## Architecture Summary
+## Product Readiness Snapshot
 
-```text
-browser desk or npm cli
-  -> backend coordination layer
-  -> provider scan / machine payment / escrow lifecycle
-  -> Base Sepolia or Celo Sepolia
-  -> receipt and status surfaces
-```
+| Area | Readiness |
+|------|-----------|
+| Browser desk | 95% |
+| CLI / SDK | 92% |
+| Backend API | 90% |
+| Base Sepolia flow | 95% |
+| Celo flow | 90% |
+| ERC-8004 trust layer | 90% |
+| x402 testnet proof | 85% |
 
-Core implementation areas:
-- `frontend/` for human operator UX
-- `cli/` for agent and terminal UX
-- `backend/src/index-simple.ts` for the canonical demo API
-- `contracts/` for escrow, hooks, and verifier logic
+## Kairen Protocol Future State
+
+DealRail is intended to become the execution desk inside the wider Kairen stack:
+- `kairen.xyz` as the protocol shell
+- `x402n` as the negotiation router
+- `market` as provider and service discovery
+- `ForgeID / SIGNET` as identity, prestige, and access verification
+- DealRail as execution, settlement, and receipts
+
+That roadmap is grounded in the local Kairen protocol repos and is documented in:
+- `docs/submission/07_ROADMAP.md`
+- `docs/strategy/ROADMAP.md`
 
 ## Success Criteria
 
@@ -149,27 +165,7 @@ The current product is successful if:
 - a judge can understand the system in under two minutes
 - a human can run the browser terminal demo without wallet friction
 - an agent can run the package with `--json`
-- the repo truthfully shows what is live, what is simulated, and what is partial
-
-## Distribution
-
-### Browser
-- `https://dealrail.kairen.xyz/`
-
-### Package
-```bash
-npx @kairenxyz/dealrail help
-npx @kairenxyz/dealrail doctor --json
-```
-
-## Canonical Supporting Docs
-
-- `README.md`
-- `AGENT.md`
-- `STATUS.md`
-- `docs/submission/00_START_HERE.md`
-- `docs/submission/02_ARCHITECTURE.md`
-- `backend/TRANSACTION_LEDGER.md`
+- the repo truthfully shows what is live, what is simulated, and what is still being upgraded
 
 ## Product Truth Rules
 

@@ -1,3 +1,13 @@
+# Historical Note
+
+This is a planning-era strategy document.
+Do not cite it as the current submission state.
+
+For current claims, use:
+- [`../submission/00_START_HERE.md`](../submission/00_START_HERE.md)
+- [`../submission/01_TRACK_MATRIX.md`](../submission/01_TRACK_MATRIX.md)
+- [`../submission/07_ROADMAP.md`](../submission/07_ROADMAP.md)
+
 # Kairen DealRail — Hackathon Strategy & Integration Plan
 
 > **Strategic Goal**: Submit DealRail as a standalone hackathon project that demonstrates value independently while showcasing integration potential with the broader Kairen Protocol ecosystem.

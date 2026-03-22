@@ -1,6 +1,6 @@
 # DealRail Docs
 
-This directory now has two distinct layers:
+This directory has two distinct layers.
 
 ## 1. Canonical Submission Docs
 
@@ -15,31 +15,34 @@ Read order:
 5. [`submission/03_EVIDENCE.md`](submission/03_EVIDENCE.md)
 6. [`submission/04_CHECKLIST.md`](submission/04_CHECKLIST.md)
 7. [`submission/05_WINNING_STRATEGY.md`](submission/05_WINNING_STRATEGY.md)
+8. [`submission/07_ROADMAP.md`](submission/07_ROADMAP.md)
 
 Track briefs:
 - [`submission/tracks/OPEN_TRACK.md`](submission/tracks/OPEN_TRACK.md)
 - [`submission/tracks/PROTOCOL_LABS_ERC8004.md`](submission/tracks/PROTOCOL_LABS_ERC8004.md)
+- [`submission/tracks/PROTOCOL_LABS_AGENT_COOK.md`](submission/tracks/PROTOCOL_LABS_AGENT_COOK.md)
+- [`submission/tracks/VIRTUALS_ERC8183.md`](submission/tracks/VIRTUALS_ERC8183.md)
 - [`submission/tracks/CELO.md`](submission/tracks/CELO.md)
+- [`submission/tracks/AGENTCASH_X402.md`](submission/tracks/AGENTCASH_X402.md)
 - [`submission/tracks/METAMASK_DELEGATIONS.md`](submission/tracks/METAMASK_DELEGATIONS.md)
 - [`submission/tracks/UNISWAP.md`](submission/tracks/UNISWAP.md)
 - [`submission/tracks/LOCUS.md`](submission/tracks/LOCUS.md)
-- [`submission/tracks/AGENTCASH_X402.md`](submission/tracks/AGENTCASH_X402.md)
 
-## 2. Historical and Working Docs
+## 2. Working And Historical Docs
 
 These are still useful, but they are not the canonical submission story:
 
-- [`project`](project): current product brief, repository layout, and internal resource handbooks
-- [`architecture`](architecture): current working architecture notes plus older technical evolution
-- [`strategy`](strategy): planning documents, track ideation, roadmap, and historical notes
+- [`project`](project): current product brief and repository layout
+- [`architecture`](architecture): working architecture notes and deeper technical context
+- [`strategy`](strategy): roadmap, track analysis, and planning history
 - [`guides`](guides): setup, deployment, and testing instructions
-- [`progress`](progress): session logs and build notes
+- [`progress`](progress): build logs and validation notes
 - [`reference`](reference): external references and research artifacts
 
 ## Read This Before Citing Anything
 
-- Prefer `docs/submission` for claims made to judges.
-- Use `project/PRD_KAIREN_DEALRAIL.md` for the current product brief.
-- Use `project/REPO_STRUCTURE.md` for the current repository layout.
-- Use `STATUS.md` and `backend/TRANSACTION_LEDGER.md` for canonical deployment and tx evidence.
-- Treat `docs/strategy` as planning context unless a fact is repeated in `docs/submission`.
+- Prefer `docs/submission` for judge-facing claims.
+- Use [`project/PRD_KAIREN_DEALRAIL.md`](project/PRD_KAIREN_DEALRAIL.md) for the current product brief.
+- Use [`strategy/ROADMAP.md`](strategy/ROADMAP.md) for the future-state Kairen integration plan.
+- Use [`STATUS.md`](../STATUS.md) and [`backend/TRANSACTION_LEDGER.md`](../backend/TRANSACTION_LEDGER.md) for canonical deployments and tx evidence.
+- Treat older planning docs as context unless a fact is repeated in `docs/submission`.

@@ -32,10 +32,9 @@ flowchart LR
     API[Backend API]
     NEG[Competition + discovery]
     PAY[Machine payments]
-    DISC[Discovery]
     ESC[Escrow Contracts]
     TRUST[ERC-8004 Trust Layer]
-    ADAPT[Optional Execution Adapters]
+    ADAPT[Optional Adapters]
   end
 
   subgraph Chains
@@ -46,8 +45,8 @@ flowchart LR
   subgraph Extensions
     UNI[Uniswap]
     LOC[Locus]
-    DEL[MetaMask Delegation Builder]
-    X4[x402 / AgentCash Path]
+    DEL[MetaMask Delegations]
+    X4[x402 / AgentCash]
   end
 
   H --> UI
@@ -59,16 +58,13 @@ flowchart LR
   CLI --> API
   API --> NEG
   API --> PAY
-  API --> DISC
   API --> ESC
   API --> TRUST
   API --> ADAPT
 
-  DISC --> TRUST
-  PAY --> X4[x402-first provider]
+  PAY --> X4
   ESC --> BASE
   ESC --> CELO
-
   ADAPT --> UNI
   ADAPT --> LOC
   ADAPT --> DEL
@@ -84,22 +80,13 @@ flowchart LR
 | Escrow | Locks funds and enforces state transitions | `contracts/src/EscrowRail.sol`, `contracts/src/EscrowRailERC20.sol` |
 | Trust layer | Checks identity/reputation and writes feedback | `contracts/src/DealRailHook.sol`, `contracts/src/identity/ERC8004Verifier.sol` |
 
-## 4. Operator Modes
-
-| Mode | Best for | First command or surface |
-|------|----------|--------------------------|
-| Human browser flow | Demo, judging, guided operation | `frontend/src/app/page.tsx` and `frontend/src/app/terminal/page.tsx` |
-| Human terminal flow | Direct operator control | `npx @kairenxyz/dealrail doctor` |
-| Agent runtime | Structured automation | `npx @kairenxyz/dealrail doctor --json` |
-| Embedded integration | Custom orchestration | `import { DealRailClient } from '@kairenxyz/dealrail'` |
-
-## 5. Canonical Deal Flow
+## 4. Canonical Deal Flow
 
 ```mermaid
 flowchart TD
   A[1. Human or agent defines intent] --> B[2. Backend scans supply and competition]
   B --> C[3. Providers are ranked]
-  C --> D{4. What execution posture fits}
+  C --> D{4. Which execution posture fits}
   D -->|Immediate paid call| E[5A. Machine payment adapter proxies request]
   D -->|Scoped service deal| F[5B. Onchain job created]
   F --> G[6. Escrow funded]
@@ -108,13 +95,11 @@ flowchart TD
   I -->|Complete| J[9. Funds released]
   I -->|Reject| K[9. Job rejected]
   J --> L[10. Reputation feedback can be written]
-  K --> M[10. Refund path remains available]
+  K --> M[10. Refund or retry posture remains]
   E --> N[6A. Response and receipt returned]
 ```
 
-## 6. Trust Loop
-
-This is the part that makes the Protocol Labs / ERC-8004 story strong.
+## 5. Trust Loop
 
 ```mermaid
 flowchart LR
@@ -127,26 +112,54 @@ flowchart LR
   HOOK --> FEED[write feedback to reputation registry]
 ```
 
-## 7. What Is Actually Demonstrated
+## 6. Readiness Map
 
 ```mermaid
 flowchart LR
-  subgraph Strongly Demonstrated
-    S1[Base Sepolia happy path]
-    S2[Celo Sepolia happy path]
-    S3[Celo Sepolia reject path]
-    S4[ERC-8004 verifier and hook tests]
-    S5[npm package install and CLI execution]
+  subgraph 85% Plus
+    S1[Open Track 95%]
+    S2[ERC-8004 90%]
+    S3[Virtuals ERC-8183 92%]
+    S4[Celo 90%]
+    S5[x402 85%]
   end
 
-  subgraph Partial But Present
-    P1[MetaMask delegation builder]
-    P2[Uniswap tx builder]
-    P3[Locus bridge]
-    P4[x402 and x402n adapters]
-    P5[market competition currently mock-first]
+  subgraph 70% To 84%
+    M1[Let the Agent Cook 70%]
+    M2[Base Agent Services on Base 75%]
+  end
+
+  subgraph Below 70%
+    P1[MetaMask 60%]
+    P2[Uniswap 55%]
+    P3[Locus 45%]
   end
 ```
+
+## 7. Future Kairen Stack
+
+```mermaid
+flowchart LR
+  SITE[kairen.xyz]
+  MARKET[Market]
+  X402[x402n]
+  DEAL[DealRail]
+  ID[ForgeID / SIGNET]
+
+  SITE --> MARKET
+  SITE --> X402
+  SITE --> DEAL
+  SITE --> ID
+  MARKET --> X402
+  X402 --> DEAL
+  ID --> DEAL
+```
+
+Meaning:
+- `Market` becomes public provider and service discovery
+- `x402n` becomes the live negotiation and transcript router
+- `ForgeID / SIGNET` becomes deeper identity, prestige, and access control
+- `DealRail` remains the execution, settlement, and receipts layer
 
 ## 8. Why The Repo Is Organized This Way
 
@@ -157,15 +170,7 @@ The repo is split so two audiences can navigate it quickly:
 - agents need a stable install and JSON command surface
 
 That is why:
-- `docs/submission` is the canonical submission pack
+- `docs/submission` is the canonical judging pack
 - `backend/TRANSACTION_LEDGER.md` is the canonical proof log
 - `STATUS.md` is the canonical deployment summary
 - `@kairenxyz/dealrail` is the canonical agent package name
-
-## 9. Best Reading Order For Humans
-
-1. [`00_START_HERE.md`](00_START_HERE.md)
-2. [`06_VISUAL_ARCHITECTURE.md`](06_VISUAL_ARCHITECTURE.md)
-3. [`01_TRACK_MATRIX.md`](01_TRACK_MATRIX.md)
-4. [`03_EVIDENCE.md`](03_EVIDENCE.md)
-5. [`05_WINNING_STRATEGY.md`](05_WINNING_STRATEGY.md)

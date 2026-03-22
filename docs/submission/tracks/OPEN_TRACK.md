@@ -1,5 +1,9 @@
 # Open Track
 
+## Current Readiness
+
+95%
+
 ## Why DealRail Fits
 
 DealRail is strongest in the Open Track because it combines three Synthesis themes in one coherent system:
@@ -9,29 +13,26 @@ DealRail is strongest in the Open Track because it combines three Synthesis them
 
 ## What To Show
 
-Show a complete story:
+Show one complete story:
 
-1. negotiate the deal
-2. create and fund escrow
-3. submit deliverable
-4. complete or reject
-5. point to onchain proof
+1. request the service
+2. compare or select the provider
+3. create and fund escrow or show the paid-request path
+4. submit deliverable
+5. complete or reject
+6. point to onchain proof and receipts
 
-## Strong Evidence
+## Strongest Evidence
 
 - [`backend/TRANSACTION_LEDGER.md`](../../../backend/TRANSACTION_LEDGER.md)
 - [`docs/submission/02_ARCHITECTURE.md`](../02_ARCHITECTURE.md)
 - [`contracts/src/EscrowRailERC20.sol`](../../../contracts/src/EscrowRailERC20.sol)
 - [`contracts/src/DealRailHook.sol`](../../../contracts/src/DealRailHook.sol)
 
-## Winning Angle
+## Main Blocker
 
-The Open Track pitch should be:
+The only meaningful blocker is final demo packaging, not product credibility.
 
-DealRail solves the missing coordination layer between “an agent can pay” and “an agent can make a trustworthy deal.”
+## Fastest Resolution
 
-## What Not To Do
-
-- do not overload the Open Track pitch with every sponsor integration
-- do not center mock adapters
-- do not describe the product as a generic marketplace
+Record one polished live walkthrough using the live frontend, live backend, and canonical tx evidence.

@@ -1,8 +1,12 @@
 # AgentCash / x402
 
-## Current Status
+## Current Readiness
 
-Ready for a strong claim on testnet.
+85%
+
+This is strong on a truthful testnet basis.
+
+## Why It Counts
 
 The repo now includes canonical proof of a real paid x402 request on Base Sepolia testnet, in addition to the existing x402 proxy path and x402n negotiation surfaces.
 
@@ -14,27 +18,20 @@ The repo now includes canonical proof of a real paid x402 request on Base Sepoli
 - [`backend/tests/proof-x402-testnet.ts`](../../../backend/tests/proof-x402-testnet.ts)
 - [`backend/TRANSACTION_LEDGER.md`](../../../backend/TRANSACTION_LEDGER.md)
 
-## What Exists
-
-- x402n negotiation session creation
-- reverse-auction style rounds
-- offer batching and confirmation
-- x402 proxy endpoints
-- real Base Sepolia paid x402 request with settlement tx evidence
-
 ## Canonical Proof
-
-The current strong proof is:
 
 1. paid request sent on `eip155:84532`
 2. payment completed successfully
 3. settlement tx recorded in the canonical ledger:
    - `0x8dfabc6a77205b0740aa7bc48e230b7516acc76295536d18a6a30db19476940c`
 
-## Recommendation
+## Main Blocker
 
-Use this as a valid stretch track on a truthful testnet basis.
+The main gap to 100% is not basic functionality.
+It is breadth:
+- only one canonical paid proof is recorded
+- the story is still testnet-first
 
-Important boundary:
-- this strengthens the x402 paid-request claim
-- it does not mean x402n negotiation is fully live beyond the recorded evidence
+## Fastest Resolution
+
+Add one more paid request or a clearly discoverable public paid service proof.

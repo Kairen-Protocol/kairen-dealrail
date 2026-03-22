@@ -2,18 +2,14 @@
 
 This is the canonical submission entry point for DealRail.
 
-## What DealRail Is
+## One-Line Thesis
 
-DealRail is an Ethereum machine-commerce execution desk:
-- compete for offers offchain
-- route machine payments for immediate calls
-- commit negotiated jobs onchain
-- settle via ERC-8183-style escrow
-- enforce trust hooks with ERC-8004-aware verification and reputation writes
-
-It has two entry surfaces:
-- humans use the browser desk
-- agents use the published npm package and JSON CLI mode
+DealRail is an Ethereum machine-commerce desk for humans and agents:
+- request work
+- compare providers
+- pay instantly or commit to escrow
+- settle with receipts
+- score counterparties through ERC-8004-aware trust hooks
 
 Live browser desk:
 - `https://dealrail.kairen.xyz/`
@@ -25,13 +21,31 @@ Published operator package:
 - `@kairenxyz/dealrail`
 - binary: `dealrail`
 
+## Judge-Readiness Snapshot
+
+These percentages are submission-readiness estimates, not code coverage.
+
+| Track | Readiness | Meaning |
+|------|-----------|---------|
+| Synthesis Open Track | 95% | Primary narrative, evidence-backed |
+| Protocol Labs: Agents With Receipts / ERC-8004 | 90% | Strongest sponsor-specific fit |
+| Virtuals: ERC-8183 Open Build | 92% | Direct protocol-thesis fit |
+| Celo: Best Agent on Celo | 90% | Real testnet deployment + proofs |
+| AgentCash / x402 | 85% | Real paid-request proof on testnet |
+| Protocol Labs: Let the Agent Cook | 70% | Good architecture fit, packaging gap remains |
+| Base: Agent Services on Base | 75% | Good evidence, discoverability proof gap |
+| MetaMask Delegations | 60% | Builder exists, execution proof missing |
+| Uniswap | 55% | Builder exists, swap proof missing |
+| Locus | 45% | Bridge exists, live proof missing |
+
 ## What Makes This Repo Competitive
 
 - Real escrow contracts deployed on Base Sepolia and Celo Sepolia
 - Recorded happy-path and reject-path transactions
 - ERC-8004 verifier and reputation hook integration
 - Published npm CLI package for agent operators
-- AI-judge-friendly docs that distinguish strong claims from partial integrations
+- Live browser desk and live backend deployment
+- AI-judge-friendly docs that distinguish shipped evidence from upgrade paths
 
 ## Human And Agent Fast Path
 
@@ -58,25 +72,19 @@ Live API check:
 DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
 ```
 
-Local backend check:
+## Best Track Lock Right Now
 
-```bash
-cd backend
-npm run build
-node dist/index-simple.js
-DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
-```
-
-## Best Track Strategy
-
-The highest-probability prize path for the current repo state is:
+The current highest-confidence submission set is:
 
 1. Synthesis Open Track
 2. Protocol Labs: Agents With Receipts / ERC-8004
 3. Virtuals: ERC-8183 Open Build
 4. Celo: Best Agent on Celo
+5. AgentCash / x402 on a testnet-only basis
 
-Only add additional tracks if sponsor-specific live evidence is captured before final submission.
+The current highest-ROI stretch track is:
+
+6. Protocol Labs: Let the Agent Cook
 
 ## Read Order
 
@@ -86,19 +94,31 @@ Only add additional tracks if sponsor-specific live evidence is captured before 
 4. [`03_EVIDENCE.md`](03_EVIDENCE.md)
 5. [`04_CHECKLIST.md`](04_CHECKLIST.md)
 6. [`05_WINNING_STRATEGY.md`](05_WINNING_STRATEGY.md)
+7. [`07_ROADMAP.md`](07_ROADMAP.md)
 
-## Official Resources Used For This Pass
-
-- `https://synthesis.md/`
-- `https://synthesis.md/skill.md`
-- `https://synthesis.md/hack/`
-- `https://synthesis.devfolio.co/submission/skill.md`
+Track briefs:
+- [`tracks/OPEN_TRACK.md`](tracks/OPEN_TRACK.md)
+- [`tracks/PROTOCOL_LABS_ERC8004.md`](tracks/PROTOCOL_LABS_ERC8004.md)
+- [`tracks/PROTOCOL_LABS_AGENT_COOK.md`](tracks/PROTOCOL_LABS_AGENT_COOK.md)
+- [`tracks/VIRTUALS_ERC8183.md`](tracks/VIRTUALS_ERC8183.md)
+- [`tracks/CELO.md`](tracks/CELO.md)
+- [`tracks/AGENTCASH_X402.md`](tracks/AGENTCASH_X402.md)
+- [`tracks/METAMASK_DELEGATIONS.md`](tracks/METAMASK_DELEGATIONS.md)
+- [`tracks/UNISWAP.md`](tracks/UNISWAP.md)
+- [`tracks/LOCUS.md`](tracks/LOCUS.md)
 
 ## Important Evaluation Rule
 
 This pack is intentionally conservative.
 
-- Strong claims are backed by code and evidence.
-- Partial claims are backed by code but not yet by sponsor-specific proof.
-- Non-load-bearing sponsor surfaces are explicitly excluded from the win strategy.
-- The CLI package is live, but some optional adapters remain partial or mock-first.
+- 85%+ means submit confidently.
+- 70-84% means valid stretch track with clear remaining work.
+- below 70% means code exists, but sponsor-grade proof is still missing.
+- live URLs and tx hashes outrank planned integrations.
+
+## Official Resources Used For This Pass
+
+- `https://synthesis.md/`
+- `https://synthesis.md/hack/`
+- `https://synthesis.devfolio.co/catalog?page=1&limit=100`
+- local Kairen protocol repos under `/Users/sarthiborkar/Build/kairen-protocol`

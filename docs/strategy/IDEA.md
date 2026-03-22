@@ -1,3 +1,12 @@
+# Historical Note
+
+This file captures earlier ideation.
+It is not the canonical product or submission narrative.
+
+Current source of truth:
+- [`../project/PRD_KAIREN_DEALRAIL.md`](../project/PRD_KAIREN_DEALRAIL.md)
+- [`../submission/00_START_HERE.md`](../submission/00_START_HERE.md)
+
 # Kairen DealRail — Detailed Hackathon Idea (V2)
 
 ## Positioning

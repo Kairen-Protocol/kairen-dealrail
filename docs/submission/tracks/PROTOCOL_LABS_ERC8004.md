@@ -1,6 +1,10 @@
 # Protocol Labs: ERC-8004
 
-## Why This Is A Strong Fit
+## Current Readiness
+
+90%
+
+## Why This Is Strong
 
 This is the strongest sponsor-specific fit in the repo.
 
@@ -16,25 +20,11 @@ ERC-8004 is not decorative here:
 - [`backend/src/services/discovery.service.ts`](../../../backend/src/services/discovery.service.ts)
 - [`contracts/test/EscrowRailERC20Hook.t.sol`](../../../contracts/test/EscrowRailERC20Hook.t.sol)
 
-## Strongest Claim
+## Main Blocker
 
-DealRail turns ERC-8004 into execution-layer trust:
-- not just identity display
-- not just profile lookup
-- actual settlement-linked trust behavior
+The remaining gap to 100% is packaging clarity:
+- one clearer operator identity artifact would help judges
 
-## Evidence To Cite
+## Fastest Resolution
 
-- Canonical Base and Celo deployment addresses in [`STATUS.md`](../../../STATUS.md)
-- Hook hardening tests in [`contracts/test/EscrowRailERC20Hook.t.sol`](../../../contracts/test/EscrowRailERC20Hook.t.sol)
-- Onchain settlement evidence in [`backend/TRANSACTION_LEDGER.md`](../../../backend/TRANSACTION_LEDGER.md)
-
-## Best Pitch
-
-Agents need receipts and trust signals that survive platform boundaries.
-DealRail uses ERC-8004 registries to gate, score, and update counterparties around real economic activity.
-
-## Current Limitation
-
-The repo strongly supports the ERC-8004 track.
-If the team also wants to push for “Let the Agent Cook,” it should add honest autonomy-packaging artifacts such as `agent.json` and `agent_log.json`.
+Add one canonical identity lookup or registration artifact alongside the existing hook and verifier evidence.

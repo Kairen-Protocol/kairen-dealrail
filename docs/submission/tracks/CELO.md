@@ -1,6 +1,10 @@
 # Celo
 
-## Why This Is A Strong Fit
+## Current Readiness
+
+90%
+
+## Why This Is Strong
 
 DealRail is actually deployed and tested on Celo Sepolia.
 
@@ -17,21 +21,10 @@ That matters because the Celo story is not hypothetical:
 - [`backend/TRANSACTION_LEDGER.md`](../../../backend/TRANSACTION_LEDGER.md)
 - [`frontend/src/lib/contracts.ts`](../../../frontend/src/lib/contracts.ts)
 
-## Best Evidence
+## Main Blocker
 
-Use the canonical Celo section of:
-- [`backend/TRANSACTION_LEDGER.md`](../../../backend/TRANSACTION_LEDGER.md)
+This is mostly a packaging blocker, not an implementation blocker.
 
-Especially:
-- happy path tx sequence
-- reject path tx sequence
-- final Celo deployment addresses
+## Fastest Resolution
 
-## Best Pitch
-
-Celo is the right settlement rail for frequent agent deals because the system wants stable-value, low-friction execution.
-
-## What To Avoid
-
-- do not describe Celo support as a future deployment
-- do not mix old Alfajores planning docs with the final Celo Sepolia evidence
+Show the Celo happy and reject flows clearly in the final demo and submission.

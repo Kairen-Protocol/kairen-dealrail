@@ -1,3 +1,10 @@
+# Historical Note
+
+This document is retained as planning context.
+For current architecture and roadmap, prefer:
+- [`../submission/02_ARCHITECTURE.md`](../submission/02_ARCHITECTURE.md)
+- [`../submission/07_ROADMAP.md`](../submission/07_ROADMAP.md)
+
 # Kairen DealRail — Revised Integration Strategy
 
 > **Based on ForgeID/X402N Current Status Assessment**
