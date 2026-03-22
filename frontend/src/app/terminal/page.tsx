@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { HomeCommandTerminal, TerminalAction } from '@/components/HomeCommandTerminal';
 import { listTerminalRuns } from '@/lib/terminalLedger';
 import { MarketPulsePanel } from '@/components/MarketPulsePanel';
+import { CliDemoTerminal } from '@/components/CliDemoTerminal';
 
 const stepMap: Record<string, string[]> = {
   help: ['Read command map', 'Choose a role or rail'],
@@ -112,6 +113,7 @@ export default function TerminalPage() {
       </section>
 
       <MarketPulsePanel variant="compact" />
+      <CliDemoTerminal />
     </div>
   );
 }

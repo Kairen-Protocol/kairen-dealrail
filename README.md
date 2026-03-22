@@ -125,6 +125,15 @@ Still pending:
 
 ## Local Verification
 
+Root commands:
+
+```bash
+npm run build
+npm run test:contracts
+```
+
+Package-local commands:
+
 Contracts:
 
 ```bash

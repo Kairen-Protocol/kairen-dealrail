@@ -1,0 +1,22 @@
+{
+  "name": "kairen-dealrail",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Production-grade monorepo entrypoint for DealRail",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build:backend && npm run build:frontend && npm run build:cli",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:cli": "npm --prefix cli run build",
+    "check": "npm run build && npm run test:contracts",
+    "test:contracts": "forge test -vvv --root contracts",
+    "typecheck:frontend": "npm --prefix frontend run type-check",
+    "check:cli": "npm --prefix cli run check",
+    "dev:backend": "npm --prefix backend run dev:simple",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "demo:cli": "npm --prefix cli run demo:walkthrough"
+  }
+}
