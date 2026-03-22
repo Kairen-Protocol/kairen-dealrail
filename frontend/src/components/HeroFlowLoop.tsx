@@ -57,26 +57,20 @@ const SCENARIOS: LoopScenario[] = [
 ];
 
 export function HeroFlowLoop() {
-  const [scenarioIndex, setScenarioIndex] = useState(0);
-  const [visibleSteps, setVisibleSteps] = useState(0);
+  const [tick, setTick] = useState(0);
+  const scenarioSpan = 7;
+  const scenarioIndex = Math.floor(tick / scenarioSpan) % SCENARIOS.length;
   const scenario = SCENARIOS[scenarioIndex];
+  const scenarioTick = tick % scenarioSpan;
+  const visibleSteps = Math.min(scenario.steps.length, Math.max(0, scenarioTick));
 
   useEffect(() => {
-    if (visibleSteps < scenario.steps.length) {
-      const timeoutId = window.setTimeout(() => {
-        setVisibleSteps((current) => current + 1);
-      }, visibleSteps === 0 ? 540 : 820);
+    const intervalId = window.setInterval(() => {
+      setTick((current) => current + 1);
+    }, 900);
 
-      return () => window.clearTimeout(timeoutId);
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setScenarioIndex((current) => (current + 1) % SCENARIOS.length);
-      setVisibleSteps(0);
-    }, 1700);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [scenario, visibleSteps]);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const progressWidth = useMemo(() => {
     if (scenario.steps.length === 0) return '0%';
