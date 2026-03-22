@@ -19,6 +19,26 @@ For judging or submission review, treat these files as canonical:
 
 Historical planning files still exist under [`docs/strategy`](docs/strategy), but they are not the canonical submission narrative.
 
+## Repo-Local Skill Pack
+
+This repo now includes a local Uniswap-oriented skill pack under [`.agents/skills`](.agents/skills).
+
+Most relevant to DealRail:
+- [`swap-integration`](.agents/skills/swap-integration/SKILL.md): implementation guidance for quotes, approvals, swap transaction building, and Trading API patterns
+- [`swap-planner`](.agents/skills/swap-planner/SKILL.md): agent-friendly planning for token discovery and swap intent gathering
+- [`viem-integration`](.agents/skills/viem-integration/SKILL.md): TypeScript patterns for reads, writes, wallet clients, and wagmi integration
+- [`pay-with-any-token`](.agents/skills/pay-with-any-token/SKILL.md): MPP / HTTP 402 payment handling using Tempo and Uniswap funding paths
+
+Lower relevance for the current product thesis:
+- [`configurator`](.agents/skills/configurator/SKILL.md)
+- [`deployer`](.agents/skills/deployer/SKILL.md)
+- [`liquidity-planner`](.agents/skills/liquidity-planner/SKILL.md)
+- [`v4-security-foundations`](.agents/skills/v4-security-foundations/SKILL.md)
+
+Important rule:
+- treat these skills as implementation guidance and workflow helpers
+- do not treat their presence as proof that Uniswap, x402, or Tempo sponsor claims are already fully evidenced in this repo
+
 ## One-Sentence Project Thesis
 
 DealRail is an Ethereum machine-commerce desk with two operator lanes: humans use the browser desk, agents use the published npm CLI and SDK, and both converge on the same escrow and receipt rails.
@@ -124,3 +144,4 @@ If you are another coding agent working in this repo:
 - update `docs/submission` first when changing the submission story
 - preserve the human path and the machine path together when editing docs
 - keep `STATUS.md`, `backend/TRANSACTION_LEDGER.md`, and `backend/src/config.ts` consistent
+- when touching token, payment, or chain-execution code, prefer the local skills in `.agents/skills` before inventing new patterns

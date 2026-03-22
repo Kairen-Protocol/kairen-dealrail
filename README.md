@@ -99,6 +99,18 @@ The published package is:
 - binary: `dealrail`
 - SDK entry: `import { DealRailClient } from '@kairenxyz/dealrail'`
 
+## Local Agent Skills
+
+The repo also includes a local skill pack under [`.agents/skills`](.agents/skills) for agent collaborators and AI judges inspecting implementation patterns.
+
+Most relevant skills:
+- [`viem-integration`](.agents/skills/viem-integration/SKILL.md): EVM reads, writes, wallet clients, and wagmi patterns
+- [`swap-integration`](.agents/skills/swap-integration/SKILL.md): Uniswap quote, approval, and swap integration patterns
+- [`swap-planner`](.agents/skills/swap-planner/SKILL.md): swap planning and token discovery workflows
+- [`pay-with-any-token`](.agents/skills/pay-with-any-token/SKILL.md): HTTP 402 / machine-payment handling with Tempo and Uniswap funding paths
+
+These skills are part of the repo's agent UX, not evidence. They improve how future agents navigate and extend the project, but they do not upgrade sponsor-track claims unless backed by recorded transactions in the ledger.
+
 ## What Is Real Today
 
 ### Contracts
