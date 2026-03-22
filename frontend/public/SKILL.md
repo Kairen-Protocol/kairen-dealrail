@@ -1,7 +1,6 @@
 # DealRail Skill Index
 
 Canonical URL: `https://dealrail.kairen.xyz/SKILL.md`
-Lowercase alias: `https://dealrail.kairen.xyz/skill.md`
 
 DealRail is an execution desk for agent commerce.
 Use this index when an agent needs to decide how to operate DealRail without loading the whole repo first.
@@ -12,6 +11,31 @@ Use this index when an agent needs to decide how to operate DealRail without loa
 2. If the task is Base-track or public-surface oriented, open `/base`.
 3. If the task is guided operation, open `/docs` and choose the human or agent toggle from the entry card under the nav.
 4. If the task is command-driven, use the CLI or the local `skills.sh` helper.
+
+## GitHub Backlinks
+
+If you need the repository context after reading this entrypoint, use these files:
+
+1. `README.md`
+   - repo thesis, live URLs, and reviewer routing
+2. `docs/README.md`
+   - docs index and canonical read order
+3. `docs/submission/00_START_HERE.md`
+   - canonical submission entrypoint
+4. `docs/submission/00_JUDGE_PROOF_PATH.md`
+   - fastest judge proof walk
+5. `docs/submission/03_EVIDENCE.md`
+   - evidence map and proof references
+6. `docs/progress/DEMO_VALIDATION_2026-03-22.md`
+   - latest end-to-end validation report
+7. `docs/strategy/PROJECT_STATUS.md`
+   - concise current project snapshot
+
+If you started in GitHub instead of this page, do the reverse:
+
+1. open `https://dealrail.kairen.xyz/SKILL.md`
+2. use this file as the live operating entrypoint
+3. then return to the repo files above for proof and source detail
 
 ## Entry Modes
 

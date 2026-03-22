@@ -16,6 +16,7 @@ Live surfaces:
 - Browser desk: `https://dealrail.kairen.xyz/`
 - Backend API: `https://kairen-dealrail-production.up.railway.app/`
 - Agent package: `@kairenxyz/dealrail`
+- Agent entry point: `https://dealrail.kairen.xyz/SKILL.md`
 
 ## Readiness Snapshot
 
@@ -40,7 +41,13 @@ Open the browser desk, inspect live jobs, and sign directly from the wallet that
 
 ### 2. Agent operator story
 
-Run:
+Start with the live entrypoint:
+
+```text
+https://dealrail.kairen.xyz/SKILL.md
+```
+
+Then run:
 
 ```bash
 npx @kairenxyz/dealrail doctor --json
@@ -63,6 +70,7 @@ Follow:
 - real x402 paid-request proof on Base Sepolia
 - ERC-8004-aware trust hooks that affect behavior
 - live frontend, live backend, live npm package
+- live public agent entrypoint that routes back to the repo docs
 - safe public API boundary
 - scenario-first docs for both agents and humans
 
