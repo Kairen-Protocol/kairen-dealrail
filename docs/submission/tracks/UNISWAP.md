@@ -1,24 +1,35 @@
 # Uniswap
 
-## Current Readiness
+## Readiness
 
-55%
+Low
 
-## Current State
+## Current Truth
 
-The repo contains quote and transaction-building logic, and current official Uniswap docs now support Base Sepolia through the Trading API, but the canonical ledger does not yet include an executed Uniswap swap tx.
+DealRail currently exposes Uniswap as a Base-only treasury-routing preview.
 
-## Core File
+What exists:
+- quote and payload building
+- Base-only labeling
+- post-settlement preview path for completed Base Sepolia jobs
+- clear UI and API notes that this is preview-only
 
-- [`backend/src/services/uniswap.service.ts`](../../../backend/src/services/uniswap.service.ts)
+What does not exist:
+- a recorded swap tx hash
+- a sponsor-grade Uniswap proof
+- a credible multichain Uniswap claim
 
-## Main Blocker
+## Why It Stays Low
 
-No sponsor-grade swap artifact exists yet:
-- no executed swap
-- no tx hash
-- no `UNISWAP_API_KEY`-backed proof in the ledger
+The official sponsor bar is higher than “we can build a payload.”
+Without a real swap proof, this should stay low-confidence.
 
-## Fastest Resolution
+## Honest Use In The Product
 
-Add the API key, execute one Base Sepolia swap, and record the tx hash plus a short explanation of why post-settlement swapping matters in DealRail.
+Use it as:
+- a post-settlement treasury-routing preview
+- a future extension for the Base execution desk
+
+Do not use it as:
+- a primary sponsor claim
+- evidence of real agentic finance execution
