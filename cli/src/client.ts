@@ -92,14 +92,28 @@ export class DealRailClient {
     });
 
     const text = await response.text();
-    const payload = text ? JSON.parse(text) : null;
+    let payload: unknown = null;
+
+    if (text) {
+      try {
+        payload = JSON.parse(text);
+      } catch {
+        payload = text;
+      }
+    }
 
     if (!response.ok) {
       const message =
         (payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
           ? payload.error
+          : typeof payload === 'string' && payload.trim()
+            ? payload.trim()
           : response.statusText) || 'Request failed';
       throw new Error(message);
+    }
+
+    if (text && typeof payload === 'string') {
+      throw new Error(`Expected JSON response from ${url.pathname}`);
     }
 
     return payload as T;

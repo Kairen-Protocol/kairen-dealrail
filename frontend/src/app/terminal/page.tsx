@@ -45,7 +45,6 @@ export default function TerminalPage() {
           <div className="flex flex-wrap gap-2">
             <span className="terminal-chip">No redirects</span>
             <span className="terminal-chip">Supply-aware</span>
-            <span className="terminal-chip">Tempo-inspired</span>
             <span className="terminal-chip">Receipt-first</span>
           </div>
         </div>

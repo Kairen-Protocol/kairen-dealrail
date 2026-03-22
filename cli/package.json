@@ -1,7 +1,7 @@
 {
   "name": "@kairen/dealrail-cli",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "description": "Publishable CLI for DealRail procurement, negotiation, and escrow rails",
   "main": "./dist/index.js",

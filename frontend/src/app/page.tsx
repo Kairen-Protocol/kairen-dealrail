@@ -93,7 +93,7 @@ export default function HomePage() {
               <div className="terminal-metric">
                 <div className="terminal-label">Supply Comes From</div>
                 <div className="mt-2 text-sm leading-6 text-[var(--terminal-muted)]">
-                  x402n listings, imported provider feeds, and Tempo-adjacent payment rails, with demo fallback until live discovery is connected.
+                  x402n listings, imported provider feeds, and wallet-native execution rails, with demo fallback until live discovery is connected.
                 </div>
               </div>
               <div className="terminal-metric">
