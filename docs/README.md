@@ -29,6 +29,7 @@ Track briefs:
 
 These are still useful, but they are not the canonical submission story:
 
+- [`project`](project): current product brief, repository layout, and internal resource handbooks
 - [`architecture`](architecture): current working architecture notes plus older technical evolution
 - [`strategy`](strategy): planning documents, track ideation, roadmap, and historical notes
 - [`guides`](guides): setup, deployment, and testing instructions
@@ -38,6 +39,7 @@ These are still useful, but they are not the canonical submission story:
 ## Read This Before Citing Anything
 
 - Prefer `docs/submission` for claims made to judges.
-- Use the root `PRD_KAIREN_DEALRAIL.md` for the current product brief.
+- Use `project/PRD_KAIREN_DEALRAIL.md` for the current product brief.
+- Use `project/REPO_STRUCTURE.md` for the current repository layout.
 - Use `STATUS.md` and `backend/TRANSACTION_LEDGER.md` for canonical deployment and tx evidence.
 - Treat `docs/strategy` as planning context unless a fact is repeated in `docs/submission`.

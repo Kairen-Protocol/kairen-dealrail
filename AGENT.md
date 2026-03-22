@@ -5,6 +5,9 @@ This repository is intentionally organized for AI judges and AI collaborators.
 Live product entry:
 - `https://dealrail.kairen.xyz/`
 
+Live backend API:
+- `https://kairen-dealrail-production.up.railway.app/`
+
 ## Canonical Rule
 
 For judging or submission review, treat these files as canonical:
@@ -53,17 +56,18 @@ npx @kairenxyz/dealrail status --json
 npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
 ```
 
-If you need the local backend:
+Live deployed backend:
+
+```bash
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
+```
+
+If you need the local backend for development:
 
 ```bash
 cd backend
 npm run build
 node dist/index-simple.js
-```
-
-Then:
-
-```bash
 DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
 ```
 
@@ -89,13 +93,16 @@ If you are a human judge or reviewer:
 Best-aligned tracks for this repo state:
 - Synthesis Open Track
 - Protocol Labs: Agents With Receipts / ERC-8004
+- Virtuals: ERC-8183 Open Build
 - Celo: Best Agent on Celo
+- AgentCash / x402 on testnet
 
 Stretch tracks only if backed by new live evidence:
+- Protocol Labs: Let the Agent Cook
 - MetaMask Delegations
 - Uniswap
 - Locus
-- AgentCash / x402
+- Base: Agent Services on Base
 
 ## Claim Discipline
 
@@ -132,6 +139,7 @@ When describing the repo, keep these truths explicit:
 
 - Open-track or general judges: start with [`docs/submission/tracks/OPEN_TRACK.md`](docs/submission/tracks/OPEN_TRACK.md)
 - Protocol Labs judges: read [`docs/submission/tracks/PROTOCOL_LABS_ERC8004.md`](docs/submission/tracks/PROTOCOL_LABS_ERC8004.md)
+- Virtuals judges: read [`docs/submission/tracks/VIRTUALS_ERC8183.md`](docs/submission/tracks/VIRTUALS_ERC8183.md)
 - Celo judges: read [`docs/submission/tracks/CELO.md`](docs/submission/tracks/CELO.md)
 - MetaMask judges: read [`docs/submission/tracks/METAMASK_DELEGATIONS.md`](docs/submission/tracks/METAMASK_DELEGATIONS.md)
 - Uniswap judges: read [`docs/submission/tracks/UNISWAP.md`](docs/submission/tracks/UNISWAP.md)

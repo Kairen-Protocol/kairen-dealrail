@@ -10,7 +10,7 @@ kairen-dealrail/
 ├── backend/             API, integrations, smoke tests, tx ledger
 ├── frontend/            Next.js app and demo UI
 ├── cli/                 Command-line interface
-├── docs/                Submission docs, strategy, guides, history
+├── docs/                Submission, project, guides, progress, and reference docs
 ├── skills/              Agent operation guides
 ├── scripts/             Utility scripts
 ├── research/            Research artifacts and briefs
@@ -25,6 +25,7 @@ kairen-dealrail/
 
 - `README.md`
 - `AGENT.md`
+- `docs/project/PRD_KAIREN_DEALRAIL.md`
 - `docs/submission/`
 - `STATUS.md`
 - `backend/TRANSACTION_LEDGER.md`
@@ -63,6 +64,11 @@ If deployments or claims change, keep these aligned:
 
 ## Docs Responsibilities
 
+### docs/project
+- current product brief
+- repository layout
+- internal resource handbooks
+
 ### docs/submission
 - canonical judging and submission pack
 
@@ -74,3 +80,9 @@ If deployments or claims change, keep these aligned:
 
 ### docs/guides
 - setup, deployment, and testing instructions
+
+### docs/progress
+- session logs and historical build notes
+
+### docs/reference
+- external references and imported research artifacts

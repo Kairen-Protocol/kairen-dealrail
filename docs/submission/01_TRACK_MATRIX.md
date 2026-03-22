@@ -7,9 +7,11 @@ This matrix maps official Synthesis prize directions to the current DealRail rep
 Submit with confidence:
 - Open Track
 - Protocol Labs: Agents With Receipts / ERC-8004
+- Virtuals: ERC-8183 Open Build
 - Celo
 
 Submit only if new proof is added:
+- Protocol Labs: Let the Agent Cook
 - MetaMask Delegations
 - Uniswap
 - Locus
@@ -30,8 +32,10 @@ Do not center the submission on:
 |-----------------|------------------|----------------------|------------------|-------------|-----------|
 | Synthesis Open Track | Clear agent system, real utility, coherent multi-theme fit | Full product narrative exists across negotiation, trust, escrow, and settlement | Base + Celo tx ledger, tests, architecture docs | Strong | Make this the main story |
 | Protocol Labs: Agents With Receipts / ERC-8004 | Onchain identity, reputation, trust, receipts | ERC8004 verifier, hook gates, post-settlement feedback writes, discovery enrichment | Contracts, tests, deployments, tx ledger | Strong | This is the best sponsor-specific fit |
+| Virtuals: ERC-8183 Open Build | Substantive ERC-8183 integration in any application domain | DealRail is architected around ERC-8183-style escrow and commerce flows, with real testnet evidence and operator surfaces | Contracts, architecture docs, Base + Celo tx ledger | Strong | This is now one of the best sponsor-specific fits |
 | Protocol Labs: Let the Agent Cook | Full autonomous loop, agent manifest, agent log, tool use | Multi-step flow exists, but manifest/log packaging is not yet canonical in repo | Partial documentation only | Conditional | Only add if `agent.json` and `agent_log.json` are prepared truthfully |
 | Celo: Best Agent on Celo | Real utility using Celo payment rails | Celo Sepolia deployment and smoke tests for happy and reject paths | Canonical tx hashes in ledger | Strong | Best third track today |
+| Base: Agent Services on Base | Discoverable agent service on Base that accepts x402 payments | Base Sepolia settlement exists and x402 paid proof exists, but discoverable paid service posture is not yet fully evidenced | Base Sepolia tx ledger plus x402 proof, but no fully recorded public service proof | Partial | Possible upgrade if a discoverable paid service is exposed and logged |
 | MetaMask: Best Use of Delegations | Real delegated authorization patterns | ERC-7710 payload builder exists | Builder code only, no delegated tx proof | Partial | Needs one real delegated funding or settlement flow |
 | Uniswap: Agentic Finance | Real swaps and tx ids | Quote and tx builder endpoints exist | No swap tx ids recorded in ledger | Partial | Needs one real post-settlement swap tx |
 | Locus: Best Use of Locus | Locus must be core and working | Live/mock bridge exists, mock mode default | No live Locus payment proof recorded | Partial | Only worth adding if live operation is captured |
@@ -53,7 +57,12 @@ Do not center the submission on:
 - ERC-8004 shapes provider verification, hook gating, and post-settlement reputation
 - This is the cleanest sponsor-to-product fit
 
-### 3. Celo
+### 3. Virtuals: ERC-8183 Open Build
+- The product thesis is directly inside the ERC-8183 design space
+- DealRail is not merely adjacent to escrowed commerce, it is built around it
+- This track is a cleaner sponsor fit than older stretch bets like Uniswap or MetaMask
+
+### 4. Celo
 - The project is actually deployed on Celo Sepolia
 - The ledger contains both happy and reject flows
 - Celo helps differentiate the project from a Base-only story
@@ -62,7 +71,7 @@ Do not center the submission on:
 
 If there is time before publish, the best stretch upgrades are:
 
-1. Add one real delegated MetaMask flow and tx hash
-2. Add one real Uniswap post-settlement swap tx hash
-3. Add one real Locus paid operation
-4. Package an honest `agent.json` and `agent_log.json` for Protocol Labs autonomy track
+1. Package an honest `agent.json` and `agent_log.json` for Protocol Labs autonomy track
+2. Add one real delegated MetaMask flow and tx hash
+3. Add one real Uniswap post-settlement swap tx hash
+4. Add one real Locus paid operation

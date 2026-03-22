@@ -34,7 +34,7 @@ If you want the client in code:
 ```ts
 import { DealRailClient } from '@kairenxyz/dealrail';
 
-const client = new DealRailClient('http://localhost:3001');
+const client = new DealRailClient('https://kairen-dealrail-production.up.railway.app');
 const health = await client.health();
 ```
 
@@ -60,12 +60,19 @@ dealrail job 12
 Set the API base URL with either:
 
 ```bash
-export DEALRAIL_API_URL=http://localhost:3001
+export DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app
 ```
 
 or:
 
 ```bash
+dealrail status --api https://kairen-dealrail-production.up.railway.app
+```
+
+For local backend development instead:
+
+```bash
+export DEALRAIL_API_URL=http://localhost:3001
 dealrail status --api http://localhost:3001
 ```
 

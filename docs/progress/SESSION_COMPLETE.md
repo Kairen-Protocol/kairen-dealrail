@@ -42,11 +42,11 @@
 ### Documentation (100% Complete)
 - ✅ **STATUS.md** - Real-time build status
 - ✅ **AGENT.md** - Context for collaborating AI agents
-- ✅ **REPO_STRUCTURE.md** - Repository organization
-- ✅ **API_REFERENCE.md** - Complete API documentation
-- ✅ **TESTING_GUIDE.md** - USDC recycling workflow
-- ✅ **SUPABASE_TODO.md** - Optional database setup
-- ✅ **PHASE1_SUMMARY.md** - Build achievements
+- ✅ **docs/project/REPO_STRUCTURE.md** - Repository organization
+- ✅ **backend/API_REFERENCE.md** - Complete API documentation
+- ✅ **docs/guides/TESTING_GUIDE.md** - USDC recycling workflow
+- ✅ **docs/guides/SUPABASE_SETUP.md** - Optional database setup
+- ✅ **docs/progress/PHASE1_SUMMARY.md** - Build achievements
 
 ---
 
@@ -235,9 +235,9 @@ docs/
 └── ...
 
 AGENT.md              # AI agent context
-REPO_STRUCTURE.md     # Repository guide
-SUPABASE_TODO.md      # Database setup
-PHASE1_SUMMARY.md     # Build summary
+docs/project/REPO_STRUCTURE.md  # Repository guide
+docs/guides/SUPABASE_SETUP.md   # Database setup
+docs/progress/PHASE1_SUMMARY.md # Build summary
 STATUS.md             # Real-time status
 ```
 
@@ -326,7 +326,7 @@ STATUS.md             # Real-time status
 **Status:** Manual setup required
 **Time:** 5 minutes
 **Purpose:** Caching, event history, faster queries
-**Guide:** `SUPABASE_TODO.md`
+**Guide:** `docs/guides/SUPABASE_SETUP.md`
 
 **Verdict:** Not needed for MVP. Backend works perfectly without it.
 

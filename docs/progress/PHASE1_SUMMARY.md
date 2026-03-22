@@ -127,8 +127,8 @@
 
 - **Base Sepolia Explorer:** https://sepolia.basescan.org
 - **Main Escrow Contract:** https://sepolia.basescan.org/address/0x53d368b5467524F7d674B70F00138a283e1533ce
-- **PRD:** [PRD_KAIREN_DEALRAIL.md](PRD_KAIREN_DEALRAIL.md)
-- **Status:** [STATUS.md](STATUS.md)
+- **PRD:** [../project/PRD_KAIREN_DEALRAIL.md](../project/PRD_KAIREN_DEALRAIL.md)
+- **Status:** [../../STATUS.md](../../STATUS.md)
 
 ---
 
@@ -209,7 +209,7 @@ Successfully implemented and tested the complete job lifecycle with nano-payment
 - ✅ Organized test scripts into `/backend/tests`
 - ✅ Moved docs to proper directories
 - ✅ Updated .gitignore for security
-- ✅ Created REPO_STRUCTURE.md
+- ✅ Created repository structure guide
 - ✅ Created TESTING_GUIDE.md
 
 ### Lessons Learned

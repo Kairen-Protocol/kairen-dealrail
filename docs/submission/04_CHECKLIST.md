@@ -38,11 +38,14 @@ Derived from `https://synthesis.devfolio.co/submission/skill.md`.
 |-------|--------|-------|
 | Open Track | Ready | Use as primary narrative |
 | Protocol Labs ERC-8004 | Ready | Strongest sponsor-specific angle |
+| Virtuals ERC-8183 Open Build | Ready | Direct product-thesis match with real testnet evidence |
 | Celo | Ready | Strong third track |
+| AgentCash / x402 | Ready on testnet | Base Sepolia paid-request proof is now in the ledger |
+| Protocol Labs Let the Agent Cook | Conditional | Needs truthful `agent.json` and `agent_log.json` packaging |
+| Base Agent Services on Base | Not ready for strong claim | Needs discoverable paid service proof on Base |
 | MetaMask | Not ready for strong claim | Needs one real delegated tx |
 | Uniswap | Not ready for strong claim | Needs one real swap tx |
 | Locus | Not ready for strong claim | Needs one live Locus proof |
-| AgentCash / x402 | Ready on testnet | Base Sepolia paid-request proof is now in the ledger |
 
 ## Final Remaining Blockers
 
@@ -57,4 +60,5 @@ Lock these unless new sponsor-specific evidence is added:
 
 1. Synthesis Open Track
 2. Protocol Labs: Agents With Receipts / ERC-8004
-3. Celo: Best Agent on Celo
+3. Virtuals: ERC-8183 Open Build
+4. Celo: Best Agent on Celo

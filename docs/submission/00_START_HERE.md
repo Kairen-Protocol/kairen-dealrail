@@ -18,6 +18,9 @@ It has two entry surfaces:
 Live browser desk:
 - `https://dealrail.kairen.xyz/`
 
+Live backend API:
+- `https://kairen-dealrail-production.up.railway.app/`
+
 Published operator package:
 - `@kairenxyz/dealrail`
 - binary: `dealrail`
@@ -49,6 +52,12 @@ npx @kairenxyz/dealrail doctor --json
 npx @kairenxyz/dealrail status --json
 ```
 
+Live API check:
+
+```bash
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
+```
+
 Local backend check:
 
 ```bash
@@ -64,7 +73,8 @@ The highest-probability prize path for the current repo state is:
 
 1. Synthesis Open Track
 2. Protocol Labs: Agents With Receipts / ERC-8004
-3. Celo: Best Agent on Celo
+3. Virtuals: ERC-8183 Open Build
+4. Celo: Best Agent on Celo
 
 Only add additional tracks if sponsor-specific live evidence is captured before final submission.
 

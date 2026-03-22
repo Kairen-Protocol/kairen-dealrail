@@ -3,6 +3,8 @@
 **Status:** ⏳ Pending Manual Setup
 **Required For:** Database persistence, advanced queries, event history
 
+Use [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md) for the full end-to-end setup, Prisma steps, and verification flow. This file is the short manual-action checklist.
+
 ---
 
 ## What You Need to Do

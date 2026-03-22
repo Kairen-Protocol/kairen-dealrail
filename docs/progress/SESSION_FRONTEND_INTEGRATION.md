@@ -184,9 +184,9 @@ Job state updated to "Funded"
 ## 🔗 Related Files
 
 ### Documentation
-- `/docs/FRONTEND_INTEGRATION.md` - Full integration guide
+- `/docs/guides/FRONTEND_INTEGRATION.md` - Full integration guide
 - `/STATUS.md` - Updated project status
-- `/SESSION_COMPLETE.md` - Phase 1 summary
+- `/docs/progress/SESSION_COMPLETE.md` - Phase 1 summary
 - `/backend/API_REFERENCE.md` - Backend API docs
 
 ### Source Code

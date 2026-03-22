@@ -9,6 +9,9 @@ Agents can operate it from the published npm package and stable JSON CLI mode.
 Live browser desk:
 - `https://dealrail.kairen.xyz/`
 
+Live backend API:
+- `https://kairen-dealrail-production.up.railway.app/`
+
 Published package:
 - `@kairenxyz/dealrail`
 - current verified npm release in this repo: `0.1.1`
@@ -33,6 +36,7 @@ If you are evaluating this repository, read these files in order:
 Track-specific briefs:
 - [`docs/submission/tracks/OPEN_TRACK.md`](docs/submission/tracks/OPEN_TRACK.md)
 - [`docs/submission/tracks/PROTOCOL_LABS_ERC8004.md`](docs/submission/tracks/PROTOCOL_LABS_ERC8004.md)
+- [`docs/submission/tracks/VIRTUALS_ERC8183.md`](docs/submission/tracks/VIRTUALS_ERC8183.md)
 - [`docs/submission/tracks/CELO.md`](docs/submission/tracks/CELO.md)
 - [`docs/submission/tracks/METAMASK_DELEGATIONS.md`](docs/submission/tracks/METAMASK_DELEGATIONS.md)
 - [`docs/submission/tracks/UNISWAP.md`](docs/submission/tracks/UNISWAP.md)
@@ -68,19 +72,27 @@ npx @kairenxyz/dealrail doctor --json
 npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
 ```
 
+Or point explicitly at the live deployed backend:
+
+```bash
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail status --json
+```
+
 ### Backend Integrator
 
-Run the demo-grade API:
+Live production API:
+
+```bash
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
+```
+
+Local development API:
 
 ```bash
 cd backend
 npm run build
 node dist/index-simple.js
-```
-
-Then point the CLI at it:
-
-```bash
 DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
 ```
 
@@ -150,11 +162,14 @@ This repo intentionally separates strong claims from partial claims.
 |-------|--------|-------------|
 | Synthesis Open Track | End-to-end product with real testnet evidence | Strong |
 | Protocol Labs: Agents With Receipts / ERC-8004 | Implemented and evidenced onchain hooks + verifier | Strong |
+| Virtuals: ERC-8183 Open Build | Direct ERC-8183-style commerce fit with real testnet evidence | Strong |
 | Celo: Best Agent on Celo | Deployed and smoke-tested on Celo Sepolia | Strong |
+| Merit / AgentCash / x402 | Real Base Sepolia paid-request proof now exists in the ledger, alongside the x402-first adapter surface | Strong on testnet |
+| Protocol Labs: Let the Agent Cook | Architecture fits, but manifest and structured execution logs are not yet canonical | Conditional |
+| Base: Agent Services on Base | Base settlement plus x402 proof exist, but discoverable paid-service proof is not yet canonical | Partial |
 | MetaMask: Best Use of Delegations | Delegation payload builder implemented, live delegated execution not evidenced | Partial |
 | Uniswap: Agentic Finance | Quote + transaction builders implemented, no swap tx evidence in ledger | Partial |
 | Locus: Best Use of Locus | Bridge implemented, mock-first by default, live evidence not included | Partial |
-| Merit / AgentCash / x402 | Real Base Sepolia paid-request proof now exists in the ledger, alongside the x402-first adapter surface | Strong on testnet |
 | Bankr, Venice, ENS, Slice, Status, Self, Arkhai, others | Not submission targets in current repo state | Do not claim |
 
 Full matrix:
@@ -269,7 +284,7 @@ npx @kairenxyz/dealrail help
 Live API preflight:
 
 ```bash
-DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
 ```
 
 ## Honest Runtime Posture

@@ -20,8 +20,11 @@ This repository is organized as a production-grade project, not a scratchpad.
 - `backend/`: API, integrations, transaction ledger, smoke tests
 - `frontend/`: Next.js application and demo UI
 - `cli/`: command-line interface
+- `docs/project/`: product brief, repository layout, and internal reference handbooks
 - `docs/submission/`: canonical submission and judging pack
 - `docs/strategy/`: planning and historical strategy
+- `docs/progress/`: session logs and historical build notes
+- `docs/reference/`: external references and imported research artifacts
 - `skills/`: operational role guides for agents
 
 ## Before Opening A PR

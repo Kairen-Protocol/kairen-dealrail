@@ -795,7 +795,7 @@ echo "  1. Copy .env.template to .env and fill in keys"
 echo "  2. Get faucet ETH: https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet"
 echo "  3. Get faucet CELO+cUSD: https://faucet.celo.org/alfajores"
 echo "  4. Register with hackathon: POST https://synthesis.devfolio.co/register"
-echo "  5. Start building: see PRD_KAIREN_DEALRAIL.md"
+echo "  5. Start building: see docs/project/PRD_KAIREN_DEALRAIL.md"
 ```
 
 ---
