@@ -1,4 +1,5 @@
 import type {
+  BaseAgentServicesResponse,
   CreateNegotiationPayload,
   DiscoveryProvidersResponse,
   DiscoverySourcesResponse,
@@ -48,6 +49,10 @@ export class DealRailClient {
 
   async machinePaymentsStatus(): Promise<MachinePaymentsStatusResponse> {
     return this.request('/api/v1/payments/status');
+  }
+
+  async getBaseAgentServices(): Promise<BaseAgentServicesResponse> {
+    return this.request('/api/v1/base/agent-services');
   }
 
   async listJobs(limit = 10): Promise<JobsListResponse> {

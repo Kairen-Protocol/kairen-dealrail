@@ -1,4 +1,5 @@
 import type {
+  BaseAgentServicesResponse,
   DoctorReport,
   DiscoveryProvidersResponse,
   ExecutionProvidersResponse,
@@ -70,6 +71,7 @@ export function renderHelp(): string {
       'dealrail demo',
       'dealrail doctor [--json]',
       'dealrail status [--json]',
+      'dealrail services [--json]',
       'dealrail scan <query> [--max-price 0.12] [--min-reputation 700]',
       'dealrail providers <query>',
       'dealrail vend <query> --budget 0.12 [--hours 24] [--queue]',
@@ -214,6 +216,32 @@ export function renderVend(result: VendResult): string {
       '',
       ...result.negotiation.offers.slice(0, 5).map(formatOffer),
       ...(result.queuedOpportunity ? ['', `queued opportunity ${result.queuedOpportunity.id}`] : []),
+    ]),
+  ].join('\n');
+}
+
+export function renderServicesDirectory(directory: BaseAgentServicesResponse): string {
+  return [
+    renderBanner(),
+    '',
+    box('BASE SERVICE DIRECTORY', [
+      section('chain', `${directory.chain} (${directory.chainId})`),
+      section('mode', directory.catalogMode),
+      section('surfaces', String(directory.publicSurfaces.length)),
+      section('supply', `${directory.discovery.providerCount} providers`),
+      section('escrow', directory.settlementRail.escrowAddress),
+      '',
+      ...directory.publicSurfaces.slice(0, 4).map((surface) =>
+        `${surface.id} :: ${surface.access} :: ${shorten(surface.endpoint, 24)}`
+      ),
+      ...(directory.supplyPreview.length > 0
+        ? [
+            '',
+            ...directory.supplyPreview.slice(0, 4).map((service) =>
+              `${shorten(service.serviceName, 20)} ${pad(`${service.basePriceUsdc ?? 'n/a'}u`, 8)} rep ${pad(String(service.reputationScore ?? 'n/a'), 4)} ${service.source}`
+            ),
+          ]
+        : ['', 'no visible provider supply']),
     ]),
   ].join('\n');
 }

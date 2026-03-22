@@ -70,6 +70,54 @@ export type MachinePaymentsStatusResponse = {
   endpoints: string[];
 };
 
+export type BaseAgentServiceSurface = {
+  id: 'provider_directory' | 'opportunity_board' | 'x402_proxy' | 'job_board' | 'post_settlement_routing';
+  name: string;
+  method: 'GET' | 'POST' | 'GET/POST';
+  endpoint: string;
+  access: 'public' | 'preview';
+  settlementModel: string;
+  useCase: string;
+};
+
+export type BaseAgentServicePreview = {
+  serviceName: string;
+  description: string;
+  source: 'x402n' | 'virtuals' | 'near' | 'mock' | 'imported';
+  endpoint: string | null;
+  basePriceUsdc: string | null;
+  providerAddress: string;
+  reputationScore: number | null;
+  erc8004Registered: boolean;
+  erc8004AgentId: string | null;
+};
+
+export type BaseAgentServicesResponse = {
+  success: true;
+  track: 'base-agent-services';
+  generatedAt: string;
+  catalogMode: 'curated_demo' | 'live_blended';
+  chain: 'baseSepolia';
+  chainId: number;
+  settlementRail: {
+    escrowAddress: string;
+    stablecoinAddress: string;
+    stablecoinSymbol: string;
+    explorerBaseUrl: string;
+    explorerUrl: string;
+  };
+  discovery: {
+    providerCount: number;
+    liveProviderCount: number;
+    mockProviderCount: number;
+  };
+  paymentModels: string[];
+  publicSurfaces: BaseAgentServiceSurface[];
+  supplyPreview: BaseAgentServicePreview[];
+  executionProviders: Array<{ id: string; mode: string; useCase: string }>;
+  notes: string[];
+};
+
 export type JobsListResponse = {
   jobs: Job[];
   pagination?: {

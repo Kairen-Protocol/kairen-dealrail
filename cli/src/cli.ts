@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { animateDemo, renderDoctor, renderHelp, renderJob, renderJobs, renderProviders, renderRails, renderStatus, renderVend } from './ascii.js';
+import { animateDemo, renderDoctor, renderHelp, renderJob, renderJobs, renderProviders, renderRails, renderServicesDirectory, renderStatus, renderVend } from './ascii.js';
 import { DealRailClient } from './client.js';
 import type { DoctorReport, VendResult } from './types.js';
 
@@ -188,6 +188,13 @@ async function run(): Promise<void> {
     case 'status': {
       const status = await client.health();
       process.stdout.write(json ? stringify(status) : `${renderStatus(status)}\n`);
+      return;
+    }
+
+    case 'services':
+    case 'catalog': {
+      const directory = await client.getBaseAgentServices();
+      process.stdout.write(json ? stringify(directory) : `${renderServicesDirectory(directory)}\n`);
       return;
     }
 
