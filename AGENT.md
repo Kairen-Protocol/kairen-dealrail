@@ -2,6 +2,9 @@
 
 This repository is intentionally organized for AI judges and AI collaborators.
 
+Live product entry:
+- `https://dealrail.kairen.xyz/`
+
 ## Canonical Rule
 
 For judging or submission review, treat these files as canonical:
@@ -44,9 +47,18 @@ Then:
 DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
 ```
 
+## Fast Human Path
+
+If you are a human judge or reviewer:
+
+1. open `https://dealrail.kairen.xyz/`
+2. skim `README.md`
+3. use `docs/submission/00_START_HERE.md` for the canonical judging path
+
 ## Operator Surfaces
 
 - Browser desk: guided human and judge-facing path in `frontend/src/app`
+- Live browser desk: `https://dealrail.kairen.xyz/`
 - npm package: `@kairenxyz/dealrail`
 - Binary: `dealrail`
 - Demo API surface: `backend/src/index-simple.ts`
@@ -110,4 +122,5 @@ When describing the repo, keep these truths explicit:
 If you are another coding agent working in this repo:
 - do not update historical planning docs first
 - update `docs/submission` first when changing the submission story
+- preserve the human path and the machine path together when editing docs
 - keep `STATUS.md`, `backend/TRANSACTION_LEDGER.md`, and `backend/src/config.ts` consistent

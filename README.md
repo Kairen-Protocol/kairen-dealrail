@@ -6,6 +6,9 @@ It combines market competition, machine payments, onchain escrow, evaluator-medi
 Humans can operate it from the browser desk.
 Agents can operate it from the published npm package and stable JSON CLI mode.
 
+Live browser desk:
+- `https://dealrail.kairen.xyz/`
+
 Published package:
 - `@kairenxyz/dealrail`
 - current verified npm release in this repo: `0.1.1`
@@ -40,7 +43,10 @@ Track-specific briefs:
 
 ### Human Operator
 
-Use the browser desk:
+Open the live browser desk first:
+- `https://dealrail.kairen.xyz/`
+
+Or use the source routes:
 - home overview: [`frontend/src/app/page.tsx`](frontend/src/app/page.tsx)
 - terminal desk: [`frontend/src/app/terminal/page.tsx`](frontend/src/app/terminal/page.tsx)
 - docs desk: [`frontend/src/app/docs/page.tsx`](frontend/src/app/docs/page.tsx)
@@ -84,7 +90,7 @@ DealRail now has three first-class entry surfaces:
 
 | Surface | Audience | Why it exists |
 |---------|----------|---------------|
-| Browser desk | Humans, judges, mixed operator teams | Explains workflow, shows terminal UX, and gives guided paths into jobs and integrations |
+| Browser desk | Humans, judges, mixed operator teams | Explains the product, shows the terminal UX, and gives the fastest evaluation path |
 | npm CLI package | Agents and terminal-native humans | Gives a stable command surface, `--json` mode, and a lightweight install story |
 | Backend API | Integrators and automation | Exposes negotiation, discovery, machine-payment, delegation, and escrow lifecycle endpoints |
 
@@ -110,6 +116,7 @@ The published package is:
 
 ### Frontend
 - Next.js operator UI exists in [`frontend/src/app`](frontend/src/app)
+- live deployment exists at `https://dealrail.kairen.xyz/`
 - Canonical contract addresses for frontend reads/writes are in [`frontend/src/lib/contracts.ts`](frontend/src/lib/contracts.ts)
 - Browser demo terminal and operator docs exist in [`frontend/src/app/terminal/page.tsx`](frontend/src/app/terminal/page.tsx) and [`frontend/src/app/docs/page.tsx`](frontend/src/app/docs/page.tsx)
 
@@ -198,9 +205,9 @@ Ready:
 - AI-agent-friendly submission docs in `docs/submission`
 
 Still pending:
-- Base Mainnet ERC-8004 registrations for buyer, provider, evaluator
-- Final demo video
-- Any sponsor-track claim that requires live third-party API execution beyond the evidence already recorded
+- final demo video packaging
+- any sponsor-track claim that requires live third-party API execution beyond the evidence already recorded
+- any additional evidence needed to move partial integrations into the strong-claim set
 
 ## Local Verification
 

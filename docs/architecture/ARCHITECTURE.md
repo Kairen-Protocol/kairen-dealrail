@@ -1,207 +1,197 @@
-# Kairen DealRail — Architecture
+# DealRail Architecture
 
-> Hackathon build | Target: Base Sepolia | Stack: Solidity + Next.js + Node.js
+This file is the current technical architecture note for the working product.
 
----
+For the judge-facing architecture narrative, use `docs/submission/02_ARCHITECTURE.md`.
 
-## Overview
+## Current System Shape
 
-DealRail is an **on-chain escrow and negotiation rail** that lets two parties transact with trustless fund custody, an immutable negotiation log, and a cryptographically verifiable settlement proof.
+DealRail has four practical layers:
 
-```
-+----------------+    REST/WS     +-----------------+   ethers.js   +------------------+
-|  Next.js       | <-----------> |  DealRail API   | <-----------> |  EVM (Base)      |
-|  Frontend      |               |  Express/Node   |               |  EscrowRail.sol  |
-|  wagmi v2      |               |  Prisma + PG    |               |  NegotiationLog  |
-+----------------+               +--------+--------+               +------------------+
-                                          |
-                                   +------+------+
-                                   |  IPFS/      |
-                                   |  Pinata     |
-                                   +-------------+
-```
+1. operator surfaces
+2. backend coordination
+3. settlement rails
+4. trust and receipt rails
 
----
-
-## Core Contracts
-
-### EscrowRail.sol
-Central state machine. Holds funds in escrow through a typed lifecycle:
-
-```
-CREATED → FUNDED → ACCEPTED → COMPLETED
-                ↘ DISPUTED → RESOLVED
-CREATED/FUNDED → CANCELLED
+```text
+browser desk or npm cli
+  -> backend api
+  -> discovery / negotiation / simulation / lifecycle services
+  -> escrow contracts on Base Sepolia or Celo Sepolia
+  -> receipt, status, and reputation surfaces
 ```
 
-- Native ETH + ERC20 variant (EscrowRailERC20.sol)
-- Every transition is access-controlled and guarded by require(state == X)
-- Re-entrancy protected via OpenZeppelin ReentrancyGuard
-- Deadlines enforced by expire() callable by anyone post-deadline
+## Operator Surfaces
 
-### NegotiationLog.sol
-Append-only, content-addressed ledger. Anchors keccak256 hashes of negotiation artifacts (terms drafts, counter-offers, evidence) keyed by dealId. Actual content lives off-chain on IPFS or Postgres.
+### Browser desk
+- implementation: `frontend/`
+- live domain: `https://dealrail.kairen.xyz/`
+- primary purpose: human onboarding, browser terminal, architecture, workflow, and demo mode
 
----
-
-## Backend
-
-Runtime: Node.js 20 + Express
-DB: PostgreSQL via Prisma ORM
-Chain interface: ethers.js v6
-
-### Responsibilities
-1. REST API — deal metadata CRUD, artifact upload, proof serving
-2. Event Listener — indexes all EscrowRail + NegotiationLog events; handles reorgs with fromBlock replay
-3. Settlement Proof Generator — on DealReleased/DealResolved: builds SettlementProof JSON, EIP-712 signs, pins to IPFS
-4. WebSocket — pushes state change events to connected frontend clients
-
-### DB Schema (simplified)
-```prisma
-model Deal {
-  id            Int       @id
-  chainId       Int
-  buyer         String
-  seller        String
-  arbitrator    String
-  amount        String    // BigInt as string
-  state         String
-  termsHash     String
-  artifacts     Artifact[]
-  proof         SettlementProof?
-}
-
-model Artifact {
-  id          Int      @id @default(autoincrement())
-  dealId      Int
-  seq         Int
-  contentHash String
-  kind        String
-  author      String
-  ipfsCid     String?
-  blob        Bytes?
-  deal        Deal     @relation(fields: [dealId], references: [id])
-}
-
-model SettlementProof {
-  dealId      Int      @id
-  proofJson   Json
-  txHash      String
-  createdAt   DateTime @default(now())
-  deal        Deal     @relation(fields: [dealId], references: [id])
-}
-```
-
----
+### npm CLI / SDK
+- implementation: `cli/`
+- package: `@kairenxyz/dealrail`
+- primary purpose: agent-friendly execution, terminal-native human use, and machine-readable JSON mode
 
 ## Frontend
 
-Stack: Next.js 14 (App Router) + Wagmi v2 + RainbowKit + shadcn/ui + Tailwind
+The frontend is a Next.js app deployed through OpenNext on Cloudflare Workers.
 
-### Page Routes
-| Route | Component | Description |
-|-------|-----------|-------------|
-| / | Home | Landing + "Create Deal" CTA |
-| /deals/new | CreateDeal | Form: seller, amount, terms upload |
-| /deals/[id] | DealStatus | Live state + negotiation thread |
-| /deals/[id]/settle | SettlementView | Proof viewer + download |
+Key responsibilities:
+- present the product and workflow clearly
+- provide a browser terminal demo surface
+- optionally connect wallets for real flows
+- show chain-aware jobs and lifecycle state
+- explain current architecture and product posture
 
-### Key Hooks
-- useEscrow(dealId) — reads on-chain state + subscribes to WS events
-- useCreateDeal() — wraps createDeal() + fund() tx sequence
-- useArtifacts(dealId) — fetches + uploads negotiation artifacts
+Important files:
+- `frontend/src/app/page.tsx`
+- `frontend/src/app/terminal/page.tsx`
+- `frontend/src/app/docs/page.tsx`
+- `frontend/src/components/HomeCommandTerminal.tsx`
+- `frontend/src/lib/api.ts`
+- `frontend/src/lib/contracts.ts`
+- `frontend/src/lib/wagmi.ts`
 
----
+## CLI and SDK
 
-## Settlement Proof Flow
+The CLI is the agent-first surface for DealRail.
 
+Key responsibilities:
+- provide stable commands for health, jobs, services, rails, and vend flows
+- expose `--json` for automation
+- mirror the browser terminal concepts without UI dependencies
+- support a recordable demo flow
+
+Important files:
+- `cli/src/cli.ts`
+- `cli/src/client.ts`
+- `cli/src/types.ts`
+- `cli/src/ascii.ts`
+- `cli/demo/dealrail-demo.sh`
+
+## Backend
+
+The canonical backend for the current product is the simplified Node/Express server in `backend/src/index-simple.ts`.
+
+This server is intentionally direct:
+- reads from chain instead of relying on a required database
+- exposes lifecycle operations and simulations
+- provides provider discovery, negotiation, machine-payments, and adapter endpoints
+- supports multiple settlement chains
+
+Important files:
+- `backend/src/index-simple.ts`
+- `backend/src/config.ts`
+- `backend/src/services/contract.service.ts`
+- `backend/src/services/machine-payments.service.ts`
+- `backend/src/services/x402n.service.ts`
+- `backend/src/services/discovery.service.ts`
+- `backend/src/services/delegation.service.ts`
+- `backend/src/services/uniswap.service.ts`
+- `backend/src/services/locus.service.ts`
+
+## Contracts
+
+The contract layer is the strongest technical core of the repo.
+
+Responsibilities:
+- create and fund jobs
+- lock settlement in escrow
+- allow provider submission
+- allow evaluator completion or rejection
+- invoke trust hooks before and after key actions
+- write ERC-8004-aware reputation updates where configured
+
+Important files:
+- `contracts/src/EscrowRail.sol`
+- `contracts/src/EscrowRailERC20.sol`
+- `contracts/src/DealRailHook.sol`
+- `contracts/src/identity/ERC8004Verifier.sol`
+- `contracts/test/EscrowRailERC20Hook.t.sol`
+
+## Chain Topology
+
+### Base Sepolia
+- primary canonical settlement rail
+- primary frontend and backend default
+
+### Celo Sepolia
+- secondary settlement rail
+- used for stablecoin-oriented alternative demo flows
+
+## Runtime Modes
+
+### 1. Frontend-only simulation mode
+
+Used for the cleanest demo experience.
+
+Properties:
+- no wallet required
+- hardcoded services catalog
+- simulated transaction hashes and receipt output
+- designed for judges, product demos, and onboarding
+
+### 2. Escrow-backed operator mode
+
+Used when the flow should reflect real settlement mechanics.
+
+Properties:
+- creates or reads jobs against deployed contracts
+- supports Base Sepolia and Celo Sepolia
+- uses evaluator-mediated completion and rejection
+
+## Current Request Flow
+
+```text
+user intent
+  -> browser terminal or CLI
+  -> service lookup or provider scan
+  -> vend decision
+  -> simulate receipt or create escrow-backed job
+  -> submit deliverable
+  -> evaluator complete or reject
+  -> receipt and status output
 ```
-1. Buyer calls release() on-chain
-2. Event listener picks up DealReleased(dealId)
-3. Backend fetches final Deal state + all Artifacts from DB
-4. Builds SettlementProof JSON
-5. Signs with EIP-712 (backend hot wallet = proof issuer)
-6. Pins proof JSON to IPFS via Pinata
-7. Stores in DB with IPFS CID
-8. WS push to frontend: { type: "PROOF_READY", proofCid: "..." }
-9. Frontend renders SettlementView with download button
-```
 
----
+## Truthfulness Rules
 
-## Security Model
+When describing architecture, keep these distinctions:
 
-| Layer | Control |
-|-------|---------|
-| Contracts | CEI pattern, ReentrancyGuard, typed state machine, access modifiers |
-| Arbitration | Trusted EOA for hackathon; upgrade path: multisig → dispute DAO |
-| API Auth | SIWE (Sign-In With Ethereum) → JWT |
-| Funds | Never custodied by backend; only smart contract holds ETH/ERC20 |
-| Artifacts | Content-addressed; hash anchored on-chain; tampering detectable |
+### Core and evidenced
+- browser desk
+- npm CLI
+- simplified backend
+- Base Sepolia and Celo Sepolia settlement rails
+- escrow lifecycle contracts
+- ERC-8004 verifier and hook integration
 
----
+### Present but partial
+- live negotiation depth
+- third-party machine payment execution
+- Locus payout operations
+- delegated execution beyond payload generation
 
-## Deployment
+## Deployment Shape
 
-| Component | Target | Notes |
-|-----------|--------|-------|
-| Contracts | Base Sepolia | Deploy via forge script Deploy.s.sol |
-| Backend | Railway / Render | Node.js, 1 dyno, Postgres addon |
-| Frontend | Vercel | Next.js, auto-deploy from main |
-| IPFS | Pinata free tier | 1GB — sufficient for hackathon |
+### Frontend
+- platform: Cloudflare Workers
+- build path: OpenNext
+- root directory for Git builds: `frontend`
 
-### Environment Variables
-```bash
-# Backend
-DATABASE_URL=postgresql://...
-RPC_URL=https://sepolia.base.org
-PRIVATE_KEY=0x...          # proof signer (NOT arbitrator key)
-PINATA_JWT=...
-ESCROW_ADDRESS=0x...
-LOG_ADDRESS=0x...
+### Backend
+- platform: separate Node host
+- posture: env-driven API target for the frontend and CLI
 
-# Frontend
-NEXT_PUBLIC_RPC_URL=https://sepolia.base.org
-NEXT_PUBLIC_ESCROW_ADDRESS=0x...
-NEXT_PUBLIC_API_URL=https://api.dealrail.xyz/v1
-```
+### CLI
+- distribution: npm package
+- install path: `@kairenxyz/dealrail`
 
----
+## Canonical Truth Files
 
-## Out of Scope (Hackathon)
+Keep these aligned when deployments or claims change:
 
-- Governance / token / DAO
-- Multi-chain support
-- Oracle price feeds
-- ZK proofs for private negotiation
-- Mobile app
-- Production audits
-
-These are post-hackathon extensions. Do not scope-creep into them.
-
----
-
-## Local Dev Quick Start
-
-```bash
-# Contracts
-cd contracts && forge install && forge build && forge test
-
-# Backend (needs Postgres + Anvil)
-cd backend && npm install
-npx prisma migrate dev
-npm run dev
-
-# Frontend
-cd frontend && npm install && npm run dev
-
-# Local chain
-anvil --chain-id 84532
-
-# Deploy to Anvil
-forge script script/Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
-```
-
----
-
-*Last updated: 2026-03-14 by Coder Agent (subagent)*
+1. `STATUS.md`
+2. `backend/TRANSACTION_LEDGER.md`
+3. `backend/src/config.ts`
+4. `frontend/src/lib/contracts.ts`

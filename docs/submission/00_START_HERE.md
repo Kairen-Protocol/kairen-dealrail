@@ -15,6 +15,9 @@ It has two entry surfaces:
 - humans use the browser desk
 - agents use the published npm package and JSON CLI mode
 
+Live browser desk:
+- `https://dealrail.kairen.xyz/`
+
 Published operator package:
 - `@kairenxyz/dealrail`
 - binary: `dealrail`
@@ -35,6 +38,9 @@ Human evaluator:
 npx @kairenxyz/dealrail doctor
 npx @kairenxyz/dealrail help
 ```
+
+Or open the live site directly:
+- `https://dealrail.kairen.xyz/`
 
 Agent evaluator:
 
