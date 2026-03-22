@@ -176,7 +176,7 @@ sequenceDiagram
 ### Implemented but not core-evidenced
 - reverse-auction style negotiation sessions
 - delegation payload building
-- Uniswap quote and tx building
+- Base-first treasury-routing preview after settlement
 - Locus bridge
 - x402 proxy path
 

@@ -4,7 +4,7 @@
 
 Partial.
 
-The repo contains quote and transaction-building logic, and current official Uniswap docs now support Base Sepolia through the Trading API, but the canonical ledger does not yet include an executed Uniswap swap tx.
+The repo contains a Base-first treasury-routing preview after settlement. It is intentionally scoped as a Base extension, not a generic multichain ingress story, and the canonical ledger does not yet include an executed Uniswap swap tx.
 
 ## Core File
 
@@ -12,10 +12,11 @@ The repo contains quote and transaction-building logic, and current official Uni
 
 ## What Exists
 
-- Base mainnet quote support
+- Base-first payout-routing preview from completed Base jobs
 - approve payload builder
 - exact-input-single swap payload builder
 - official current Uniswap docs show Trading API support for Base Sepolia (`84532`)
+- Celo remains a settlement rail, but this Uniswap extension is not enabled for Celo jobs
 
 ## What Is Missing For A Strong Claim
 
