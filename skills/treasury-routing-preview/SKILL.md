@@ -28,3 +28,4 @@ Use this skill only after settlement, and only on Base.
 - Do not use this on Celo jobs.
 - Do not claim live swap execution unless a real tx hash exists.
 - Do not use this as the first step of a deal.
+- Never ask for private keys, seed phrases, or mnemonics. Approval and swap signing stay client-side when execution exists.

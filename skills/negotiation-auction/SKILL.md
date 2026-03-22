@@ -38,3 +38,4 @@ Use this skill to run the offer-formation layer before escrow.
 - Do not treat negotiation as proof of live public market depth if the catalog is still curated.
 - Keep budget and delivery bounds explicit.
 - Do not skip from negotiation into settlement without a confirmed offer.
+- Never request wallet secrets. Negotiation should not depend on private-key sharing.

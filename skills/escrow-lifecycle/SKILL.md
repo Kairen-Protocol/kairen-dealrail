@@ -35,3 +35,4 @@ Use this skill for the onchain state machine, not for discovery or negotiation.
 - Never try to force an invalid transition.
 - Exactly one terminal evaluator decision per submitted job.
 - Treat tx hash plus final state as the proof pair.
+- Never ask for private keys, seed phrases, or mnemonics. Use client-side signing or documented managed demo signers only.

@@ -36,3 +36,4 @@ Use this skill to decide whether DealRail can currently see enough supply to pur
 - Do not describe curated demo supply as a fully open live market.
 - Call out `mock` supply explicitly.
 - If there are zero relevant providers, say so directly.
+- Never ask for private keys, seed phrases, or mnemonics during provider scans.

@@ -29,3 +29,4 @@ Use this skill to explain and operate the Base-facing public surface honestly.
 - This is a public Base-facing service directory, not proof of a fully open live market.
 - Say whether the directory is in `curated_demo` or `live_blended`.
 - Keep Celo in the wider product story, but keep this skill scoped to Base.
+- Never present managed-demo or preview-only surfaces as unrestricted autonomous spend authority.

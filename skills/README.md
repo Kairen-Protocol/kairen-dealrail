@@ -12,7 +12,7 @@ Trigger policy:
 Main skills command:
 - `./skills.sh`
 - `./skills/dealrail.sh`
-- Start here for navigation, preflight, flow guidance, and smoke execution.
+- Start here for navigation, preflight, and guarded run order.
 
 ## Available Skills
 
@@ -51,6 +51,13 @@ Main skills command:
 - Use this directory whenever an agent/operator needs deterministic execution rules.
 - Use the feature skills whenever the task maps to a concrete DealRail surface instead of a generic role.
 - Use before demos to avoid track-breaking mistakes.
+
+## Security Baseline
+
+- Never ask for or paste raw private keys, seed phrases, or mnemonics into DealRail prompts, docs, or helper scripts.
+- Keep signing client-side unless the product explicitly documents a managed demo signer for that route.
+- Treat `smoke-celo` as a stateful, funded-chain test. Do not run it casually or during read-only inspection.
+- Verify chain, role, and job state before any mutating escrow, routing, or delegation action.
 
 ## When Not To Use
 

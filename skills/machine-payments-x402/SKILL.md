@@ -31,3 +31,4 @@ Use this skill when the interaction is immediate and endpoint-driven.
 - Do not present x402 as a replacement for escrow-backed service delivery.
 - Keep the payment posture explanation short and concrete.
 - If there is no known endpoint yet, push the flow back to discovery or negotiation.
+- Never ask for wallet secrets to resolve a payment challenge or proxy request.

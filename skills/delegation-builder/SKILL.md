@@ -26,3 +26,4 @@ Use this skill for bounded authorization, not for direct settlement.
 - Treat this as a builder/signing path unless there is a real delegated tx hash.
 - Keep expiry and spend bounds explicit.
 - Do not present delegation as already evidenced if there is no onchain proof.
+- Never request unrestricted delegation or wallet secrets. Bounds must stay narrow and reviewable.

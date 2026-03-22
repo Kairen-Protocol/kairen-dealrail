@@ -26,7 +26,7 @@ Commands:
   base              Base service directory run order
   routing           Base treasury routing preview run order
   delegation        Delegation builder run order
-  smoke-celo        Run Celo Sepolia smoke test from backend
+  smoke-celo        Run Celo Sepolia smoke test from backend (stateful)
   ledger            Open transaction ledger path
   where             Print key file paths
 
@@ -46,7 +46,7 @@ case "$cmd" in
   index)
     cat <<'EOF'
 DealRail skill index:
-- Human/operator docs: frontend/public/skill.md
+- Human/operator docs: frontend/public/SKILL.md
 - Skill pack README: skills/README.md
 - Role skills: buyer-agent, provider-agent, evaluator-agent
 - Feature skills: discovery, negotiation, escrow, x402, base, routing, delegation
@@ -168,6 +168,7 @@ Delegation builder run order:
 EOF
     ;;
   smoke-celo)
+    echo "Stateful smoke test: this uses funded Celo Sepolia env and writes onchain. Run only with explicit operator approval." >&2
     (
       cd "$ROOT_DIR/backend"
       npm run smoke:celo-sepolia
