@@ -10,6 +10,7 @@ allowed-tools: Read, Glob, Grep, Bash(curl:*), Bash(jq:*), Bash(cast:*), Bash(te
 model: opus
 license: MIT
 metadata:
+  internal: true
   author: uniswap
   version: '2.0.0'
 ---

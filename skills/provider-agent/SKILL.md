@@ -1,6 +1,6 @@
 ---
 name: provider-agent
-description: Use for provider-side agent operations: funded-job validation, deliverable submission, and post-settlement optional routing.
+description: "Use for provider-side agent operations: funded-job validation, deliverable submission, and post-settlement optional routing."
 ---
 
 # Provider Agent

@@ -1,6 +1,6 @@
 ---
 name: evaluator-agent
-description: Use for evaluator-side deterministic decisions: validate submitted work and finalize complete/reject state transitions.
+description: "Use for evaluator-side deterministic decisions: validate submitted work and finalize complete/reject state transitions."
 ---
 
 # Evaluator Agent

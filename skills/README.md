@@ -2,6 +2,22 @@
 
 Purpose: agent-friendly operations directory that centralizes how DealRail should be run by role.
 
+## Public Install
+
+This repository is structured to work directly with `skills.sh`:
+
+```bash
+npx skills add Kairen-Protocol/kairen-dealrail --list
+npx skills add Kairen-Protocol/kairen-dealrail --skill '*' -a codex
+```
+
+Exported public skills:
+- everything under `skills/`
+
+Internal helper skills:
+- anything under `.agents/skills/`
+- these are marked with `metadata.internal: true` so they stay out of normal public discovery and leaderboard installs
+
 Trigger policy:
 - Pick one primary role skill (`buyer-agent`, `provider-agent`, or `evaluator-agent`).
 - Add one or more feature skills when the request is about a concrete product surface.

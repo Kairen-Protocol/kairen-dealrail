@@ -5,6 +5,7 @@ allowed-tools: Read, Glob, Grep, Bash(curl:*), Bash(jq:*), Bash(cast:*), Bash(xd
 model: sonnet
 license: MIT
 metadata:
+  internal: true
   author: uniswap
   version: '0.2.1'
 ---

@@ -5,6 +5,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(npm:*), Bash(npx:*), Bash(yar
 model: opus
 license: MIT
 metadata:
+  internal: true
   author: uniswap
   version: '1.3.0'
 ---

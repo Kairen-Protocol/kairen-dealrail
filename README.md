@@ -17,6 +17,18 @@ Live product:
 - Agent entry point: `https://dealrail.kairen.xyz/SKILL.md`
 - Base service directory: `https://dealrail.kairen.xyz/base`
 
+## Public Skill Pack
+
+DealRail also exports a public skill pack for `skills.sh`.
+
+```bash
+npx skills add Kairen-Protocol/kairen-dealrail --list
+npx skills add Kairen-Protocol/kairen-dealrail --skill '*' -a codex
+```
+
+Public skills are the DealRail-owned skills in `skills/`.
+Bundled helper skills under `.agents/skills/` are marked internal so they do not appear in normal public discovery.
+
 ## What This Repo Really Is
 
 DealRail is strongest today as:

@@ -12,6 +12,18 @@ Use this index when an agent needs to decide how to operate DealRail without loa
 3. If the task is guided operation, open `/docs` and choose the human or agent toggle from the entry card under the nav.
 4. If the task is command-driven, use the CLI or the local `skills.sh` helper.
 
+## Install This Skill Pack
+
+From `skills.sh`, install the public DealRail skill pack with:
+
+```bash
+npx skills add Kairen-Protocol/kairen-dealrail --list
+npx skills add Kairen-Protocol/kairen-dealrail --skill '*' -a codex
+```
+
+Normal public installs export the DealRail-owned skills in `skills/`.
+Bundled helper skills from other repos stay internal and do not appear in normal discovery.
+
 ## GitHub Backlinks
 
 If you need the repository context after reading this entrypoint, use these files:

@@ -5,6 +5,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(curl:*), WebFetch, AskUserQue
 model: opus
 license: MIT
 metadata:
+  internal: true
   author: uniswap
   version: '1.0.0'
 ---

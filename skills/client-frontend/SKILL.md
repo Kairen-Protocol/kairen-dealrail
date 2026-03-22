@@ -1,6 +1,6 @@
 ---
 name: client-frontend
-description: Use for frontend UX operation: simple human navigation and agent-mode tooling with explicit state visibility.
+description: "Use for frontend UX operation: simple human navigation and agent-mode tooling with explicit state visibility."
 ---
 
 # Client Frontend Operations

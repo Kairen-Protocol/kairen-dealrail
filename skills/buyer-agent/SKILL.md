@@ -1,6 +1,6 @@
 ---
 name: buyer-agent
-description: Use for buyer-side agent execution: policy setup, negotiation, offer acceptance, and escrow funding within strict bounds.
+description: "Use for buyer-side agent execution: policy setup, negotiation, offer acceptance, and escrow funding within strict bounds."
 ---
 
 # Buyer Agent

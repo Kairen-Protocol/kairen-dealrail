@@ -5,6 +5,7 @@ allowed-tools: Read, Glob, Grep, Bash(forge:*), Bash(cast:*), Bash(curl:*), AskU
 model: opus
 license: MIT
 metadata:
+  internal: true
   author: uniswap
   version: '1.0.0'
 ---

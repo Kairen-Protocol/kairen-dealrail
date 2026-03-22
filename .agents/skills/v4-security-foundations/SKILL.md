@@ -5,6 +5,7 @@ allowed-tools: Read, Glob, Grep, WebFetch, Task(subagent_type:Explore)
 model: opus
 license: MIT
 metadata:
+  internal: true
   author: uniswap
   version: '1.1.0'
 ---
