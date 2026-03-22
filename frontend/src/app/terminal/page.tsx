@@ -40,8 +40,8 @@ export default function TerminalPage() {
             <div className="terminal-kicker">Terminal</div>
             <h1 className="hero-display mt-3 text-5xl md:text-6xl">A simpler command surface for DealRail.</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--terminal-muted)]">
-              Start with `doctor`, then move to `vend`, `providers`, or `rails`. This page should read like an operator
-              tool, not a dashboard trying to do everything at once.
+              Start with `doctor`, then move to `services`, `vend`, `providers`, or `rails`. This page should read like
+              an operator tool, not a dashboard trying to do everything at once.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -62,6 +62,10 @@ export default function TerminalPage() {
               <div>
                 <div className="terminal-label">`doctor`</div>
                 Run this first. It tells you what is live, what is still mock, how much supply the desk can see, and what command to run next.
+              </div>
+              <div>
+                <div className="terminal-label">`services`</div>
+                Use this for the frontend-only demo path. It loads the hardcoded service catalog and gives you stablecoin simulation targets immediately.
               </div>
               <div>
                 <div className="terminal-label">`vend`</div>
@@ -85,7 +89,7 @@ export default function TerminalPage() {
                 <div className="terminal-label">Human</div>
                 <div className="mt-2 text-sm font-semibold">Doctor, inspect, decide, then settle.</div>
                 <div className="mt-2 text-xs leading-5 text-[var(--terminal-muted)]">
-                  Use the browser terminal when you want a guided flow and visible output before recording a demo or settlement step.
+                  Use the browser terminal when you want a guided flow and visible output before recording a demo or settlement step. Wallet connection is optional in this mode.
                 </div>
                 <div className="mt-3 terminal-mono text-[11px] text-[var(--terminal-accent)]">doctor -&gt; vend benchmark report under 0.12 usdc in 24h</div>
               </div>

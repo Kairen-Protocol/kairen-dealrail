@@ -41,8 +41,8 @@ type ChainContext = {
   chain: SupportedChain;
   chainConfig: ChainConfig;
   provider: ethers.JsonRpcProvider;
-  escrowContract: ethers.Contract;
-  stablecoinContract: ethers.Contract;
+  escrowContract: any;
+  stablecoinContract: any;
   stablecoinAddress: string;
   stablecoinSymbol: string;
   explorerBaseUrl: string;

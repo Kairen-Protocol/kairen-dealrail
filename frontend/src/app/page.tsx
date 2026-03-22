@@ -83,7 +83,7 @@ export default function HomePage() {
               <div className="terminal-metric">
                 <div className="terminal-label">Human lane</div>
                 <div className="mt-2 text-sm leading-6 text-[var(--terminal-muted)]">
-                  Use the browser desk when you want a guided, legible workflow.
+                  Use the browser desk when you want a guided, legible workflow and a demo that does not require wallet connection.
                 </div>
               </div>
               <div className="terminal-metric">
@@ -143,8 +143,8 @@ export default function HomePage() {
           <h2 className="mt-3 text-3xl font-semibold">The desk should feel simple</h2>
           <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--terminal-muted)]">
             <p>1. Run `doctor` to confirm the desk can actually see the backend and the current rail posture.</p>
-            <p>2. Run `vend` when you know the outcome you want but not the winning provider yet.</p>
-            <p>3. Move to the board or receipt rails only after the request is clear.</p>
+            <p>2. Run `services` or `vend image generation under 0.08 usdc in 6h` to demo the frontend-only stablecoin simulation path.</p>
+            <p>3. Connect a wallet only when you want to graduate from demo mode into a real provider or client settlement flow.</p>
           </div>
         </div>
         <div className="terminal-panel rounded-[1.5rem] p-6 xl:col-span-5">

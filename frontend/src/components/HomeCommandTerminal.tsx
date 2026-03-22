@@ -1,6 +1,8 @@
 'use client';
 
 import { FormEvent, KeyboardEvent, useMemo, useState } from 'react';
+import { useAccount } from 'wagmi';
+import { keccak256, toBytes } from 'viem';
 import { healthCheck, integrationsApi, jobsApi } from '@/lib/api';
 import { pushTerminalRun, TerminalActionKind } from '@/lib/terminalLedger';
 
@@ -24,13 +26,55 @@ type Props = {
 
 const EXAMPLES = [
   'doctor',
+  'services',
   'vend benchmark report under 0.12 usdc in 24h',
+  'vend image generation under 0.08 usdc in 6h',
   'providers compliance checks',
   'rails',
   'status',
 ];
 
+const DEMO_SERVICES = [
+  {
+    id: 'image-generation',
+    name: 'Image generation',
+    description: 'Generate editorial product visuals, launch images, and prompt-tuned campaign assets.',
+    startingPriceUsdc: 0.08,
+    deliveryHours: 6,
+    settlementRail: 'Base Sepolia USDC',
+    providerAddress: '0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF',
+  },
+  {
+    id: 'web-fetch',
+    name: 'Fetch and extract',
+    description: 'Fetch URLs, extract structured text, and normalize web data into machine-readable output.',
+    startingPriceUsdc: 0.03,
+    deliveryHours: 2,
+    settlementRail: 'Base Sepolia USDC',
+    providerAddress: '0x77712e28F7A4a2EeD0bd7f9F8B8486332a38892e',
+  },
+  {
+    id: 'finding-agent',
+    name: 'Finding and research',
+    description: 'Search, shortlist, and summarize sources for procurement, diligence, or market discovery tasks.',
+    startingPriceUsdc: 0.05,
+    deliveryHours: 4,
+    settlementRail: 'Celo Sepolia stablecoin',
+    providerAddress: '0xe872Bd6d99452C87BA54c7618FEc71f0DB23d4f2',
+  },
+  {
+    id: 'benchmark-report',
+    name: 'Automation benchmark report',
+    description: 'Compare providers, summarize tradeoffs, and return a scored recommendation sheet.',
+    startingPriceUsdc: 0.09,
+    deliveryHours: 20,
+    settlementRail: 'Base Sepolia USDC',
+    providerAddress: '0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF',
+  },
+] as const;
+
 export function HomeCommandTerminal({ compact = false, onAction }: Props) {
+  const { address } = useAccount();
   const [input, setInput] = useState('');
   const [running, setRunning] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
@@ -42,6 +86,33 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   ]);
 
   const statusLabel = useMemo(() => (running ? 'RUNNING' : 'IDLE'), [running]);
+
+  function findDemoServices(query: string) {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return [...DEMO_SERVICES];
+    return DEMO_SERVICES.filter((service) =>
+      `${service.name} ${service.description} ${service.id}`.toLowerCase().includes(normalized)
+    );
+  }
+
+  function mockTxHash(seed: string) {
+    return keccak256(toBytes(`${seed}:${Date.now()}:${Math.random().toString(36).slice(2)}`));
+  }
+
+  function appendSimulationReceipt(service: (typeof DEMO_SERVICES)[number], command: string) {
+    const approveTx = mockTxHash(`${command}:approve:${service.id}`);
+    const fundTx = mockTxHash(`${command}:fund:${service.id}`);
+    const receiptId = `sim_${service.id}_${Date.now().toString(36)}`;
+
+    appendMany([
+      { tone: 'ok', text: `demo service=${service.name} | price=${service.startingPriceUsdc.toFixed(2)} USDC | eta=${service.deliveryHours}h` },
+      { tone: 'ok', text: `settlement rail=${service.settlementRail} | provider=${service.providerAddress}` },
+      { tone: 'system', text: `sim approve tx=${approveTx}` },
+      { tone: 'system', text: `sim settle tx=${fundTx}` },
+      { tone: 'ok', text: `receipt=${receiptId} | mode=frontend simulation | wallet=${address ? address : 'optional'}` },
+      { tone: 'system', text: address ? 'wallet is connected, so this can graduate to a live client/provider path later.' : 'wallet is optional for demo mode; connect it only when you want real client/provider execution.' },
+    ]);
+  }
 
   function append(tone: LineTone, text: string) {
     setLines((prev) => [...prev, { tone, text }]);
@@ -98,16 +169,30 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     appendMany([
       { tone: 'system', text: 'GRAMMAR' },
       { tone: 'system', text: 'doctor' },
+      { tone: 'system', text: 'services' },
       { tone: 'system', text: 'scan automation' },
       { tone: 'system', text: 'providers benchmark report' },
       { tone: 'system', text: 'vend benchmark report under 0.12 usdc in 24h' },
-      { tone: 'system', text: 'sell workflow automation from 0.12 usdc' },
       { tone: 'system', text: 'rails' },
       { tone: 'system', text: 'status' },
+      { tone: 'system', text: 'demo mode: vend a hardcoded service and inspect the simulated stablecoin settlement' },
       { tone: 'system', text: 'agent lane: use the CLI with --json after doctor confirms posture' },
-      { tone: 'system', text: 'human lane: use scan or vend here, then inspect the board and settlement rails' },
+      { tone: 'system', text: 'human lane: use services or vend here, then inspect the board and settlement rails' },
     ]);
     emit('help', command, note);
+  }
+
+  async function showServices(command: string) {
+    const note = 'Hardcoded service catalog loaded';
+    appendMany([
+      { tone: 'ok', text: 'frontend demo catalog' },
+      ...DEMO_SERVICES.map((service) => ({
+        tone: 'system' as LineTone,
+        text: `${service.name} | ${service.startingPriceUsdc.toFixed(2)} USDC | ${service.deliveryHours}h | ${service.settlementRail}`,
+      })),
+      { tone: 'system', text: 'try: vend image generation under 0.08 usdc in 6h' },
+    ]);
+    emit('market_scan', command, note);
   }
 
   async function runDoctor(command: string) {
@@ -172,6 +257,22 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
   async function runScan(command: string) {
     const query = stripVerb(command, ['scan', 'market', 'find providers', 'providers']);
+    const demoMatches = findDemoServices(query);
+
+    if (demoMatches.length > 0) {
+      const note = `Demo service scan returned ${demoMatches.length} catalog entries`;
+      appendMany([
+        { tone: 'ok', text: `scan query=${query || 'all demo services'}` },
+        { tone: 'ok', text: 'source posture=frontend demo catalog' },
+        ...demoMatches.slice(0, 4).map((service) => ({
+          tone: 'system' as LineTone,
+          text: `${service.name} | ${service.startingPriceUsdc.toFixed(2)} USDC | ${service.deliveryHours}h | ${service.settlementRail}`,
+        })),
+      ]);
+      emit('market_scan', command, note);
+      return;
+    }
+
     try {
       const result = await integrationsApi.listProviders({ query: query || undefined });
       const top = result.providers.slice(0, 4);
@@ -203,8 +304,26 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     const query = normalizeBuyerQuery(command);
     const maxBasePriceUsdc = parseBudget(command);
     const maxDeliveryHours = parseDeliveryHours(command);
+    const demoMatches = findDemoServices(query);
 
     prefillFlow(query || command);
+
+    if (demoMatches.length > 0) {
+      const service = demoMatches[0];
+      const note = `Frontend simulation staged for ${service.name}`;
+
+      appendMany([
+        { tone: 'ok', text: 'role=buyer' },
+        { tone: 'ok', text: `objective=${query || service.name}` },
+        ...(typeof maxBasePriceUsdc === 'number' ? [{ tone: 'ok' as LineTone, text: `budget ceiling=${maxBasePriceUsdc} USDC` }] : []),
+        ...(typeof maxDeliveryHours === 'number' ? [{ tone: 'ok' as LineTone, text: `delivery target=${maxDeliveryHours}h` }] : []),
+        { tone: 'ok', text: 'supply posture=frontend demo simulation' },
+        { tone: 'ok', text: `candidate=${service.name} | price=${service.startingPriceUsdc.toFixed(2)} | eta=${service.deliveryHours}h | demo catalog` },
+      ]);
+      appendSimulationReceipt(service, command);
+      emit('role_buyer', command, note);
+      return;
+    }
 
     try {
       const result = await integrationsApi.listProviders({
@@ -310,6 +429,11 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     try {
       if (normalized === 'help' || normalized === '?') {
         await showHelp(command);
+        return;
+      }
+
+      if (normalized === 'services' || normalized === 'catalog') {
+        await showServices(command);
         return;
       }
 
