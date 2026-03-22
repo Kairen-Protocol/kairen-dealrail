@@ -1,60 +1,62 @@
 # Submission Checklist
 
-This checklist combines official submission requirements with repo-state verification.
+This is the final submission checklist with percentage-based track posture.
+
+## Submission Metadata Lock
+
+Use these values consistently across Devfolio, README, demo, and video.
+
+| Field | Locked value |
+|------|--------------|
+| Live frontend | `https://dealrail.kairen.xyz/` |
+| Live backend | `https://kairen-dealrail-production.up.railway.app/` |
+| npm package | `@kairenxyz/dealrail` |
+| Primary thesis | Ethereum agent commerce execution desk |
+| Core standards | ERC-8183-style escrow flow + ERC-8004 trust hooks |
+| Human path | browser desk |
+| Agent path | CLI / `--json` |
 
 ## Official Submission Requirements
 
-Derived from `https://synthesis.devfolio.co/submission/skill.md`.
-
-| Item | Status | Evidence / Note |
-|------|--------|-----------------|
-| Registered participant identity | User-stated | User indicated registration is already done; not independently verified in repo |
-| Self-custody transfer complete for publish | User-stated | Required by official submission flow; confirm in submission dashboard before publish |
-| Team exists | User-stated | Official flow says a team is auto-created at registration |
-| At least one track selected | Ready | Track strategy documented in [`01_TRACK_MATRIX.md`](01_TRACK_MATRIX.md) |
-| Public repo | Done | This GitHub repo is submission-ready |
-| Description and problem statement | Ready to finalize | Use [`05_WINNING_STRATEGY.md`](05_WINNING_STRATEGY.md) to tighten wording |
-| Conversation log | Required | Must be truthful and complete in submission payload |
-| Submission metadata | Required | Must accurately list tools, skills, resources actually used |
-| Deployed URL | Optional but recommended | Frontend/backend should be linked if publicly reachable |
-| Video URL | Pending | This remains one of the main final blockers |
+| Item | Status | Note |
+|------|--------|------|
+| Public repo | Done | this repo |
+| Live product URL | Done | frontend deployed |
+| Live API URL | Done | backend deployed |
+| Description and problem statement | Ready | use the locked wording from README and `05_WINNING_STRATEGY.md` |
+| Conversation log | Required | keep truthful |
+| Submission metadata consistency | Required | use the table above |
+| Video URL | Pending | still the main final blocker |
 
 ## Repo Readiness
 
 | Item | Status | Evidence |
 |------|--------|----------|
-| Canonical deployment addresses aligned | Done | [`STATUS.md`](../../STATUS.md), [`backend/src/config.ts`](../../backend/src/config.ts), [`frontend/src/lib/contracts.ts`](../../frontend/src/lib/contracts.ts) |
-| Base Sepolia onchain evidence | Done | [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md) |
-| Celo Sepolia onchain evidence | Done | [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md) |
-| Happy path demonstrated | Done | Base and Celo tx hashes recorded |
-| Reject path demonstrated | Done | Celo reject flow recorded |
-| Contract hardening tests | Done | [`contracts/test/EscrowRailERC20Hook.t.sol`](../../contracts/test/EscrowRailERC20Hook.t.sol) |
-| AI-judge-friendly docs | Done | `docs/submission` |
-| Root docs consistent with canonical deployment set | Done | Root README, AGENT, docs index updated |
+| Base Sepolia evidence | Done | [`../../backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md) |
+| Celo Sepolia evidence | Done | [`../../backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md) |
+| x402 proof | Done on testnet | [`../progress/X402_TESTNET_PROOF_2026-03-22.md`](../progress/X402_TESTNET_PROOF_2026-03-22.md) |
+| Contract tests reproducible | Done | `npm run test:contracts` |
+| Public API trust boundary fixed | Done | raw-key routes removed from public contract |
+| Judge pack | Done | `docs/submission` |
+| Agent pack | Done | `agent.json`, `agent_log.json` |
 
 ## Prize Readiness
 
-| Track | Status | Notes |
-|-------|--------|-------|
-| Open Track | Ready | Use as primary narrative |
-| Protocol Labs ERC-8004 | Ready | Strongest sponsor-specific angle |
-| Celo | Ready | Strong third track |
-| MetaMask | Not ready for strong claim | Needs one real delegated tx |
-| Uniswap | Not ready for strong claim | Needs one real swap tx |
-| Locus | Not ready for strong claim | Needs one live Locus proof |
-| AgentCash / x402 | Ready on testnet | Base Sepolia paid-request proof is now in the ledger |
+| Track | Readiness | Blocker |
+|------|-----------|---------|
+| Open Track | 96% | final video |
+| Protocol Labs ERC-8004 | 93% | better identity-facing demo moment |
+| Virtuals ERC-8183 | 93% | packaging only |
+| Celo | 91% | packaging only |
+| AgentCash / x402 | 86% | only one canonical paid proof |
+| Let the Agent Cook | 82% | no autonomous onchain write run yet |
+| Base Agent Services | 78% | public paid service proof still light |
+| MetaMask | 62% | delegated tx missing |
+| Uniswap | 58% | swap tx missing |
+| Locus | 42% | live proof missing |
 
-## Final Remaining Blockers
+## Final Remaining Items
 
-1. Publish or link the final demo video.
-2. Confirm self-custody transfer status in the submission system.
-3. Submit only the tracks supported by actual evidence unless new proof is recorded.
-4. If claiming Protocol Labs autonomy beyond ERC-8004, prepare honest `agent.json` and `agent_log.json` artifacts first.
-
-## Recommended Final Track Lock
-
-Lock these unless new sponsor-specific evidence is added:
-
-1. Synthesis Open Track
-2. Protocol Labs: Agents With Receipts / ERC-8004
-3. Celo: Best Agent on Celo
+1. Publish or attach the final demo video.
+2. Keep only the locked primary tracks unless new proof is recorded.
+3. If stretching for more prizes, upgrade MetaMask or Uniswap with one real tx, not more docs.

@@ -4,86 +4,78 @@ This is the canonical submission entry point for DealRail.
 
 ## One-Line Thesis
 
-DealRail is an Ethereum machine-commerce desk for humans and agents:
-- request work
-- compare providers
+DealRail is an Ethereum machine-commerce execution desk:
+- discover providers
+- negotiate or shortlist
 - pay instantly or commit to escrow
-- settle with receipts
-- score counterparties through ERC-8004-aware trust hooks
+- submit work
+- complete or reject
+- keep a receipt and trust trail
 
-Live browser desk:
-- `https://dealrail.kairen.xyz/`
+Live surfaces:
+- Browser desk: `https://dealrail.kairen.xyz/`
+- Backend API: `https://kairen-dealrail-production.up.railway.app/`
+- npm package: `@kairenxyz/dealrail`
 
-Live backend API:
-- `https://kairen-dealrail-production.up.railway.app/`
+## The Fastest Way To Understand It
 
-Published operator package:
-- `@kairenxyz/dealrail`
-- binary: `dealrail`
+Think in scenarios, not standards.
 
-## Judge-Readiness Snapshot
+1. Human buyer
+   A startup founder needs an automation benchmark report, funds a stablecoin escrow, and only releases payment after evaluator approval.
 
-These percentages are submission-readiness estimates, not code coverage.
+2. Agent buyer
+   An agent runs `vend ... --json`, gets structured offers, and hands a machine-readable receipt to another runtime.
+
+3. Future Kairen stack
+   `market` discovers, `x402n` negotiates, `DealRail` settles, and `ForgeID / Signet` becomes the cross-surface trust layer.
+
+## Judge Snapshot
+
+These are readiness percentages, not code coverage.
 
 | Track | Readiness | Meaning |
 |------|-----------|---------|
-| Synthesis Open Track | 95% | Primary narrative, evidence-backed |
-| Protocol Labs: Agents With Receipts / ERC-8004 | 90% | Strongest sponsor-specific fit |
-| Virtuals: ERC-8183 Open Build | 92% | Direct protocol-thesis fit |
-| Celo: Best Agent on Celo | 90% | Real testnet deployment + proofs |
-| AgentCash / x402 | 85% | Real paid-request proof on testnet |
-| Protocol Labs: Let the Agent Cook | 70% | Good architecture fit, packaging gap remains |
-| Base: Agent Services on Base | 75% | Good evidence, discoverability proof gap |
-| MetaMask Delegations | 60% | Builder exists, execution proof missing |
-| Uniswap | 55% | Builder exists, swap proof missing |
-| Locus | 45% | Bridge exists, live proof missing |
+| Synthesis Open Track | 96% | submit confidently |
+| Protocol Labs: Agents With Receipts / ERC-8004 | 93% | strong sponsor fit |
+| Virtuals: ERC-8183 Open Build | 93% | direct protocol fit |
+| Celo: Best Agent on Celo | 91% | strong third track |
+| AgentCash / x402 | 86% | strong on testnet |
+| Protocol Labs: Let the Agent Cook | 82% | now packaged credibly |
+| Base: Agent Services on Base | 78% | credible stretch |
+| MetaMask Delegations | 62% | builder exists, tx proof missing |
+| Uniswap | 58% | builder exists, swap proof missing |
+| Locus | 42% | adapter exists, live proof missing |
 
-## Fast Read Order
+## Read In This Order
 
 1. [`00_JUDGE_PROOF_PATH.md`](00_JUDGE_PROOF_PATH.md)
 2. [`01_TRACK_MATRIX.md`](01_TRACK_MATRIX.md)
-3. [`02_ARCHITECTURE.md`](02_ARCHITECTURE.md)
-4. [`06_VISUAL_ARCHITECTURE.md`](06_VISUAL_ARCHITECTURE.md)
-5. [`03_EVIDENCE.md`](03_EVIDENCE.md)
-6. [`04_CHECKLIST.md`](04_CHECKLIST.md)
-7. [`05_WINNING_STRATEGY.md`](05_WINNING_STRATEGY.md)
-8. [`07_ROADMAP.md`](07_ROADMAP.md)
-9. [`08_DEMO_SCRIPT.md`](08_DEMO_SCRIPT.md)
+3. [`03_EVIDENCE.md`](03_EVIDENCE.md)
+4. [`08_DEMO_SCRIPT.md`](08_DEMO_SCRIPT.md)
+5. [`07_ROADMAP.md`](07_ROADMAP.md)
+6. [`agent.json`](agent.json)
+7. [`agent_log.json`](agent_log.json)
 
-Track briefs:
-- [`tracks/OPEN_TRACK.md`](tracks/OPEN_TRACK.md)
-- [`tracks/PROTOCOL_LABS_ERC8004.md`](tracks/PROTOCOL_LABS_ERC8004.md)
-- [`tracks/PROTOCOL_LABS_AGENT_COOK.md`](tracks/PROTOCOL_LABS_AGENT_COOK.md)
-- [`tracks/CELO.md`](tracks/CELO.md)
-- [`tracks/AGENTCASH_X402.md`](tracks/AGENTCASH_X402.md)
+## Human And Agent Quick Path
 
-## Human And Agent Fast Path
-
-Human evaluator:
+Human:
 
 ```bash
-npx @kairenxyz/dealrail doctor
 npx @kairenxyz/dealrail help
+npx @kairenxyz/dealrail doctor
 ```
 
-Agent evaluator:
-
-```bash
-npx @kairenxyz/dealrail doctor --json
-npx @kairenxyz/dealrail status --json
-```
-
-Live API check:
+Agent:
 
 ```bash
 DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail status --json
 ```
 
-## Important Evaluation Rule
+## Important Boundary
 
-This pack is intentionally conservative.
-
-- `85%+` means submit confidently.
-- `70-84%` means valid stretch track with clear remaining work.
-- below `70%` means code exists, but sponsor-grade proof is still missing.
-- live URLs and tx hashes outrank planned integrations.
+- Public API routes do not accept raw private keys.
+- Demo execution routes only use managed demo actors for matching demo jobs.
+- Wallet signing and `/api/v1/jobs/simulate` remain the correct public execution paths.
+- In mock mode, discovery and negotiation share the same provider catalog.

@@ -2,28 +2,32 @@
 
 ## Current Readiness
 
-70%
+82%
 
-## Why It Already Fits
+## Why It Fits
 
-DealRail already has:
-- a live agent CLI package
-- stable `--json` output
-- a live backend API
-- real onchain evidence to point the agent run at
+DealRail already gives an agent:
+- a published CLI package
+- stable JSON output
+- a live backend target
+- a recorded autonomous operator run
+- real onchain evidence the run can point to
 
-## Main Blocker
+## Strongest Files
 
-The missing pieces are packaging artifacts, not core architecture:
-- `agent.json`
-- `agent_log.json`
-- one canonical autonomous run
+- [`../../../cli/src/cli.ts`](../../../cli/src/cli.ts)
+- [`../../../cli/src/types.ts`](../../../cli/src/types.ts)
+- [`../agent.json`](../agent.json)
+- [`../agent_log.json`](../agent_log.json)
 
-## Fastest Resolution
+## Main Remaining Blocker
 
-1. add truthful `agent.json`
-2. add truthful `agent_log.json`
-3. capture one structured run using:
-   - `doctor --json`
-   - `status --json`
-   - `vend ... --json`
+The current recorded run is read-heavy and negotiation-heavy.
+The missing proof is a fully autonomous write path that accepts and settles without a human wallet step.
+
+## Honest Positioning
+
+This is a credible stretch track now, not a placeholder.
+The right claim is:
+- agents can already inspect, query, and negotiate through the live stack
+- autonomous settlement can go further, but it is not yet the strongest proof in the repo

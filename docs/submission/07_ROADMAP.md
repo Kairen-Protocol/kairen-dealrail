@@ -1,48 +1,67 @@
 # Roadmap
 
-This is the forward roadmap judges should use when evaluating DealRail’s upside beyond the current hackathon build.
+This roadmap explains where DealRail fits inside the broader Kairen stack and what comes next.
 
-## Current Role In The Kairen Stack
+## Current Role
 
 DealRail is the execution desk.
 
-Today it provides:
-- browser desk for humans
-- npm CLI / SDK for agents
-- backend coordination layer
-- escrow and receipts on Base Sepolia and Celo Sepolia
+Today it already provides:
+- human browser desk
+- agent CLI / JSON operator lane
+- escrow and evaluator settlement on Base Sepolia and Celo Sepolia
 - ERC-8004-aware trust hooks
+- receipts and transaction evidence
 
-## Future Kairen Map
+## Kairen Stack Map
 
 ```text
-kairen.xyz -> protocol shell
-market -> provider and service discovery
-x402n -> negotiation router and transcripts
-ForgeID / SIGNET -> identity, prestige, access control
-DealRail -> execution, settlement, receipts
+kairen.xyz shell -> protocol narrative and entrypoint
+market -> provider discovery and supply aggregation
+x402n -> negotiation router, offer transcripts, batching
+DealRail -> execution, escrow, evaluator settlement, receipts
+ForgeID / Signet -> identity, prestige, access control, portable trust
 ```
 
-## Next Phases
+## The Strategic Direction
 
-### Phase 1
-- final demo packaging
-- `agent.json`
-- `agent_log.json`
+DealRail is not meant to replace the rest of Kairen.
+It is meant to become the execution primitive the rest of Kairen routes into.
 
-### Phase 2
-- x402n-native negotiation routing
-- transcript import and accepted-offer binding
+## Phases
 
-### Phase 3
-- Market-backed provider discovery
-- discoverable public paid services
+### Phase 1: Submission-grade completion
+- keep the current primary tracks honest
+- tighten demo and video packaging
+- keep the public API trust boundary strict
 
-### Phase 4
-- deeper ForgeID / SIGNET identity and prestige integration
-- richer ERC-8004 registration and reputation flow
+### Phase 2: Market and x402n convergence
+- bind accepted negotiations to explicit discovery records
+- import negotiation transcripts from x402n
+- let `market` and DealRail share the same provider directory in a non-demo way
 
-### Phase 5
-- production hardening
-- mainnet posture
-- sponsor-grade MetaMask / Uniswap / Locus proofs where worth it
+### Phase 3: ForgeID and Signet
+- add first-class provider identity records
+- attach portable prestige / reputation to providers and evaluators
+- map ForgeID records into ERC-8004-compatible trust views
+
+### Phase 4: Kairen provider graph
+- provider pages
+- evaluator profiles
+- infra and service categories
+- cross-surface discovery from `kairen.xyz`, `market`, and DealRail
+
+### Phase 5: Sponsor-grade upgrades
+- real delegated MetaMask settlement
+- real Uniswap post-settlement swap proof
+- real Locus payout proof
+- stronger public paid-service proof on Base
+
+## Why This Matters
+
+The long-term Kairen upside is not one isolated app.
+It is a stack where:
+- discovery compounds in `market`
+- negotiation compounds in `x402n`
+- settlement compounds in DealRail
+- identity compounds in ForgeID / Signet
