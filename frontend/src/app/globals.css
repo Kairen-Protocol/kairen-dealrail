@@ -371,6 +371,173 @@ textarea {
     box-shadow: var(--terminal-shadow);
   }
 
+  .hero-loop-shell {
+    display: flex;
+    min-height: 27rem;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--terminal-border) 86%, transparent);
+    border-radius: 1.6rem;
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--terminal-ice) 12%, transparent), transparent 32%),
+      linear-gradient(180deg, rgba(10, 10, 10, 0.92), rgba(14, 13, 12, 0.98));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 26px 60px rgba(0, 0, 0, 0.22);
+  }
+
+  :root[data-theme='light'] .hero-loop-shell {
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--terminal-ice) 10%, transparent), transparent 32%),
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(245, 237, 227, 0.98));
+  }
+
+  .hero-loop-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--terminal-border);
+    padding: 1.15rem 1.2rem 1rem;
+  }
+
+  .hero-loop-title {
+    margin-top: 0.4rem;
+    font-family: var(--font-display), var(--font-plex-sans), sans-serif;
+    font-size: 1.7rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--terminal-fg);
+  }
+
+  .hero-loop-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid var(--terminal-border);
+    background: color-mix(in srgb, var(--terminal-panel) 88%, black 12%);
+    padding: 0.42rem 0.7rem;
+    font-family: var(--font-plex-mono), monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--terminal-muted);
+  }
+
+  .hero-loop-orb {
+    height: 0.46rem;
+    width: 0.46rem;
+    border-radius: 9999px;
+    background: var(--terminal-good);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--terminal-good) 48%, transparent);
+    animation: heroLoopPulse 1.7s ease-in-out infinite;
+  }
+
+  .hero-loop-command-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--terminal-border) 80%, transparent);
+    padding: 1rem 1.2rem;
+    font-family: var(--font-plex-mono), monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+
+  .hero-loop-command-label {
+    color: var(--terminal-accent);
+    white-space: nowrap;
+  }
+
+  .hero-loop-command {
+    color: var(--terminal-fg);
+    overflow-wrap: anywhere;
+  }
+
+  .hero-loop-caret {
+    display: inline-block;
+    height: 0.9em;
+    width: 0.58ch;
+    translate: 0 0.08em;
+    margin-left: 0.3rem;
+    background: color-mix(in srgb, var(--terminal-accent) 82%, white 18%);
+    animation: heroLoopCaret 0.95s steps(1) infinite;
+  }
+
+  .hero-loop-body {
+    display: flex;
+    min-height: 12.5rem;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem 1.2rem 0.9rem;
+    font-family: var(--font-plex-mono), monospace;
+    font-size: 0.76rem;
+    line-height: 1.75;
+  }
+
+  .hero-loop-line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.7rem;
+    overflow-wrap: anywhere;
+    animation: heroLoopReveal 0.24s ease-out both;
+  }
+
+  .hero-loop-line-system {
+    color: var(--terminal-muted);
+  }
+
+  .hero-loop-line-ok {
+    color: var(--terminal-good);
+  }
+
+  .hero-loop-line-warn {
+    color: var(--terminal-warn);
+  }
+
+  .hero-loop-line-pending {
+    color: color-mix(in srgb, var(--terminal-muted) 72%, transparent);
+  }
+
+  .hero-loop-index {
+    color: color-mix(in srgb, var(--terminal-accent) 72%, var(--terminal-muted) 28%);
+  }
+
+  .hero-loop-footer {
+    border-top: 1px solid color-mix(in srgb, var(--terminal-border) 80%, transparent);
+    padding: 0.95rem 1.2rem 1.15rem;
+  }
+
+  .hero-loop-note {
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--terminal-muted);
+  }
+
+  .hero-loop-progress {
+    margin-top: 0.8rem;
+    height: 0.42rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--terminal-panel) 85%, black 15%);
+  }
+
+  .hero-loop-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--terminal-accent) 86%, white 14%),
+      color-mix(in srgb, var(--terminal-ice) 72%, var(--terminal-accent) 28%)
+    );
+    box-shadow: 0 0 18px color-mix(in srgb, var(--terminal-accent) 20%, transparent);
+    transition: width 0.32s ease;
+  }
+
   .shell-divider {
     height: 1.5rem;
     width: 1px;
@@ -593,6 +760,40 @@ textarea {
   100% {
     opacity: 0;
     transform: translateY(-10px);
+  }
+}
+
+@keyframes heroLoopReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroLoopPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes heroLoopCaret {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
   }
 }
 

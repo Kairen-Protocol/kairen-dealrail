@@ -16,19 +16,22 @@ Use this index when an agent needs to decide how to operate DealRail without loa
 
 If you need the repository context after reading this entrypoint, use these files:
 
-1. `README.md`
+Repo root:
+- [github.com/Kairen-Protocol/kairen-dealrail](https://github.com/Kairen-Protocol/kairen-dealrail)
+
+1. [README.md](https://github.com/Kairen-Protocol/kairen-dealrail/blob/main/README.md)
    - repo thesis, live URLs, and reviewer routing
-2. `docs/README.md`
+2. [docs/README.md](https://github.com/Kairen-Protocol/kairen-dealrail/blob/main/docs/README.md)
    - docs index and canonical read order
-3. `docs/submission/00_START_HERE.md`
+3. [docs/submission/00_START_HERE.md](https://github.com/Kairen-Protocol/kairen-dealrail/blob/main/docs/submission/00_START_HERE.md)
    - canonical submission entrypoint
-4. `docs/submission/00_JUDGE_PROOF_PATH.md`
+4. [docs/submission/00_JUDGE_PROOF_PATH.md](https://github.com/Kairen-Protocol/kairen-dealrail/blob/main/docs/submission/00_JUDGE_PROOF_PATH.md)
    - fastest judge proof walk
-5. `docs/submission/03_EVIDENCE.md`
+5. [docs/submission/03_EVIDENCE.md](https://github.com/Kairen-Protocol/kairen-dealrail/blob/main/docs/submission/03_EVIDENCE.md)
    - evidence map and proof references
-6. `docs/progress/DEMO_VALIDATION_2026-03-22.md`
+6. [docs/progress/DEMO_VALIDATION_2026-03-22.md](https://github.com/Kairen-Protocol/kairen-dealrail/blob/main/docs/progress/DEMO_VALIDATION_2026-03-22.md)
    - latest end-to-end validation report
-7. `docs/strategy/PROJECT_STATUS.md`
+7. [docs/strategy/PROJECT_STATUS.md](https://github.com/Kairen-Protocol/kairen-dealrail/blob/main/docs/strategy/PROJECT_STATUS.md)
    - concise current project snapshot
 
 If you started in GitHub instead of this page, do the reverse:
