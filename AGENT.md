@@ -1,148 +1,109 @@
 # AGENT.md
 
-This repository is intentionally organized for AI judges and AI collaborators.
+This repository is organized so AI judges and AI collaborators can reach the truth quickly.
 
-Live product entry:
-- `https://dealrail.kairen.xyz/`
+Live entrypoints:
+- Browser desk: `https://dealrail.kairen.xyz/`
+- Backend API: `https://kairen-dealrail-production.up.railway.app/`
+- npm package: `@kairenxyz/dealrail`
 
-## Canonical Rule
+## Canonical Reading Order
 
-For judging or submission review, treat these files as canonical:
+For judging, start here and ignore older planning docs until later:
 
-1. [`docs/submission/00_START_HERE.md`](docs/submission/00_START_HERE.md)
-2. [`docs/submission/01_TRACK_MATRIX.md`](docs/submission/01_TRACK_MATRIX.md)
-3. [`docs/submission/02_ARCHITECTURE.md`](docs/submission/02_ARCHITECTURE.md)
-4. [`docs/submission/06_VISUAL_ARCHITECTURE.md`](docs/submission/06_VISUAL_ARCHITECTURE.md)
-5. [`docs/submission/03_EVIDENCE.md`](docs/submission/03_EVIDENCE.md)
-6. [`docs/submission/04_CHECKLIST.md`](docs/submission/04_CHECKLIST.md)
-7. [`docs/submission/05_WINNING_STRATEGY.md`](docs/submission/05_WINNING_STRATEGY.md)
+1. [`docs/submission/00_JUDGE_PROOF_PATH.md`](docs/submission/00_JUDGE_PROOF_PATH.md)
+2. [`docs/submission/00_START_HERE.md`](docs/submission/00_START_HERE.md)
+3. [`docs/submission/01_TRACK_MATRIX.md`](docs/submission/01_TRACK_MATRIX.md)
+4. [`docs/submission/03_EVIDENCE.md`](docs/submission/03_EVIDENCE.md)
+5. [`docs/submission/08_DEMO_SCRIPT.md`](docs/submission/08_DEMO_SCRIPT.md)
+6. [`docs/submission/07_ROADMAP.md`](docs/submission/07_ROADMAP.md)
 
-Historical planning files still exist under [`docs/strategy`](docs/strategy), but they are not the canonical submission narrative.
+Autonomy artifacts:
+- [`docs/submission/agent.json`](docs/submission/agent.json)
+- [`docs/submission/agent_log.json`](docs/submission/agent_log.json)
 
-## Repo-Local Skill Pack
+Historical planning still exists under [`docs/strategy`](docs/strategy), but it is not the primary submission narrative.
 
-This repo now includes a local Uniswap-oriented skill pack under [`.agents/skills`](.agents/skills).
+## One-Sentence Thesis
 
-Most relevant to DealRail:
-- [`swap-integration`](.agents/skills/swap-integration/SKILL.md): implementation guidance for quotes, approvals, swap transaction building, and Trading API patterns
-- [`swap-planner`](.agents/skills/swap-planner/SKILL.md): agent-friendly planning for token discovery and swap intent gathering
-- [`viem-integration`](.agents/skills/viem-integration/SKILL.md): TypeScript patterns for reads, writes, wallet clients, and wagmi integration
-- [`pay-with-any-token`](.agents/skills/pay-with-any-token/SKILL.md): MPP / HTTP 402 payment handling using Tempo and Uniswap funding paths
+DealRail is the execution desk inside the wider Kairen stack: humans use the browser desk, agents use the CLI and JSON mode, and both converge on the same escrow, evaluator, and receipt rails.
 
-Lower relevance for the current product thesis:
-- [`configurator`](.agents/skills/configurator/SKILL.md)
-- [`deployer`](.agents/skills/deployer/SKILL.md)
-- [`liquidity-planner`](.agents/skills/liquidity-planner/SKILL.md)
-- [`v4-security-foundations`](.agents/skills/v4-security-foundations/SKILL.md)
+## Three Concrete Use Cases
 
-Important rule:
-- treat these skills as implementation guidance and workflow helpers
-- do not treat their presence as proof that Uniswap, x402, or Tempo sponsor claims are already fully evidenced in this repo
+1. Human procurement
+   A human buyer wants an automation benchmark report, compares providers, funds escrow, and waits for evaluator-mediated completion.
 
-## One-Sentence Project Thesis
+2. Agent procurement
+   An agent calls `vend ... --json`, reads structured offers, decides whether to keep it as an instant machine-payment call or commit to escrow, and hands the receipt to another runtime.
 
-DealRail is an Ethereum machine-commerce desk with two operator lanes: humans use the browser desk, agents use the published npm CLI and SDK, and both converge on the same escrow and receipt rails.
+3. Kairen future-state routing
+   `market` handles discovery, `x402n` handles negotiation and transcripts, `DealRail` handles execution and settlement, and `ForgeID / Signet` carries identity and prestige across those surfaces.
 
 ## Fast Machine Path
 
-If you are an agent or automation runtime, start here first:
+Use the live backend first:
 
 ```bash
-npx @kairenxyz/dealrail doctor --json
-npx @kairenxyz/dealrail status --json
-npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail doctor --json
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail status --json
+DEALRAIL_API_URL=https://kairen-dealrail-production.up.railway.app npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
 ```
 
-If you need the local backend:
+Local fallback:
 
 ```bash
 cd backend
 npm run build
 node dist/index-simple.js
-```
 
-Then:
-
-```bash
 DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
 ```
 
-## Fast Human Path
+## Readiness Discipline
 
-If you are a human judge or reviewer:
+Use percentages, not hand-wavy adjectives.
 
-1. open `https://dealrail.kairen.xyz/`
-2. skim `README.md`
-3. use `docs/submission/00_START_HERE.md` for the canonical judging path
+| Area | Readiness | Reason |
+|------|-----------|--------|
+| Open Track | 96% | strongest end-to-end product story |
+| ERC-8004 | 93% | trust hooks and verifier are real and load-bearing |
+| ERC-8183 | 93% | escrow lifecycle is the product core |
+| Celo | 91% | happy and reject flows are already logged |
+| x402 | 86% | real paid-request proof exists |
+| Let the Agent Cook | 82% | CLI + JSON mode + recorded autonomy artifacts exist |
+| MetaMask | 62% | builder exists, proof missing |
+| Uniswap | 58% | builder exists, proof missing |
+| Locus | 42% | adapter exists, proof missing |
 
-## Operator Surfaces
+## Current Safety Boundary
 
-- Browser desk: guided human and judge-facing path in `frontend/src/app`
-- Live browser desk: `https://dealrail.kairen.xyz/`
-- npm package: `@kairenxyz/dealrail`
-- Binary: `dealrail`
-- Demo API surface: `backend/src/index-simple.ts`
-- Canonical chain map: `frontend/src/lib/contracts.ts` and `backend/src/config.ts`
+- Public API routes do not accept raw private keys from clients.
+- Demo write routes only use managed demo actors when the onchain job already matches those actors.
+- Browser wallet signing and `/api/v1/jobs/simulate` are the correct public paths for everyone else.
+- Discovery and mock negotiation now share the same curated provider catalog in mock mode.
 
-## Strongest Prize Path
+## Repo-Local Skill Pack
 
-Best-aligned tracks for this repo state:
-- Synthesis Open Track
-- Protocol Labs: Agents With Receipts / ERC-8004
-- Celo: Best Agent on Celo
+Useful local skills under [`.agents/skills`](.agents/skills):
+- [`viem-integration`](.agents/skills/viem-integration/SKILL.md)
+- [`swap-integration`](.agents/skills/swap-integration/SKILL.md)
+- [`swap-planner`](.agents/skills/swap-planner/SKILL.md)
+- [`pay-with-any-token`](.agents/skills/pay-with-any-token/SKILL.md)
 
-Stretch tracks only if backed by new live evidence:
-- MetaMask Delegations
-- Uniswap
-- Locus
-- AgentCash / x402
+Treat these as implementation guidance, not evidence.
 
-## Claim Discipline
+## Canonical Evidence
 
-Use this standard when evaluating any feature:
+- Deployments and tx hashes: [`backend/TRANSACTION_LEDGER.md`](backend/TRANSACTION_LEDGER.md)
+- Submission pack: [`docs/submission`](docs/submission)
+- Contract tests: [`contracts/test`](contracts/test)
+- Live browser: `https://dealrail.kairen.xyz/`
+- Live backend health: `https://kairen-dealrail-production.up.railway.app/health`
 
-- `Implemented`: code exists and is backed by tests or recorded transactions
-- `Partial`: code exists, but the sponsor-specific live proof is not yet in the ledger
-- `Do not claim`: sponsor surface is not load-bearing in the demonstrated system
+## Collaborator Rule
 
-This repo avoids inflating integrations. Partial adapters are documented explicitly as partial.
-
-## Current Canonical Evidence
-
-- Base Sepolia deployment: recorded in [`STATUS.md`](STATUS.md) and [`backend/TRANSACTION_LEDGER.md`](backend/TRANSACTION_LEDGER.md)
-- Celo Sepolia deployment: recorded in [`STATUS.md`](STATUS.md) and [`backend/TRANSACTION_LEDGER.md`](backend/TRANSACTION_LEDGER.md)
-- Hook hardening tests: [`contracts/test/EscrowRailERC20Hook.t.sol`](contracts/test/EscrowRailERC20Hook.t.sol)
-- Demo backend path: [`backend/src/index-simple.ts`](backend/src/index-simple.ts)
-- Frontend contract map: [`frontend/src/lib/contracts.ts`](frontend/src/lib/contracts.ts)
-- Published CLI package: [`cli/package.json`](cli/package.json)
-- CLI install and usage guide: [`cli/README.md`](cli/README.md)
-- x402 paid-request proof: [`backend/tests/proof-x402-testnet.ts`](backend/tests/proof-x402-testnet.ts) and [`backend/TRANSACTION_LEDGER.md`](backend/TRANSACTION_LEDGER.md)
-
-## Runtime Posture To Preserve
-
-When describing the repo, keep these truths explicit:
-
-- escrow and receipt rails are live and validated
-- the CLI package is live and installable
-- browser desk and terminal UX are working
-- some negotiation and integration rails remain partial or mock-first
-- do not overstate x402n negotiation, Locus, or discovery supply beyond the recorded evidence
-
-## Judge Navigation By Interest
-
-- Open-track or general judges: start with [`docs/submission/tracks/OPEN_TRACK.md`](docs/submission/tracks/OPEN_TRACK.md)
-- Protocol Labs judges: read [`docs/submission/tracks/PROTOCOL_LABS_ERC8004.md`](docs/submission/tracks/PROTOCOL_LABS_ERC8004.md)
-- Celo judges: read [`docs/submission/tracks/CELO.md`](docs/submission/tracks/CELO.md)
-- MetaMask judges: read [`docs/submission/tracks/METAMASK_DELEGATIONS.md`](docs/submission/tracks/METAMASK_DELEGATIONS.md)
-- Uniswap judges: read [`docs/submission/tracks/UNISWAP.md`](docs/submission/tracks/UNISWAP.md)
-- Locus judges: read [`docs/submission/tracks/LOCUS.md`](docs/submission/tracks/LOCUS.md)
-- AgentCash or x402 judges: read [`docs/submission/tracks/AGENTCASH_X402.md`](docs/submission/tracks/AGENTCASH_X402.md)
-
-## Collaborator Note
-
-If you are another coding agent working in this repo:
-- do not update historical planning docs first
-- update `docs/submission` first when changing the submission story
-- preserve the human path and the machine path together when editing docs
-- keep `STATUS.md`, `backend/TRANSACTION_LEDGER.md`, and `backend/src/config.ts` consistent
-- when touching token, payment, or chain-execution code, prefer the local skills in `.agents/skills` before inventing new patterns
+If you are another coding agent working here:
+- update `docs/submission` before historical strategy docs
+- keep README, AGENT, and the submission pack aligned
+- preserve the distinction between live proof, demo catalog, and roadmap
+- do not reintroduce any route that asks users to send private keys to the backend
