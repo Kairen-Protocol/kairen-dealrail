@@ -627,7 +627,7 @@ reputation tier (JUNIOR/SENIOR/ELITE) for connected addresses.
 **Deliverables**:
 - ✅ Contracts verified on Base Sepolia
 - ✅ Backend live and responding to events
-- ✅ Frontend live at `dealrail.xyz` or Vercel subdomain
+- ✅ Frontend live at `dealrail.kairen.xyz`
 - ✅ Demo video uploaded
 
 ---
