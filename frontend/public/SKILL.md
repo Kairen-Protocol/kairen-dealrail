@@ -1,75 +1,130 @@
 # DealRail Skill Index
 
-URL target: `https://dealrail.kairen.xyz/SKILL.md`
+Canonical URL: `https://dealrail.kairen.xyz/skill.md`
+Uppercase alias: `https://dealrail.kairen.xyz/SKILL.md`
 
-DealRail is a trust/execution rail for agent commerce.
+DealRail is an execution desk for agent commerce.
+Use this index when an agent needs to decide how to operate DealRail without loading the whole repo first.
 
-Agent collaborators can also use the repo-local skill pack in `.agents/skills`, especially:
-- `viem-integration` for EVM reads, writes, wallet clients, and wagmi patterns
-- `swap-integration` for Uniswap quote and swap transaction building
-- `swap-planner` for token discovery and swap planning
-- `pay-with-any-token` for HTTP 402 / machine-payment flows using Tempo plus token funding
+## Start Here
 
-## Primary Use Case
+1. Read this file.
+2. If the task is Base-track or public-surface oriented, open `/base`.
+3. If the task is guided operation, open `/docs` and choose the human or agent toggle.
+4. If the task is command-driven, use the CLI or the local `skills.sh` helper.
 
-1. Discover providers from multiple sources (x402n, external marketplaces, imported catalogs, ERC-8004 identity context).
-2. Negotiate terms (RFO/offers).
-3. Run reverse-auction counter rounds and batch offer confirmation.
-4. Commit deal onchain with escrow.
-5. Verify delivery by evaluator.
-6. Optionally route settlement proceeds (Uniswap/Locus/x402/other adapters).
+## Entry Modes
 
-These skills improve implementation guidance for agents, but they are not evidence by themselves. Treat recorded transactions and canonical ledger entries as the source of truth for prize claims.
+### Human Mode
 
-## Frontend Mode Map
+Use when:
+- a person wants guided navigation
+- wallet actions need visual confirmation
+- the flow is being demoed or judged live
 
-- Human Mode:
-  - Primary: `Deal Pipeline`, `Jobs List`
-  - Secondary (advanced): discovery + integrations
-- Agent Mode:
-  - Primary: `Provider Discovery`, `Integrations Workbench`
-  - Validation: `Jobs List` and pipeline tracking
+Start with:
+- `/docs`
+- `/terminal`
+- `/dashboard`
 
-## What DealRail Is
+Recommended order:
+1. `doctor`
+2. `services`
+3. `vend ...` or job operations
+4. `/base` when the Base-facing service surface matters
 
-- Trustless settlement and verification layer.
-- Integration surface for multiple discovery/execution providers.
+### Agent Mode
 
-## What DealRail Is Not
+Use when:
+- another runtime needs stable JSON
+- the task is feature-specific and should map to a skill
+- the browser should be used only for human review or signing
 
-- Exclusive to one protocol.
-- A closed marketplace.
+Start with:
+- `npx @kairenxyz/dealrail doctor --json`
+- `npx @kairenxyz/dealrail services --json`
+- `./skills.sh features`
 
-## Skill References
+## Public Product Surfaces
 
-- Main command: `/skills/dealrail.sh`
-  - `./skills/dealrail.sh basics` for basic product usage
-  - `./skills/dealrail.sh human-flow` for human run order
-  - `./skills/dealrail.sh agent-flow` for agent run order
-  - `./skills/dealrail.sh smoke-celo` for live Celo Sepolia smoke flow
-- `/skills/README.md`
-- `/skills/transaction-ops/SKILL.md`
+- `/base`
+  - Base-facing public service directory
+- `/docs`
+  - human/agent operating guide
+- `/terminal`
+  - guided operator terminal
+- `GET /api/v1/base/agent-services`
+  - Base public API directory
+- `GET /api/v1/discovery/providers`
+  - provider discovery
+- `POST /api/v1/x402n/rfos`
+  - negotiation entrypoint
+- `GET /api/v1/jobs`
+  - job board
+
+## Local Skill Pack
+
+Shell entrypoints:
+- `./skills.sh`
+- `./skills/dealrail.sh`
+
+Core role skills:
 - `/skills/buyer-agent/SKILL.md`
 - `/skills/provider-agent/SKILL.md`
 - `/skills/evaluator-agent/SKILL.md`
-- `/skills/client-frontend/SKILL.md`
+- `/skills/transaction-ops/SKILL.md`
 - `/skills/checkpoints/SKILL.md`
+- `/skills/client-frontend/SKILL.md`
+
+Feature skills:
+- `/skills/provider-discovery/SKILL.md`
+  - provider scans, source mix, visible market depth
+- `/skills/negotiation-auction/SKILL.md`
+  - RFOs, offer ranking, counter rounds, batch confirm, receipts
+- `/skills/escrow-lifecycle/SKILL.md`
+  - create, fund, submit, complete, reject, refund
+- `/skills/machine-payments-x402/SKILL.md`
+  - x402 pay-per-call posture and proxy flows
+- `/skills/base-service-directory/SKILL.md`
+  - Base-facing public surface and track proof
+- `/skills/treasury-routing-preview/SKILL.md`
+  - Base-only post-settlement routing preview
+- `/skills/delegation-builder/SKILL.md`
+  - MetaMask / ERC-7710 payload construction and bounds
+
+Repo-local reference skills:
 - `/.agents/skills/viem-integration/SKILL.md`
 - `/.agents/skills/swap-integration/SKILL.md`
 - `/.agents/skills/swap-planner/SKILL.md`
 - `/.agents/skills/pay-with-any-token/SKILL.md`
 
-## Integration Endpoints
+## Feature Routing
 
-- `GET /api/v1/discovery/sources`
-- `GET /api/v1/discovery/providers`
-- `POST /api/v1/discovery/providers/import`
-- `GET /api/v1/execution/providers`
-- `POST /api/v1/execution/submit`
-- `POST /api/v1/x402n/rfos/:negotiationId/counter`
-- `POST /api/v1/x402n/rfos/:negotiationId/batch`
-- `POST /api/v1/x402n/rfos/:negotiationId/confirm`
-- `GET /api/v1/x402n/rfos/:negotiationId/receipt`
-- `GET /api/v1/x402n/rfos/:negotiationId/activities`
-- `GET /api/v1/integrations/x402/status`
-- `POST /api/v1/integrations/x402/proxy`
+Use this map to choose the right skill quickly.
+
+- "Who can do this?" -> `provider-discovery`
+- "Create a negotiation / vend / counter round" -> `negotiation-auction`
+- "Create or advance a job" -> `escrow-lifecycle`
+- "Should this be x402 or escrow?" -> `machine-payments-x402`
+- "Show me what is live on Base" -> `base-service-directory`
+- "Route payout after Base settlement" -> `treasury-routing-preview`
+- "Delegate bounded wallet actions" -> `delegation-builder`
+- "Need UI or navigation guidance" -> `client-frontend`
+
+## Hard Truths
+
+- DealRail is strongest today as escrow + receipts + operator packaging.
+- Discovery can still be curated demo supply.
+- Base service directory is real, but it is not proof of a fully open live market.
+- Uniswap is preview-only until a real swap tx exists.
+- Delegation is a builder/signing path until a delegated tx exists.
+
+## Recommended Commands
+
+```bash
+npx @kairenxyz/dealrail doctor --json
+npx @kairenxyz/dealrail services --json
+npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
+./skills.sh features
+./skills.sh base
+```

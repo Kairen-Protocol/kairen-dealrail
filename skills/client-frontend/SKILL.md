@@ -7,11 +7,13 @@ description: Use for frontend UX operation: simple human navigation and agent-mo
 
 ## Navigation Model
 - Human Mode:
+  - Start with `/docs` and select the human toggle.
   - Run deal pipeline first (policy -> negotiation -> confirmation -> tracking).
   - Manage jobs second.
   - Keep discovery/integrations in advanced section.
 - Agent Mode:
-  - Start with provider discovery.
+  - Start with `/skill.md` or the agent toggle in `/docs`.
+  - Move to `/base`, provider discovery, or terminal depending on the task.
   - Use integrations workbench for payload ops.
   - Validate final onchain state in jobs list.
 
@@ -33,6 +35,7 @@ description: Use for frontend UX operation: simple human navigation and agent-mo
 ## Required Panels
 - Human Mode: Deal pipeline + Jobs list
 - Agent Mode: Discovery + Integration workbench + Jobs list
+- Shared reference: `/skill.md` public index + `/base` public Base service directory
 
 ## Checkpoints
 - Connected wallet visible.
