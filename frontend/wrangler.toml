@@ -1,4 +1,4 @@
-name = "kairen-dealrail-frontend"
+name = "kairen-dealrail"
 main = ".open-next/worker.js"
 compatibility_date = "2026-03-22"
 compatibility_flags = ["nodejs_compat"]
