@@ -5,9 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { integrationsApi, jobsApi, Job, getErrorMessage } from '@/lib/api';
 import { formatDistanceToNow, format } from 'date-fns';
 import Link from 'next/link';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSendTransaction } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSendTransaction, useSwitchChain } from 'wagmi';
 import { parseUnits, encodePacked, keccak256 } from 'viem';
-import { ESCROW_ABI, USDC_ABI, getEscrowAddress, getUSDCAddress } from '@/lib/contracts';
+import { ESCROW_ABI, USDC_ABI, getChainLabel, getEscrowAddress, getUSDCAddress } from '@/lib/contracts';
 
 const stateColors: Record<string, string> = {
   Open: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
@@ -31,6 +31,7 @@ export default function JobDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { address, chainId } = useAccount();
+  const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,9 +76,27 @@ export default function JobDetailPage() {
     void loadJob();
   }, [loadJob]);
 
+  const settlementChainId = job?.chainId ?? null;
+  const isWalletOnJobChain = !!settlementChainId && chainId === settlementChainId;
+
+  function ensureWalletReadyForJobWrite(): boolean {
+    if (!job) return false;
+    if (!address) {
+      setActionError('Connect your wallet to sign this job action.');
+      return false;
+    }
+    if (chainId !== job.chainId) {
+      setActionError(
+        `Wrong network for this job. Switch your wallet to ${getChainLabel(job.chainId)} before signing.`
+      );
+      return false;
+    }
+    return true;
+  }
+
   // Handle transaction confirmation and multi-step flows
   useEffect(() => {
-    if (isConfirmed && jobId && chainId) {
+    if (isConfirmed && jobId && settlementChainId) {
       // Handle approval confirmation - proceed to funding
       if (fundingStep === 'approving') {
         setFundingStep('approved');
@@ -86,7 +105,7 @@ export default function JobDetailPage() {
         // Call fund after approval
         setTimeout(() => {
           const amount = parseUnits(fundAmount, 6);
-          const escrowAddress = getEscrowAddress(chainId);
+          const escrowAddress = getEscrowAddress(settlementChainId);
 
           setFundingStep('funding');
           writeContract({
@@ -107,11 +126,11 @@ export default function JobDetailPage() {
         }, 2000); // Wait 2s for state to propagate
       }
     }
-  }, [chainId, fundAmount, fundingStep, isConfirmed, jobId, loadJob, writeContract]);
+  }, [fundAmount, fundingStep, isConfirmed, jobId, loadJob, settlementChainId, writeContract]);
 
   // Fund Job action (approve + fund)
   async function handleFundJob() {
-    if (!jobId || !chainId || !address) return;
+    if (!jobId || !settlementChainId || !ensureWalletReadyForJobWrite()) return;
 
     setActionLoading(true);
     setActionError(null);
@@ -120,8 +139,8 @@ export default function JobDetailPage() {
 
     try {
       const amount = parseUnits(fundAmount, 6); // USDC has 6 decimals
-      const escrowAddress = getEscrowAddress(chainId);
-      const usdcAddress = getUSDCAddress(chainId);
+      const escrowAddress = getEscrowAddress(settlementChainId);
+      const usdcAddress = getUSDCAddress(settlementChainId);
 
       // Step 1: Approve USDC (step 2 happens automatically in useEffect after confirmation)
       setActionSuccess('Step 1/2: Approving USDC...');
@@ -141,7 +160,7 @@ export default function JobDetailPage() {
 
   // Submit Deliverable action
   async function handleSubmitDeliverable() {
-    if (!jobId || !chainId || !deliverableInput) return;
+    if (!jobId || !settlementChainId || !deliverableInput || !ensureWalletReadyForJobWrite()) return;
 
     setActionLoading(true);
     setActionError(null);
@@ -150,7 +169,7 @@ export default function JobDetailPage() {
     try {
       // Convert deliverable string to bytes32 hash
       const deliverableHash = keccak256(encodePacked(['string'], [deliverableInput]));
-      const escrowAddress = getEscrowAddress(chainId);
+      const escrowAddress = getEscrowAddress(settlementChainId);
 
       setActionSuccess('Submitting deliverable...');
       writeContract({
@@ -168,14 +187,14 @@ export default function JobDetailPage() {
 
   // Complete Job action
   async function handleCompleteJob() {
-    if (!jobId || !chainId) return;
+    if (!jobId || !settlementChainId || !ensureWalletReadyForJobWrite()) return;
 
     setActionLoading(true);
     setActionError(null);
     setActionSuccess(null);
 
     try {
-      const escrowAddress = getEscrowAddress(chainId);
+      const escrowAddress = getEscrowAddress(settlementChainId);
       const reason = keccak256(encodePacked(['string'], ['Work approved']));
 
       setActionSuccess('Completing job...');
@@ -194,14 +213,14 @@ export default function JobDetailPage() {
 
   // Reject Job action
   async function handleRejectJob() {
-    if (!jobId || !chainId) return;
+    if (!jobId || !settlementChainId || !ensureWalletReadyForJobWrite()) return;
 
     setActionLoading(true);
     setActionError(null);
     setActionSuccess(null);
 
     try {
-      const escrowAddress = getEscrowAddress(chainId);
+      const escrowAddress = getEscrowAddress(settlementChainId);
       const reason = keccak256(encodePacked(['string'], ['Work rejected']));
 
       setActionSuccess('Rejecting job...');
@@ -238,6 +257,7 @@ export default function JobDetailPage() {
 
   async function executePostSettlementTx(kind: 'approve' | 'swap') {
     if (!postSettlementPayload) return;
+    if (!ensureWalletReadyForJobWrite()) return;
     const tx = kind === 'approve'
       ? postSettlementPayload.execution?.approveTx
       : postSettlementPayload.execution?.swapTx;
@@ -456,6 +476,23 @@ export default function JobDetailPage() {
             <h3 className="text-xl font-bold mb-4">Next Steps</h3>
 
             {/* Success/Error Messages */}
+            {address && settlementChainId && !isWalletOnJobChain && (
+              <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+                <p className="text-amber-300">
+                  This job lives on {getChainLabel(settlementChainId)}, but your wallet is connected to{' '}
+                  {getChainLabel(chainId)}.
+                </p>
+                {switchChain && (
+                  <button
+                    onClick={() => switchChain({ chainId: settlementChainId })}
+                    disabled={isSwitchingChain}
+                    className="mt-3 rounded bg-amber-500 px-3 py-2 text-sm font-semibold text-black transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-amber-700"
+                  >
+                    {isSwitchingChain ? 'Switching...' : `Switch to ${getChainLabel(settlementChainId)}`}
+                  </button>
+                )}
+              </div>
+            )}
             {actionSuccess && (
               <div className="mb-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
                 <p className="text-green-400">{actionSuccess}</p>
@@ -480,12 +517,12 @@ export default function JobDetailPage() {
                     </p>
                   </div>
                   <a
-                    href={`https://sepolia.basescan.org/tx/${hash}`}
+                    href={`${job.explorerBaseUrl}/tx/${hash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-sm underline"
                   >
-                    View on BaseScan
+                    View on Explorer
                   </a>
                 </div>
               </div>
@@ -522,7 +559,7 @@ export default function JobDetailPage() {
                           />
                           <button
                             onClick={handleFundJob}
-                            disabled={isWritePending || isConfirming}
+                            disabled={!isWalletOnJobChain || isWritePending || isConfirming}
                             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded transition-colors"
                           >
                             {isWritePending || isConfirming ? 'Processing...' : 'Fund Job'}
@@ -562,7 +599,7 @@ export default function JobDetailPage() {
                           />
                           <button
                             onClick={handleSubmitDeliverable}
-                            disabled={!deliverableInput || isWritePending || isConfirming}
+                            disabled={!isWalletOnJobChain || !deliverableInput || isWritePending || isConfirming}
                             className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded transition-colors"
                           >
                             {isWritePending || isConfirming ? 'Processing...' : 'Submit Deliverable'}
@@ -592,14 +629,14 @@ export default function JobDetailPage() {
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             onClick={handleCompleteJob}
-                            disabled={isWritePending || isConfirming}
+                            disabled={!isWalletOnJobChain || isWritePending || isConfirming}
                             className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded transition-colors"
                           >
                             {isWritePending || isConfirming ? 'Processing...' : 'Approve'}
                           </button>
                           <button
                             onClick={handleRejectJob}
-                            disabled={isWritePending || isConfirming}
+                            disabled={!isWalletOnJobChain || isWritePending || isConfirming}
                             className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded transition-colors"
                           >
                             {isWritePending || isConfirming ? 'Processing...' : 'Reject'}

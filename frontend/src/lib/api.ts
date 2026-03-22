@@ -206,12 +206,10 @@ export interface FundJobRequest {
 
 export interface SubmitDeliverableRequest {
   deliverable: string; // Bytes32 hash
-  providerPrivateKey: string;
 }
 
 export interface CompleteJobRequest {
   reason: string; // Bytes32 hash or string
-  evaluatorPrivateKey: string;
 }
 
 export interface HealthCheckResponse {

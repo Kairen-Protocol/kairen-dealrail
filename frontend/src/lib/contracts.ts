@@ -205,9 +205,21 @@ export const JobStateNames: Record<number, string> = {
   [JobState.EXPIRED]: 'Expired',
 };
 
+function requireSupportedAddress(
+  map: Record<number, Address>,
+  chainId: number,
+  label: 'escrow' | 'stablecoin'
+): Address {
+  const address = map[chainId];
+  if (!address) {
+    throw new Error(`Unsupported settlement chain ${chainId} for ${label} address lookup`);
+  }
+  return address;
+}
+
 // Helper to get contract address for current chain
 export function getEscrowAddress(chainId: number): Address {
-  return ESCROW_ADDRESSES[chainId] || ESCROW_ADDRESSES[84532];
+  return requireSupportedAddress(ESCROW_ADDRESSES, chainId, 'escrow');
 }
 
 export function getHookAddress(chainId: number): Address {
@@ -216,7 +228,7 @@ export function getHookAddress(chainId: number): Address {
 
 // Helper to get USDC address for current chain
 export function getUSDCAddress(chainId: number): Address {
-  return USDC_ADDRESSES[chainId] || USDC_ADDRESSES[84532];
+  return requireSupportedAddress(USDC_ADDRESSES, chainId, 'stablecoin');
 }
 
 export function isSupportedSettlementChain(chainId?: number | null): chainId is (typeof SUPPORTED_SETTLEMENT_CHAIN_IDS)[number] {
