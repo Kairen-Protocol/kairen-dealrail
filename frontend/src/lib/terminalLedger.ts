@@ -2,6 +2,8 @@ export type TerminalActionKind =
   | 'help'
   | 'doctor'
   | 'status'
+  | 'wallet_send'
+  | 'swap_preview'
   | 'start_flow'
   | 'start_ops'
   | 'open_integrations'

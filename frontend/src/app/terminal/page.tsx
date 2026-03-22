@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { HomeCommandTerminal, TerminalAction } from '@/components/HomeCommandTerminal';
 import { listTerminalRuns } from '@/lib/terminalLedger';
-import { MarketPulsePanel } from '@/components/MarketPulsePanel';
 import { CliDemoTerminal } from '@/components/CliDemoTerminal';
 
 const stepMap: Record<string, string[]> = {
   help: ['Read command map', 'Choose a role or rail'],
   doctor: ['Check backend reachability', 'Read discovery and rail posture', 'Choose the next human or agent path'],
   status: ['Check backend health', 'Confirm active chain and escrow'],
+  wallet_send: ['Connect wallet if needed', 'Switch to the requested testnet', 'Submit the send transaction', 'Open explorer receipt'],
+  swap_preview: ['Read the sample route', 'Keep it labeled as sample', 'Use live wallet sends as the stronger demo proof'],
   start_flow: ['Capture policy', 'Discover supply', 'Run reverse auction', 'Batch and confirm'],
   start_ops: ['Create job', 'Fund escrow', 'Submit deliverable', 'Resolve settlement'],
   open_integrations: ['Choose a settlement rail', 'Configure values', 'Execute or inspect output'],
@@ -40,13 +41,14 @@ export default function TerminalPage() {
             <div className="terminal-kicker">Terminal</div>
             <h1 className="hero-display mt-3 text-5xl md:text-6xl">A simpler command surface for DealRail.</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--terminal-muted)]">
-              Start with `doctor`, then move to `services`, `vend`, `providers`, or `rails`. This page should read like
-              an operator tool, not a dashboard trying to do everything at once.
+              Start with `doctor`, then use one of two honest paths: hardcoded service demos for the product story, or
+              real wallet sends on testnet for the transaction moment.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <span className="inline-command">npx @kairenxyz/dealrail doctor</span>
-            <span className="inline-command">npx @kairenxyz/dealrail doctor --json</span>
+            <span className="inline-command">doctor</span>
+            <span className="inline-command">services</span>
+            <span className="inline-command">send 1 usdc to 0x... on base sepolia</span>
           </div>
         </div>
       </section>
@@ -57,27 +59,27 @@ export default function TerminalPage() {
         </div>
         <div className="space-y-5 xl:col-span-4">
           <div className="terminal-panel rounded-[1.5rem] p-6">
-            <div className="terminal-kicker">Operator Paths</div>
+            <div className="terminal-kicker">Recommended Demo</div>
             <div className="mt-5 space-y-4 text-sm leading-6 text-[var(--terminal-muted)]">
               <div>
                 <div className="terminal-label">`doctor`</div>
-                Run this first. It tells you what is live, what is still mock, how much supply the desk can see, and what command to run next.
+                Run this first. It tells you whether the backend is reachable, which chain is active, and whether the wallet path is ready.
               </div>
               <div>
                 <div className="terminal-label">`services`</div>
-                Use this to inspect the Base-facing service directory. It loads the public Base surfaces and visible provider supply instead of a hardcoded list.
+                Use this for the hardcoded frontend demo path. It is the cleanest way to show the product idea without overclaiming live market depth.
+              </div>
+              <div>
+                <div className="terminal-label">`send`</div>
+                Use this for the strongest live browser proof: a wallet-connected testnet send on Base Sepolia or Celo Sepolia directly from the terminal.
               </div>
               <div>
                 <div className="terminal-label">`vend`</div>
-                Use this when you want the procurement-style path: state the need, budget, and delivery target, then let the desk shortlist providers.
+                Use this when you want the procurement-style sample path: state the need, budget, and delivery target, then let the desk shortlist from the curated catalog.
               </div>
               <div>
-                <div className="terminal-label">`providers`</div>
-                Use this before settlement when you want proof that the desk can actually see supply for the category.
-              </div>
-              <div>
-                <div className="terminal-label">`rails`</div>
-                Use this only after the request is clear and you need to inspect the execution or payout posture.
+                <div className="terminal-label">`swap`</div>
+                Keep this as a sample-only terminal command for now. It explains routing without pretending the desk already executes live testnet swaps.
               </div>
             </div>
           </div>
@@ -87,15 +89,15 @@ export default function TerminalPage() {
             <div className="mt-4 space-y-3">
               <div className="rounded-[1.2rem] border border-[var(--terminal-border)] bg-black/10 p-4">
                 <div className="terminal-label">Human</div>
-                <div className="mt-2 text-sm font-semibold">Doctor, inspect, decide, then settle.</div>
+                <div className="mt-2 text-sm font-semibold">Doctor, demo, then send.</div>
                 <div className="mt-2 text-xs leading-5 text-[var(--terminal-muted)]">
-                  Use the browser terminal when you want a guided flow and visible output before recording a demo or settlement step. Wallet connection is optional in this mode.
+                  Use the browser terminal when you want a guided flow. Start with hardcoded demo services, then use a real wallet send for the transaction moment in the demo.
                 </div>
-                <div className="mt-3 terminal-mono text-[11px] text-[var(--terminal-accent)]">doctor -&gt; vend benchmark report under 0.12 usdc in 24h</div>
+                <div className="mt-3 terminal-mono text-[11px] text-[var(--terminal-accent)]">doctor -&gt; services -&gt; send 1 usdc to 0x... on base sepolia</div>
               </div>
               <div className="rounded-[1.2rem] border border-[var(--terminal-border)] bg-black/10 p-4">
                 <div className="terminal-label">Agent</div>
-                <div className="mt-2 text-sm font-semibold">Preflight in JSON, then dispatch the request.</div>
+                <div className="mt-2 text-sm font-semibold">Preflight in JSON, then use the curated procurement sample.</div>
                 <div className="mt-2 text-xs leading-5 text-[var(--terminal-muted)]">
                   Use the publishable CLI when another agent needs machine-readable posture and deterministic output.
                 </div>
@@ -141,7 +143,6 @@ export default function TerminalPage() {
         </div>
       </section>
 
-      <MarketPulsePanel variant="compact" />
       <CliDemoTerminal />
     </div>
   );

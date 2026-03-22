@@ -59,8 +59,8 @@ export default function HomePage() {
                 </span>
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-[var(--terminal-muted)]">
-                One request in. Provider supply scanned. Payment posture chosen. Escrow committed when the job needs
-                it. Receipt emitted at the end for the next human or agent step.
+                Show one thing that is running. Hardcoded service demos for the product story. Real wallet sends on
+                testnet for the transaction moment. Live Base and Celo job receipts for proof.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/terminal" className="terminal-btn terminal-btn-accent">
@@ -77,28 +77,29 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="mt-6 flex flex-wrap gap-2">
-                <span className="inline-command">npx @kairenxyz/dealrail doctor</span>
-                <span className="inline-command">npx @kairenxyz/dealrail doctor --json</span>
+                <span className="inline-command">doctor</span>
+                <span className="inline-command">services</span>
+                <span className="inline-command">send 1 usdc to 0x... on base sepolia</span>
               </div>
             </div>
 
             <div className="mt-8 grid max-w-3xl grid-cols-1 gap-3 md:grid-cols-3">
               <div className="terminal-metric">
-                <div className="terminal-label">Human lane</div>
+                <div className="terminal-label">Demo lane</div>
                 <div className="mt-2 text-sm leading-6 text-[var(--terminal-muted)]">
-                  Use the browser desk when you want a guided, legible workflow and a demo that does not require wallet connection.
+                  Use the browser desk for hardcoded services, sample procurement, and a clean walkthrough that does not depend on live market depth.
                 </div>
               </div>
               <div className="terminal-metric">
-                <div className="terminal-label">Agent lane</div>
+                <div className="terminal-label">Wallet lane</div>
                 <div className="mt-2 text-sm leading-6 text-[var(--terminal-muted)]">
-                  Use the published CLI in JSON mode when another runtime is driving the deal.
+                  Use the connected wallet to send real testnet value from the terminal on Base Sepolia or Celo Sepolia.
                 </div>
               </div>
               <div className="terminal-metric">
-                <div className="terminal-label">Settlement</div>
+                <div className="terminal-label">Proof lane</div>
                 <div className="mt-2 text-sm leading-6 text-[var(--terminal-muted)]">
-                  Machine payment for immediate calls, escrow when a scoped service deal needs a receipt.
+                  Keep the proof layer narrow: live jobs, receipts, and terminal-submitted testnet transactions.
                 </div>
               </div>
             </div>
@@ -143,24 +144,24 @@ export default function HomePage() {
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
         <div className="terminal-panel rounded-[1.5rem] p-6 xl:col-span-7">
           <div className="terminal-kicker">Start Here</div>
-          <h2 className="mt-3 text-3xl font-semibold">The desk should feel simple</h2>
+          <h2 className="mt-3 text-3xl font-semibold">Record one honest path</h2>
           <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--terminal-muted)]">
-            <p>1. Run `doctor` to confirm the desk can actually see the backend and the current rail posture.</p>
-            <p>2. Run `services` to inspect the Base-facing public service directory, or `vend image generation under 0.08 usdc in 6h` to stage a quick demo path.</p>
-            <p>3. Connect a wallet only when you want to graduate from demo mode into a real provider or client settlement flow.</p>
+            <p>1. Run `doctor` to confirm the desk can see the backend and the current chain.</p>
+            <p>2. Run `services` or `vend image generation under 0.08 usdc in 6h` for the hardcoded product demo.</p>
+            <p>3. Connect a wallet and run `send 1 usdc to 0x... on base sepolia` for a real testnet transaction from the same terminal.</p>
           </div>
         </div>
         <div className="terminal-panel rounded-[1.5rem] p-6 xl:col-span-5">
-          <div className="terminal-kicker">Quick Links</div>
+          <div className="terminal-kicker">Live Surfaces</div>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/terminal" className="terminal-btn terminal-btn-accent">
               Full Terminal
             </Link>
+            <Link href="/dashboard" className="terminal-btn">
+              Live Jobs
+            </Link>
             <Link href="/docs" className="terminal-btn">
               Usage Docs
-            </Link>
-            <Link href="/integrations" className="terminal-btn">
-              Rails
             </Link>
           </div>
         </div>

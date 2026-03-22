@@ -30,6 +30,7 @@ Configured in [`src/lib/contracts.ts`](src/lib/contracts.ts):
 ## Main Routes
 
 - `/`: landing and system overview
+- `/base`: Base-facing public service directory
 - `/terminal`: operator-centric terminal view
 - `/jobs/[jobId]`: job details
 - `/docs`: in-app docs surface
@@ -77,6 +78,7 @@ If Cloudflare runs the build from the repo root, it will fail to detect Next.js 
 
 Strongly grounded:
 - browser desk and browser terminal
+- Base-facing service directory and visible supply board
 - chain-aware contract reads
 - frontend-only service and receipt simulation
 - operator-oriented architecture and job navigation

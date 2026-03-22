@@ -1,9 +1,10 @@
 'use client';
 
 import { FormEvent, KeyboardEvent, useMemo, useState } from 'react';
-import { useAccount } from 'wagmi';
-import { keccak256, toBytes } from 'viem';
+import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { Address, isAddress, keccak256, parseEther, parseUnits, toBytes } from 'viem';
 import { healthCheck, integrationsApi, jobsApi } from '@/lib/api';
+import { getChainLabel, getExplorerTxUrl, getUSDCAddress, USDC_ABI } from '@/lib/contracts';
 import { pushTerminalRun, TerminalActionKind } from '@/lib/terminalLedger';
 
 type LineTone = 'system' | 'user' | 'ok' | 'warn';
@@ -24,13 +25,28 @@ type Props = {
   onAction?: (action: TerminalAction) => void;
 };
 
+type ParsedSendCommand = {
+  amount: string;
+  asset: 'usdc' | 'native';
+  assetLabel: string;
+  recipient: Address;
+  chainId: 84532 | 11142220;
+};
+
+type ParsedSwapCommand = {
+  amountIn: string;
+  tokenIn: 'USDC' | 'WETH';
+  tokenOut: 'USDC' | 'WETH';
+  chainId: 84532;
+};
+
 const EXAMPLES = [
   'doctor',
   'services',
-  'vend benchmark report under 0.12 usdc in 24h',
   'vend image generation under 0.08 usdc in 6h',
-  'providers compliance checks',
-  'rails',
+  'send 1 usdc to 0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF on base sepolia',
+  'send 0.001 eth to 0x77712e28F7A4a2EeD0bd7f9F8B8486332a38892e on base sepolia',
+  'swap 10 usdc to weth on base sepolia',
   'status',
 ];
 
@@ -73,46 +89,30 @@ const DEMO_SERVICES = [
   },
 ] as const;
 
+const INITIAL_LINES: TerminalLine[] = [
+  { tone: 'system', text: 'DEALRAIL READY' },
+  { tone: 'system', text: 'start: doctor | services | vend <need> under <budget> usdc in <hours>h' },
+  { tone: 'system', text: 'wallet sends are live: send <amount> usdc to <address> on base sepolia' },
+  { tone: 'system', text: 'swaps are sample-only: swap <amount> usdc to weth on base sepolia' },
+  { tone: 'system', text: 'agent path: npx @kairenxyz/dealrail doctor --json' },
+];
+
 export function HomeCommandTerminal({ compact = false, onAction }: Props) {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
+  const { sendTransactionAsync } = useSendTransaction();
+  const { writeContractAsync } = useWriteContract();
+  const { switchChainAsync } = useSwitchChain();
   const [input, setInput] = useState('');
   const [running, setRunning] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [lines, setLines] = useState<TerminalLine[]>([
-    { tone: 'system', text: 'DEALRAIL READY' },
-    { tone: 'system', text: 'start: doctor | vend <need> under <budget> usdc in <hours>h | providers <need> | rails' },
-    { tone: 'system', text: 'agent path: npx @kairenxyz/dealrail doctor --json' },
-  ]);
+  const [lines, setLines] = useState<TerminalLine[]>(INITIAL_LINES);
 
   const statusLabel = useMemo(() => (running ? 'RUNNING' : 'IDLE'), [running]);
-
-  function findDemoServices(query: string) {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return [...DEMO_SERVICES];
-    return DEMO_SERVICES.filter((service) =>
-      `${service.name} ${service.description} ${service.id}`.toLowerCase().includes(normalized)
-    );
-  }
-
-  function mockTxHash(seed: string) {
-    return keccak256(toBytes(`${seed}:${Date.now()}:${Math.random().toString(36).slice(2)}`));
-  }
-
-  function appendSimulationReceipt(service: (typeof DEMO_SERVICES)[number], command: string) {
-    const approveTx = mockTxHash(`${command}:approve:${service.id}`);
-    const fundTx = mockTxHash(`${command}:fund:${service.id}`);
-    const receiptId = `sim_${service.id}_${Date.now().toString(36)}`;
-
-    appendMany([
-      { tone: 'ok', text: `demo service=${service.name} | price=${service.startingPriceUsdc.toFixed(2)} USDC | eta=${service.deliveryHours}h` },
-      { tone: 'ok', text: `settlement rail=${service.settlementRail} | provider=${service.providerAddress}` },
-      { tone: 'system', text: `sim approve tx=${approveTx}` },
-      { tone: 'system', text: `sim settle tx=${fundTx}` },
-      { tone: 'ok', text: `receipt=${receiptId} | mode=frontend simulation | wallet=${address ? address : 'optional'}` },
-      { tone: 'system', text: address ? 'wallet is connected, so this can graduate to a live client/provider path later.' : 'wallet is optional for demo mode; connect it only when you want real client/provider execution.' },
-    ]);
-  }
+  const walletLabel = useMemo(() => {
+    if (!address) return 'wallet offline';
+    return `${address.slice(0, 6)}...${address.slice(-4)} on ${getChainLabel(chainId)}`;
+  }, [address, chainId]);
 
   function append(tone: LineTone, text: string) {
     setLines((prev) => [...prev, { tone, text }]);
@@ -126,6 +126,18 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     const action: TerminalAction = { kind, command, note };
     pushTerminalRun({ action: kind, command, note });
     onAction?.(action);
+  }
+
+  function findDemoServices(query: string) {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return [...DEMO_SERVICES];
+    return DEMO_SERVICES.filter((service) =>
+      `${service.name} ${service.description} ${service.id}`.toLowerCase().includes(normalized)
+    );
+  }
+
+  function mockTxHash(seed: string) {
+    return keccak256(toBytes(`${seed}:${Date.now()}:${Math.random().toString(36).slice(2)}`));
   }
 
   function prefillFlow(text: string) {
@@ -158,28 +170,111 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   function stripVerb(command: string, verbs: string[]) {
     let next = command.trim();
     for (const verb of verbs) {
-      const regex = new RegExp(`^${verb}\\s*:?\s*`, 'i');
+      const regex = new RegExp(`^${verb}\\s*:?\\s*`, 'i');
       next = next.replace(regex, '');
     }
     return next.trim();
   }
 
+  function resolveChainId(command: string): 84532 | 11142220 {
+    const normalized = command.toLowerCase();
+    if (normalized.includes('celo')) return 11142220;
+    if (normalized.includes('base')) return 84532;
+    return chainId === 11142220 ? 11142220 : 84532;
+  }
+
+  function parseSendCommand(command: string): ParsedSendCommand | null {
+    const match = command.match(/^send\s+(\d+(?:\.\d+)?)\s+([a-z]+)\s+to\s+(0x[a-fA-F0-9]{40})(?:\s+on\s+.+)?$/i);
+    if (!match) return null;
+
+    const [, amount, rawAsset, rawRecipient] = match;
+    if (!isAddress(rawRecipient)) return null;
+
+    const normalizedAsset = rawAsset.toLowerCase();
+    const targetChainId = resolveChainId(command);
+
+    if (normalizedAsset === 'usdc') {
+      return {
+        amount,
+        asset: 'usdc',
+        assetLabel: 'USDC',
+        recipient: rawRecipient as Address,
+        chainId: targetChainId,
+      };
+    }
+
+    if (normalizedAsset === 'eth' || normalizedAsset === 'native' || normalizedAsset === 'celo') {
+      return {
+        amount,
+        asset: 'native',
+        assetLabel: targetChainId === 11142220 ? 'CELO' : 'ETH',
+        recipient: rawRecipient as Address,
+        chainId: targetChainId,
+      };
+    }
+
+    return null;
+  }
+
+  function parseSwapCommand(command: string): ParsedSwapCommand | null {
+    const match = command.match(/^swap\s+(\d+(?:\.\d+)?)\s+(usdc|weth)\s+to\s+(usdc|weth)(?:\s+on\s+.+)?$/i);
+    if (!match) return null;
+
+    const [, amountIn, rawTokenIn, rawTokenOut] = match;
+    const tokenIn = rawTokenIn.toUpperCase() as 'USDC' | 'WETH';
+    const tokenOut = rawTokenOut.toUpperCase() as 'USDC' | 'WETH';
+
+    if (tokenIn === tokenOut) return null;
+
+    return {
+      amountIn,
+      tokenIn,
+      tokenOut,
+      chainId: 84532,
+    };
+  }
+
+  async function ensureWalletChain(targetChainId: number) {
+    if (!address) {
+      throw new Error(`Connect a wallet on ${getChainLabel(targetChainId)} before sending transactions from the terminal.`);
+    }
+
+    if (chainId !== targetChainId) {
+      await switchChainAsync({ chainId: targetChainId });
+    }
+  }
+
+  function appendSimulationReceipt(service: (typeof DEMO_SERVICES)[number], command: string) {
+    const approveTx = mockTxHash(`${command}:approve:${service.id}`);
+    const fundTx = mockTxHash(`${command}:fund:${service.id}`);
+    const receiptId = `sim_${service.id}_${Date.now().toString(36)}`;
+
+    appendMany([
+      { tone: 'ok', text: `demo service=${service.name} | price=${service.startingPriceUsdc.toFixed(2)} USDC | eta=${service.deliveryHours}h` },
+      { tone: 'ok', text: `settlement rail=${service.settlementRail} | provider=${service.providerAddress}` },
+      { tone: 'system', text: `sim approve tx=${approveTx}` },
+      { tone: 'system', text: `sim settle tx=${fundTx}` },
+      { tone: 'ok', text: `receipt=${receiptId} | mode=frontend simulation | wallet=${address ? address : 'optional'}` },
+      { tone: 'system', text: address ? 'wallet is connected, so this can graduate to a live client/provider path later.' : 'wallet is optional for demo mode; connect it only when you want real client/provider execution.' },
+    ]);
+  }
+
   async function showHelp(command: string) {
-    const note = 'Command map loaded';
     appendMany([
       { tone: 'system', text: 'GRAMMAR' },
       { tone: 'system', text: 'doctor' },
       { tone: 'system', text: 'services' },
-      { tone: 'system', text: 'scan automation' },
+      { tone: 'system', text: 'vend image generation under 0.08 usdc in 6h' },
       { tone: 'system', text: 'providers benchmark report' },
-      { tone: 'system', text: 'vend benchmark report under 0.12 usdc in 24h' },
-      { tone: 'system', text: 'rails' },
+      { tone: 'system', text: 'send 1 usdc to 0x... on base sepolia' },
+      { tone: 'system', text: 'send 0.001 eth to 0x... on base sepolia' },
+      { tone: 'system', text: 'swap 10 usdc to weth on base sepolia' },
       { tone: 'system', text: 'status' },
-      { tone: 'system', text: 'services now loads the Base-facing service directory and visible provider supply' },
+      { tone: 'system', text: 'wallet sends are live on testnet when your wallet is connected' },
+      { tone: 'system', text: 'swaps are shown as sample-only so the desk does not overclaim execution' },
       { tone: 'system', text: 'agent lane: use the CLI with --json after doctor confirms posture' },
-      { tone: 'system', text: 'human lane: use services or vend here, then inspect the board and settlement rails' },
     ]);
-    emit('help', command, note);
+    emit('help', command, 'Command map loaded');
   }
 
   async function showServices(command: string) {
@@ -197,17 +292,15 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
           tone: 'system' as LineTone,
           text: `${surface.name} | ${surface.method} ${surface.endpoint} | ${surface.access}`,
         })),
-        { tone: 'system', text: 'visible supply' },
-        ...directory.supplyPreview.slice(0, 4).map((service) => ({
+        { tone: 'system', text: 'curated examples' },
+        ...DEMO_SERVICES.slice(0, 4).map((service) => ({
           tone: 'system' as LineTone,
-          text: `${service.serviceName} | ${service.basePriceUsdc ?? 'n/a'} USDC | rep ${service.reputationScore ?? 'n/a'} | ${service.source}`,
+          text: `${service.name} | ${service.startingPriceUsdc.toFixed(2)} USDC | ${service.deliveryHours}h | ${service.settlementRail}`,
         })),
-        { tone: 'system', text: 'next: providers <need> or vend <need> under <budget> usdc in <hours>h' },
       ]);
       emit('market_scan', command, note);
       return;
     } catch {
-      const note = 'Fallback service catalog loaded';
       appendMany([
         { tone: 'warn', text: 'base service directory is unavailable; showing fallback demo catalog' },
         ...DEMO_SERVICES.map((service) => ({
@@ -216,67 +309,62 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
         })),
         { tone: 'system', text: 'try: vend image generation under 0.08 usdc in 6h' },
       ]);
-      emit('market_scan', command, note);
+      emit('market_scan', command, 'Fallback service catalog loaded');
     }
   }
 
   async function runDoctor(command: string) {
     try {
-      const [health, sources, providers, execution, locus, jobs] = await Promise.all([
+      const [health, sources, providers, execution, jobs] = await Promise.all([
         healthCheck(),
         integrationsApi.listDiscoverySources().catch(() => ({ sources: [] })),
         integrationsApi.listProviders().catch(() => ({ providers: [] })),
         integrationsApi.listExecutionProviders().catch(() => ({ providers: [] })),
-        integrationsApi.listLocusTools().catch(() => ({ tools: { mode: 'fallback' as const } })),
         jobsApi.list({ limit: 4 }).catch(() => ({ jobs: [], pagination: { limit: 4, totalOnchain: 0 } })),
       ]);
 
       const enabledSources = sources.sources.filter((source) => source.enabled).map((source) => source.id);
       const providerCount = providers.providers.length;
       const liveProviderCount = providers.providers.filter((provider) => provider.source !== 'mock').length;
-      const locusMode = Array.isArray(locus.tools) ? 'live' : locus.tools?.mode || 'fallback';
       const note = health.integrations?.x402nMockMode
-        ? 'Doctor complete: desk is reachable but competition is still demo/mock'
-        : 'Doctor complete: desk is reachable and ready for live routing';
+        ? 'Doctor complete: desk is reachable and the demo catalog is active'
+        : 'Doctor complete: desk is reachable and routing is live';
 
       appendMany([
         { tone: 'ok', text: `api=reachable | chain=${health.blockchain.chainId} | escrow=${health.blockchain.escrowAddress}` },
-        { tone: health.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market competition=${health.integrations?.x402nMockMode ? 'demo/mock' : 'live'}` },
+        { tone: health.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market posture=${health.integrations?.x402nMockMode ? 'curated demo' : 'live routing'}` },
         { tone: 'ok', text: `machine payments=${health.integrations?.machinePaymentsPrimary ?? 'x402'}` },
         { tone: enabledSources.length > 0 ? 'ok' : 'warn', text: `enabled discovery=${enabledSources.join(', ') || 'none'}` },
         { tone: liveProviderCount > 0 ? 'ok' : 'warn', text: `provider supply=${providerCount} total | ${liveProviderCount} live | ${providerCount - liveProviderCount} mock` },
-        { tone: locusMode === 'live' ? 'ok' : 'warn', text: `locus payout=${locusMode}` },
         { tone: 'ok', text: `execution adapters=${execution.providers.length} | onchain jobs=${jobs.pagination?.totalOnchain ?? jobs.jobs.length}` },
-        { tone: 'system', text: 'next human: vend automation benchmark report under 0.12 usdc in 24h' },
-        { tone: 'system', text: 'next agent: dealrail doctor --json && dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json' },
+        { tone: address ? 'ok' : 'warn', text: `wallet=${address ? `${address.slice(0, 6)}...${address.slice(-4)} on ${getChainLabel(chainId)}` : 'not connected'}` },
+        { tone: 'system', text: 'next demo: services or vend image generation under 0.08 usdc in 6h' },
+        { tone: 'system', text: 'next wallet: send 1 usdc to 0x... on base sepolia' },
       ]);
 
       emit('doctor', command, note);
     } catch {
-      const note = 'Doctor failed: backend is unreachable';
       appendMany([
-        { tone: 'warn', text: note },
-        { tone: 'warn', text: 'check NEXT_PUBLIC_API_URL, backend startup, and local port forwarding before testing flows' },
+        { tone: 'warn', text: 'Doctor failed: backend is unreachable' },
+        { tone: 'warn', text: 'check NEXT_PUBLIC_API_URL and backend deployment before recording flows' },
       ]);
-      emit('doctor', command, note);
+      emit('doctor', command, 'Doctor failed: backend is unreachable');
     }
   }
 
   async function runStatus(command: string) {
     try {
       const health = await healthCheck();
-      const note = `Backend online on chain ${health.blockchain.chainId}`;
       appendMany([
-        { tone: 'ok', text: note },
+        { tone: 'ok', text: `backend online on ${getChainLabel(health.blockchain.chainId)}` },
         { tone: 'ok', text: `escrow=${health.blockchain.escrowAddress}` },
-        { tone: health.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market competition=${health.integrations?.x402nMockMode ? 'demo/mock' : 'live'}` },
+        { tone: health.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market posture=${health.integrations?.x402nMockMode ? 'curated demo' : 'live routing'}` },
         { tone: 'ok', text: `machine payments=${health.integrations?.machinePaymentsPrimary ?? 'x402'}` },
       ]);
-      emit('status', command, note);
+      emit('status', command, `Backend online on chain ${health.blockchain.chainId}`);
     } catch {
-      const note = 'Backend offline or miswired';
-      append('warn', `${note}. Check NEXT_PUBLIC_API_URL and restart the frontend after env changes.`);
-      emit('status', command, note);
+      append('warn', 'Backend offline or miswired. Check NEXT_PUBLIC_API_URL and redeploy the frontend if needed.');
+      emit('status', command, 'Backend offline or miswired');
     }
   }
 
@@ -285,7 +373,6 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
     const demoMatches = findDemoServices(query);
 
     if (demoMatches.length > 0) {
-      const note = `Demo service scan returned ${demoMatches.length} catalog entries`;
       appendMany([
         { tone: 'ok', text: `scan query=${query || 'all demo services'}` },
         { tone: 'ok', text: 'source posture=frontend demo catalog' },
@@ -294,7 +381,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
           text: `${service.name} | ${service.startingPriceUsdc.toFixed(2)} USDC | ${service.deliveryHours}h | ${service.settlementRail}`,
         })),
       ]);
-      emit('market_scan', command, note);
+      emit('market_scan', command, `Demo service scan returned ${demoMatches.length} catalog entries`);
       return;
     }
 
@@ -302,11 +389,10 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       const result = await integrationsApi.listProviders({ query: query || undefined });
       const top = result.providers.slice(0, 4);
       const allMock = result.providers.length > 0 && result.providers.every((provider) => provider.source === 'mock');
-      const note = `Supply scan returned ${result.providers.length} providers`;
 
       appendMany([
         { tone: 'ok', text: `scan query=${query || 'all supply'}` },
-        { tone: allMock ? 'warn' : 'ok', text: `source posture=${allMock ? 'demo/mock only' : 'mixed/live'}` },
+        { tone: allMock ? 'warn' : 'ok', text: `source posture=${allMock ? 'curated demo only' : 'mixed/live'}` },
         ...top.map((provider) => ({
           tone: (provider.source === 'mock' ? 'warn' : 'ok') as LineTone,
           text: `${provider.serviceName} | ${provider.basePriceUsdc ?? 'n/a'} USDC | rep ${provider.reputationScore ?? 'n/a'} | ${provider.source}`,
@@ -314,14 +400,13 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       ]);
 
       if (top.length === 0) {
-        append('warn', 'No provider supply matched. Add imported providers or point discovery to a live marketplace feed.');
+        append('warn', 'No provider supply matched. Keep the demo on the hardcoded catalog unless a live feed is available.');
       }
 
-      emit('market_scan', command, note);
+      emit('market_scan', command, `Supply scan returned ${result.providers.length} providers`);
     } catch {
-      const note = 'Supply scan failed';
-      append('warn', `${note}. Discovery endpoint did not respond.`);
-      emit('market_scan', command, note);
+      append('warn', 'Supply scan failed. Discovery endpoint did not respond.');
+      emit('market_scan', command, 'Supply scan failed');
     }
   }
 
@@ -335,8 +420,6 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
     if (demoMatches.length > 0) {
       const service = demoMatches[0];
-      const note = `Frontend simulation staged for ${service.name}`;
-
       appendMany([
         { tone: 'ok', text: 'role=buyer' },
         { tone: 'ok', text: `objective=${query || service.name}` },
@@ -346,7 +429,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
         { tone: 'ok', text: `candidate=${service.name} | price=${service.startingPriceUsdc.toFixed(2)} | eta=${service.deliveryHours}h | demo catalog` },
       ]);
       appendSimulationReceipt(service, command);
-      emit('role_buyer', command, note);
+      emit('role_buyer', command, `Frontend simulation staged for ${service.name}`);
       return;
     }
 
@@ -357,14 +440,13 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       });
       const shortlist = result.providers.slice(0, 3);
       const allMock = result.providers.length > 0 && result.providers.every((provider) => provider.source === 'mock');
-      const note = `Buyer flow staged with ${result.providers.length} candidate providers`;
 
       appendMany([
         { tone: 'ok', text: 'role=buyer' },
         { tone: 'ok', text: `objective=${query || 'service request'}` },
         ...(typeof maxBasePriceUsdc === 'number' ? [{ tone: 'ok' as LineTone, text: `budget ceiling=${maxBasePriceUsdc} USDC` }] : []),
         ...(typeof maxDeliveryHours === 'number' ? [{ tone: 'ok' as LineTone, text: `delivery target=${maxDeliveryHours}h` }] : []),
-        { tone: allMock ? 'warn' : 'ok', text: `supply posture=${allMock ? 'demo/mock' : 'mixed/live'}` },
+        { tone: allMock ? 'warn' : 'ok', text: `supply posture=${allMock ? 'curated demo' : 'mixed/live'}` },
         ...shortlist.map((provider) => ({
           tone: (provider.source === 'mock' ? 'warn' : 'ok') as LineTone,
           text: `candidate=${provider.serviceName} | price=${provider.basePriceUsdc ?? 'n/a'} | rep=${provider.reputationScore ?? 'n/a'} | ${provider.source}`,
@@ -383,63 +465,112 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
         append('warn', 'No matching supply yet. Demand was stored in the opportunity book instead of being dropped.');
         append('ok', `opportunity=${queued.opportunity.id} | providers can pick this up later from the dashboard`);
       } else {
-        append('ok', 'next: compare the shortlist, run competition if needed, then choose machine payment or escrow commit');
+        append('ok', 'next: compare the shortlist, then choose sample demo or a real settlement path');
       }
 
-      emit('role_buyer', command, note);
+      emit('role_buyer', command, `Buyer flow staged with ${result.providers.length} candidate providers`);
     } catch {
-      const note = 'Buyer flow staged but supply lookup failed';
       appendMany([
         { tone: 'ok', text: 'role=buyer' },
-        { tone: 'warn', text: note },
+        { tone: 'warn', text: 'Buyer flow staged but supply lookup failed' },
       ]);
-      emit('role_buyer', command, note);
+      emit('role_buyer', command, 'Buyer flow staged but supply lookup failed');
     }
   }
 
   async function runSell(command: string) {
     const query = stripVerb(command, ['sell', 'provider', 'offer']);
-    const note = 'Provider onboarding guidance loaded';
-
     appendMany([
       { tone: 'ok', text: 'role=provider' },
       { tone: 'ok', text: `service=${query || 'unspecified service'}` },
       { tone: 'ok', text: 'to appear in scans: publish to a market adapter or import your provider feed into DealRail discovery' },
       { tone: 'ok', text: 'next: expose endpoint + base price + evaluator path, then respond to active demand' },
     ]);
-
-    emit('role_provider', command, note);
+    emit('role_provider', command, 'Provider onboarding guidance loaded');
   }
 
   async function runRails(command: string) {
     try {
-      const [health, execution, locus, discovery] = await Promise.all([
+      const [health, execution, discovery] = await Promise.all([
         healthCheck().catch(() => null),
         integrationsApi.listExecutionProviders().catch(() => ({ providers: [] })),
-        integrationsApi.listLocusTools().catch(() => ({ tools: { mode: 'fallback' as const } })),
         integrationsApi.listProviders().catch(() => ({ providers: [] })),
       ]);
 
-      const locusMode = Array.isArray(locus.tools) ? 'live' : locus.tools?.mode || 'fallback';
-      const discoveryMode = discovery.providers.every((provider) => provider.source === 'mock') ? 'demo/mock' : 'mixed/live';
-      const note = 'Rail status loaded';
+      const discoveryMode = discovery.providers.every((provider) => provider.source === 'mock') ? 'curated demo' : 'mixed/live';
 
       appendMany([
-        { tone: 'ok', text: note },
-        { tone: health?.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market competition=${health?.integrations?.x402nMockMode ? 'demo/mock' : 'live'}` },
+        { tone: 'ok', text: 'desk capabilities loaded' },
+        { tone: health?.integrations?.x402nMockMode ? 'warn' : 'ok', text: `market competition=${health?.integrations?.x402nMockMode ? 'curated demo' : 'live'}` },
         { tone: 'ok', text: `machine payments=${health?.integrations?.machinePaymentsPrimary ?? 'x402'}` },
-        { tone: discoveryMode === 'demo/mock' ? 'warn' : 'ok', text: `provider market=${discoveryMode}` },
-        { tone: locusMode === 'live' ? 'ok' : 'warn', text: `locus payout=${locusMode}` },
-        { tone: execution.providers.some((provider) => provider.id === 'wallet') ? 'ok' : 'warn', text: 'delegation builder=ready' },
-        { tone: 'ok', text: 'uniswap tx builder=ready' },
+        { tone: discoveryMode === 'curated demo' ? 'warn' : 'ok', text: `provider market=${discoveryMode}` },
+        { tone: execution.providers.some((provider) => provider.id === 'wallet') ? 'ok' : 'warn', text: 'wallet tx terminal=ready' },
+        { tone: 'warn', text: 'swap terminal=sample only' },
       ]);
 
-      emit('open_integrations', command, note);
+      emit('open_integrations', command, 'Rail status loaded');
     } catch {
-      const note = 'Rail status failed to load';
-      append('warn', note);
-      emit('open_integrations', command, note);
+      append('warn', 'Rail status failed to load');
+      emit('open_integrations', command, 'Rail status failed to load');
     }
+  }
+
+  async function runWalletSend(command: string) {
+    const parsed = parseSendCommand(command);
+
+    if (!parsed) {
+      append('warn', 'Send syntax: send <amount> usdc|eth|native to 0x... on base sepolia');
+      emit('wallet_send', command, 'Wallet send syntax error');
+      return;
+    }
+
+    try {
+      await ensureWalletChain(parsed.chainId);
+
+      const hash = parsed.asset === 'usdc'
+        ? await writeContractAsync({
+            address: getUSDCAddress(parsed.chainId),
+            abi: USDC_ABI,
+            functionName: 'transfer',
+            args: [parsed.recipient, parseUnits(parsed.amount, 6)],
+            chainId: parsed.chainId,
+          })
+        : await sendTransactionAsync({
+            to: parsed.recipient,
+            value: parseEther(parsed.amount),
+            chainId: parsed.chainId,
+          });
+
+      appendMany([
+        { tone: 'ok', text: `wallet send submitted | asset=${parsed.assetLabel} | amount=${parsed.amount} | chain=${getChainLabel(parsed.chainId)}` },
+        { tone: 'ok', text: `to=${parsed.recipient}` },
+        { tone: 'system', text: `tx=${hash}` },
+        { tone: 'system', text: `explorer=${getExplorerTxUrl(parsed.chainId, hash)}` },
+      ]);
+      emit('wallet_send', command, `${parsed.assetLabel} send submitted on ${getChainLabel(parsed.chainId)}`);
+    } catch (error) {
+      append('warn', error instanceof Error ? error.message : 'Wallet send failed.');
+      emit('wallet_send', command, 'Wallet send failed');
+    }
+  }
+
+  async function runSwapPreview(command: string) {
+    const parsed = parseSwapCommand(command);
+
+    if (!parsed) {
+      append('warn', 'Swap syntax: swap <amount> usdc|weth to usdc|weth on base sepolia');
+      emit('swap_preview', command, 'Swap syntax error');
+      return;
+    }
+
+    appendMany([
+      { tone: 'ok', text: `swap sample | chain=${getChainLabel(parsed.chainId)} | route=${parsed.tokenIn} -> ${parsed.tokenOut}` },
+      { tone: 'ok', text: `amount in=${parsed.amountIn} ${parsed.tokenIn}` },
+      { tone: 'system', text: `sample route id=${mockTxHash(`swap:${command}`)}` },
+      { tone: 'warn', text: 'This is a terminal sample, not a live desk-executed swap proof yet.' },
+      { tone: 'system', text: 'Keep wallet sends live in the demo. Keep swap clearly labeled as sample.' },
+    ]);
+    emit('swap_preview', command, 'Base Sepolia swap sample loaded');
   }
 
   async function runCommand(raw: string) {
@@ -463,11 +594,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       }
 
       if (normalized === 'clear') {
-        setLines([
-          { tone: 'system', text: 'DEALRAIL READY' },
-          { tone: 'system', text: 'start: doctor | vend <need> under <budget> usdc in <hours>h | providers <need> | rails' },
-          { tone: 'system', text: 'agent path: npx @kairenxyz/dealrail doctor --json' },
-        ]);
+        setLines(INITIAL_LINES);
         emit('clear', command, 'Terminal output cleared');
         return;
       }
@@ -479,6 +606,16 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
       if (normalized === 'status') {
         await runStatus(command);
+        return;
+      }
+
+      if (/^send\b/i.test(command)) {
+        await runWalletSend(command);
+        return;
+      }
+
+      if (/^swap\b/i.test(command)) {
+        await runSwapPreview(command);
         return;
       }
 
@@ -497,7 +634,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
         return;
       }
 
-      if (/^(rails|integrations)\b/i.test(command) || normalized.includes('x402') || normalized.includes('locus')) {
+      if (/^(rails|integrations)\b/i.test(command) || normalized.includes('x402')) {
         await runRails(command);
         return;
       }
@@ -509,7 +646,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
         return;
       }
 
-      append('warn', 'Unknown command. Use `help`, `scan`, `providers`, `buy`, `vend`, `sell`, `rails`, or `status`.');
+      append('warn', 'Unknown command. Use `help`, `services`, `send`, `swap`, `scan`, `providers`, `buy`, `vend`, or `status`.');
       emit('unknown', command, 'Command not mapped');
     } finally {
       setRunning(false);
@@ -547,13 +684,13 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       <div className="flex items-center justify-between border-b border-[var(--terminal-border)] px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-danger)]/85" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-warn)]/85" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-good)]/85" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-border)]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[color:color-mix(in_srgb,var(--terminal-muted)_45%,transparent)]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[color:color-mix(in_srgb,var(--terminal-muted)_72%,transparent)]" />
           </div>
           <div>
             <div className="terminal-kicker">Command Desk</div>
-            <div className="terminal-mono text-[11px] text-[var(--terminal-muted)]">doctor / vend / providers / rails / status</div>
+            <div className="terminal-mono text-[11px] text-[var(--terminal-muted)]">doctor / services / vend / send / swap / status</div>
           </div>
         </div>
         <div className="terminal-mono text-[11px] text-[var(--terminal-muted)]">{statusLabel}</div>
@@ -562,11 +699,11 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       <div className="p-4">
         <div className="terminal-console terminal-screen overflow-hidden rounded-[1.2rem]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--terminal-border)] px-4 py-3">
-            <div className="terminal-mono text-[11px] uppercase tracking-[0.24em] text-[var(--terminal-accent)]">
+            <div className="terminal-mono text-[11px] uppercase tracking-[0.24em] text-[var(--terminal-muted)]">
               DealRail / operator terminal
             </div>
             <div className="terminal-mono text-[10px] text-[var(--terminal-muted)]">
-              Human: `doctor` -&gt; `vend` | Agent: `doctor --json` -&gt; `vend --json`
+              {walletLabel}
             </div>
           </div>
 
@@ -591,15 +728,15 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
             </div>
 
             <form onSubmit={onSubmit} className="mt-4 flex items-center gap-2">
-              <span className="terminal-mono text-xs text-[var(--terminal-accent)]">dealrail$</span>
+              <span className="terminal-mono text-xs text-[var(--terminal-muted)]">dealrail$</span>
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={onKeyDown}
                 className="terminal-input terminal-mono"
-                placeholder='Try: vend benchmark report under 0.12 usdc in 24h'
+                placeholder="Try: send 1 usdc to 0x... on base sepolia"
               />
-              <button type="submit" className="terminal-btn terminal-btn-accent" disabled={running}>
+              <button type="submit" className="terminal-btn" disabled={running}>
                 Run
               </button>
             </form>
@@ -614,17 +751,15 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
 
             <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
               <div className="rounded-[1rem] border border-[var(--terminal-border)] bg-black/10 px-4 py-3">
-                <div className="terminal-label">Human path</div>
+                <div className="terminal-label">Live now</div>
                 <div className="mt-2 text-sm text-[var(--terminal-muted)]">
-                  Run the desk interactively, inspect live posture, then choose whether the request should stay as a
-                  machine-paid call or move into escrow.
+                  `doctor`, `services`, `vend`, and `send` are the clean browser demo path. Wallet sends are real testnet transactions when the wallet is connected.
                 </div>
               </div>
               <div className="rounded-[1rem] border border-[var(--terminal-border)] bg-black/10 px-4 py-3">
-                <div className="terminal-label">Agent path</div>
+                <div className="terminal-label">Sample only</div>
                 <div className="mt-2 text-sm text-[var(--terminal-muted)]">
-                  Use the same verbs from the published CLI in JSON mode when another service needs deterministic
-                  posture and receipt output.
+                  Negotiation and swap stay clearly labeled as sample or agent-oriented flows until the live market and Base testnet swap path are stronger.
                 </div>
               </div>
             </div>
