@@ -29,8 +29,8 @@ const MOCK_CANDIDATES: ProviderCandidate[] = [
     evaluatorAddress: '0xe872Bd6d99452C87BA54c7618FEc71f0DB23d4f2',
     source: 'mock',
     serviceId: 'mock-1',
-    serviceName: 'API Integration Sprint',
-    description: 'Build and verify API integrations with deterministic output.',
+    serviceName: 'Automation Benchmark Report',
+    description: 'Benchmark an automation workflow and return a report with deterministic checkpoints.',
     endpoint: 'https://x402n.kairen.xyz/api/v1',
     basePriceUsdc: '0.10',
     reputationScore: 835,
@@ -43,10 +43,36 @@ const MOCK_CANDIDATES: ProviderCandidate[] = [
     source: 'mock',
     serviceId: 'mock-2',
     serviceName: 'Agent Workflow Automation',
-    description: 'Low-latency automation flow with checkpoint traces.',
+    description: 'Low-latency automation service with benchmark traces and operator notes.',
     endpoint: 'https://x402n.kairen.xyz/api/v1',
     basePriceUsdc: '0.12',
     reputationScore: 902,
+    erc8004AgentId: null,
+    erc8004Registered: false,
+  },
+  {
+    providerAddress: '0x2365DBD6f08F3049f643F6385D0f0B6Ff14E0A1f',
+    evaluatorAddress: '0xAc5E2f0E2E6f66F8f02E8A53b8D4d367a28d9f80',
+    source: 'mock',
+    serviceId: 'mock-3',
+    serviceName: 'Research Findings Report',
+    description: 'Compile findings into a report with benchmark appendix and delivery notes.',
+    endpoint: 'https://x402n.kairen.xyz/api/v1',
+    basePriceUsdc: '0.09',
+    reputationScore: 768,
+    erc8004AgentId: null,
+    erc8004Registered: false,
+  },
+  {
+    providerAddress: '0xA4F52B80e7f89d3E87B4aDD2E0E9D2C18c0D5b71',
+    evaluatorAddress: '0xB8A6843353423Af6285e6Ec5063154db88D63c7E',
+    source: 'mock',
+    serviceId: 'mock-4',
+    serviceName: 'Image Generation Pack',
+    description: 'Generate prompt-driven image assets with quick preview delivery for demos.',
+    endpoint: 'https://x402n.kairen.xyz/api/v1',
+    basePriceUsdc: '0.08',
+    reputationScore: 811,
     erc8004AgentId: null,
     erc8004Registered: false,
   },
@@ -54,7 +80,11 @@ const MOCK_CANDIDATES: ProviderCandidate[] = [
 
 class DiscoveryService {
   private importedCandidates: ProviderCandidate[] = [];
-  private ercProvider = new ethers.JsonRpcProvider(config.integrations.erc8004.baseMainnetRpc);
+  private ercProvider = new ethers.JsonRpcProvider(
+    config.integrations.erc8004.baseMainnetRpc,
+    { chainId: 8453, name: 'base' },
+    { staticNetwork: true }
+  );
   private identity = new ethers.Contract(
     config.integrations.erc8004.identityRegistry,
     IDENTITY_ABI,
@@ -72,19 +102,17 @@ class DiscoveryService {
     maxBasePriceUsdc?: number;
     sources?: Array<'x402n' | 'virtuals' | 'near' | 'mock' | 'imported'>;
   }): Promise<ProviderCandidate[]> {
-    const seed = await this.fetchAllSources();
+    const shouldFetchExternal =
+      !filters?.sources || filters.sources.some((source) => ['x402n', 'virtuals', 'near'].includes(source));
+    const seed = shouldFetchExternal ? await this.fetchAllSources() : [];
     const imported = this.importedCandidates.map((row) => ({ ...row, source: 'imported' as const }));
-    const base = (seed.length > 0 ? seed : MOCK_CANDIDATES).concat(imported);
+    const base = this.deduplicateCandidates([...seed, ...MOCK_CANDIDATES, ...imported]);
     const enriched = await Promise.all(base.map((candidate) => this.enrichReputation(candidate)));
 
     return enriched
       .filter((candidate) => {
         if (filters?.query) {
-          const q = filters.query.toLowerCase();
-          const inText =
-            candidate.serviceName.toLowerCase().includes(q) ||
-            candidate.description.toLowerCase().includes(q);
-          if (!inText) return false;
+          if (!this.matchesQuery(candidate, filters.query)) return false;
         }
         if (typeof filters?.minReputation === 'number') {
           if ((candidate.reputationScore ?? 0) < filters.minReputation) return false;
@@ -176,6 +204,46 @@ class DiscoveryService {
     return resolved.flat();
   }
 
+  private deduplicateCandidates(candidates: ProviderCandidate[]): ProviderCandidate[] {
+    const seen = new Set<string>();
+    const result: ProviderCandidate[] = [];
+
+    for (const candidate of candidates) {
+      const key = `${candidate.providerAddress.toLowerCase()}:${candidate.serviceId ?? candidate.serviceName.toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(candidate);
+    }
+
+    return result;
+  }
+
+  private matchesQuery(candidate: ProviderCandidate, query: string): boolean {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return true;
+
+    const haystack = `${candidate.serviceName} ${candidate.description}`.toLowerCase();
+    if (haystack.includes(normalizedQuery)) {
+      return true;
+    }
+
+    const hayTerms = new Set(this.tokenize(haystack));
+    const queryTerms = this.tokenize(normalizedQuery);
+
+    if (queryTerms.length === 0) {
+      return true;
+    }
+
+    return queryTerms.some((term) => hayTerms.has(term));
+  }
+
+  private tokenize(value: string): string[] {
+    return value
+      .split(/[^a-z0-9]+/i)
+      .map((term) => term.trim().toLowerCase())
+      .filter((term) => term.length >= 3);
+  }
+
   private async fetchX402nServices(): Promise<ProviderCandidate[]> {
     try {
       const response = await this.fetchWithTimeout(`${config.x402n.baseUrl}/services`, {
@@ -260,6 +328,10 @@ class DiscoveryService {
   }
 
   private async enrichReputation(candidate: ProviderCandidate): Promise<ProviderCandidate> {
+    if (candidate.reputationScore !== null) {
+      return candidate;
+    }
+
     try {
       const agentId = await this.identity.agentIdOf(candidate.providerAddress);
       if (!agentId || BigInt(agentId) === 0n) {

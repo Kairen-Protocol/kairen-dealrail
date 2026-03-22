@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { config } from '../config';
+import { discoveryService, ProviderCandidate } from './discovery.service';
 
 export type NetworkMode = 'demo' | 'testnet' | 'mainnet';
 
@@ -91,36 +92,6 @@ export interface NegotiationSession {
   baselineBestPriceUsdc: number | null;
 }
 
-const DEMO_PROVIDERS: Array<{
-  provider: string;
-  evaluator: string;
-  basePrice: number;
-  baseHours: number;
-  reputation: number;
-}> = [
-  {
-    provider: '0xef9C7E3Fea4f54CB3C6c8fa0978a0C8aB8f28fcF',
-    evaluator: '0xe872Bd6d99452C87BA54c7618FEc71f0DB23d4f2',
-    basePrice: 0.09,
-    baseHours: 20,
-    reputation: 835,
-  },
-  {
-    provider: '0x9f2B0f8d8A3f52f8444A9fc4b6c67Aaa4a84F26a',
-    evaluator: '0x782D2a5fD77d001865fA425d995E7fd5Ce880332',
-    basePrice: 0.11,
-    baseHours: 14,
-    reputation: 902,
-  },
-  {
-    provider: '0x2365DBD6f08F3049f643F6385D0f0B6Ff14E0A1f',
-    evaluator: '0xAc5E2f0E2E6f66F8f02E8A53b8D4d367a28d9f80',
-    basePrice: 0.08,
-    baseHours: 28,
-    reputation: 768,
-  },
-];
-
 class X402nService {
   private sessions = new Map<string, NegotiationSession>();
 
@@ -143,7 +114,7 @@ class X402nService {
       }
     }
 
-    const mockSession = this.bootstrapSession(this.createMockNegotiation(normalizedPolicy));
+    const mockSession = this.bootstrapSession(await this.createMockNegotiation(normalizedPolicy));
     this.sessions.set(mockSession.negotiationId, mockSession);
     return mockSession;
   }
@@ -355,39 +326,15 @@ class X402nService {
     return session?.receipt ?? null;
   }
 
-  private createMockNegotiation(policy: NegotiationPolicy): NegotiationSession {
+  private async createMockNegotiation(policy: NegotiationPolicy): Promise<NegotiationSession> {
     const negotiationId = `neg_${randomUUID().slice(0, 8)}`;
-
-    const offers = DEMO_PROVIDERS
-      .map((provider, idx) => {
-        const price = Number((provider.basePrice + idx * 0.005).toFixed(3));
-        const delivery = provider.baseHours + idx * 2;
-        const reputation = provider.reputation;
-        const confidence = Number((0.78 + idx * 0.06).toFixed(2));
-
-        const budgetScore = Math.max(0, 1 - price / Math.max(policy.maxBudgetUsdc, 0.01));
-        const latencyScore = Math.max(0, 1 - delivery / Math.max(policy.maxDeliveryHours, 1));
-        const reputationScore = Math.max(0, reputation / 1000);
-        const composite = Number(
-          (budgetScore * 0.45 + latencyScore * 0.25 + reputationScore * 0.3).toFixed(3)
-        );
-
-        return {
-          offerId: `offer_${idx + 1}`,
-          provider: provider.provider,
-          evaluator: provider.evaluator,
-          priceUsdc: price,
-          deliveryHours: delivery,
-          reputationScore: reputation,
-          confidence,
-          score: composite,
-          terms: `${policy.serviceRequirement} | ${delivery}h SLA | dispute via evaluator`,
-          round: 0,
-          initialPriceUsdc: price,
-        } satisfies ProviderOffer;
-      })
-      .filter((offer) => offer.reputationScore >= policy.minReputationScore)
-      .sort((a, b) => b.score - a.score);
+    const candidates = await discoveryService.listProviderCandidates({
+      query: policy.serviceRequirement,
+      minReputation: policy.minReputationScore,
+      maxBasePriceUsdc: policy.maxBudgetUsdc,
+      sources: ['mock', 'imported'],
+    });
+    const offers = this.rankMockOffers(candidates, policy);
 
     return {
       negotiationId,
@@ -406,6 +353,56 @@ class X402nService {
       receipt: null,
       baselineBestPriceUsdc: null,
     };
+  }
+
+  private rankMockOffers(candidates: ProviderCandidate[], policy: NegotiationPolicy): ProviderOffer[] {
+    return candidates
+      .map((candidate, idx) => {
+        const price = this.resolveCandidatePrice(candidate, idx);
+        const delivery = this.resolveCandidateDeliveryHours(candidate, idx, policy.maxDeliveryHours);
+        const reputation = candidate.reputationScore ?? Math.max(620, 760 - idx * 35);
+        const confidence = Number(Math.min(0.97, 0.78 + idx * 0.05).toFixed(2));
+
+        const budgetScore = Math.max(0, 1 - price / Math.max(policy.maxBudgetUsdc, 0.01));
+        const latencyScore = Math.max(0, 1 - delivery / Math.max(policy.maxDeliveryHours, 1));
+        const reputationScore = Math.max(0, reputation / 1000);
+        const composite = Number(
+          (budgetScore * 0.45 + latencyScore * 0.25 + reputationScore * 0.3).toFixed(3)
+        );
+
+        return {
+          offerId: `offer_${idx + 1}`,
+          provider: candidate.providerAddress,
+          evaluator: candidate.evaluatorAddress,
+          priceUsdc: price,
+          deliveryHours: delivery,
+          reputationScore: reputation,
+          confidence,
+          score: composite,
+          terms: `${candidate.serviceName} | ${delivery}h SLA | ${candidate.source} catalog`,
+          round: 0,
+          initialPriceUsdc: price,
+        } satisfies ProviderOffer;
+      })
+      .filter((offer) => offer.reputationScore >= policy.minReputationScore)
+      .sort((a, b) => b.score - a.score);
+  }
+
+  private resolveCandidatePrice(candidate: ProviderCandidate, idx: number): number {
+    const parsed = candidate.basePriceUsdc ? Number(candidate.basePriceUsdc) : Number.NaN;
+    const basePrice = Number.isFinite(parsed) ? parsed : 0.08 + idx * 0.01;
+    return Number((basePrice + idx * 0.005).toFixed(3));
+  }
+
+  private resolveCandidateDeliveryHours(
+    candidate: ProviderCandidate,
+    idx: number,
+    maxDeliveryHours: number
+  ): number {
+    const text = `${candidate.serviceName} ${candidate.description}`.toLowerCase();
+    const baseline =
+      text.includes('image') ? 8 : text.includes('automation') ? 14 : text.includes('report') ? 18 : 22;
+    return Math.max(2, Math.min(maxDeliveryHours, baseline + idx * 2));
   }
 
   private async tryCreateLiveNegotiation(

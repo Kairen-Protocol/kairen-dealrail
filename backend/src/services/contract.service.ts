@@ -196,7 +196,6 @@ class ContractService {
     return {
       chain: context.chain,
       chainId: context.chainConfig.chainId,
-      rpcUrl: context.chainConfig.rpcUrl,
       escrowAddress: context.chainConfig.contracts.escrowRailERC20,
       stablecoinAddress: context.stablecoinAddress,
       stablecoinSymbol: context.stablecoinSymbol,
