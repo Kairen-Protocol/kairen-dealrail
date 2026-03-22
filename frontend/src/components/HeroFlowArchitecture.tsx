@@ -9,6 +9,12 @@ type FlowRow = {
   tag: string;
 };
 
+type SurfaceCard = {
+  title: string;
+  sub: string;
+  detail: string;
+};
+
 const phases: Array<{
   title: string;
   phase: string;
@@ -63,6 +69,29 @@ const lanes = [
   { role: 'Evaluator', sub: 'Receipt', color: 'var(--terminal-danger)' },
 ];
 
+const entrySurfaces: SurfaceCard[] = [
+  {
+    title: 'Browser Desk',
+    sub: 'Human lane',
+    detail: 'Use the homepage, terminal, and docs desk when a human operator or judge wants guided navigation.',
+  },
+  {
+    title: 'npm CLI',
+    sub: 'Agent lane',
+    detail: 'Use `@kairenxyz/dealrail` in human ASCII mode or `--json` mode for structured agent execution.',
+  },
+  {
+    title: 'Backend API',
+    sub: 'Control plane',
+    detail: 'Both surfaces converge on the same coordination layer for discovery, machine payments, delegation, and escrow jobs.',
+  },
+  {
+    title: 'Receipt Rail',
+    sub: 'Outcome lane',
+    detail: 'Every executed deal should end in a visible receipt, payout event, or reject path rather than an unverifiable chat log.',
+  },
+];
+
 export function HeroFlowArchitecture() {
   const [phaseIndex, setPhaseIndex] = useState(0);
 
@@ -80,10 +109,10 @@ export function HeroFlowArchitecture() {
       <div className="relative z-10 mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="terminal-kicker">Protocol Flow</div>
-          <h2 className="mt-2 text-2xl font-semibold">One desk from scan to receipt</h2>
+          <h2 className="mt-2 text-2xl font-semibold">Two entry surfaces, one receipt rail</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--terminal-muted)]">
-            Structured as an Ethereum machine-commerce loop for DealRail: discover supply, choose payment posture,
-            lock an offer, settle with escrow, and emit a receipt.
+            DealRail runs as an Ethereum machine-commerce loop for both humans and agents: discover supply, choose a
+            payment posture, lock an offer, settle with escrow, and emit a receipt that another runtime can trust.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -100,6 +129,18 @@ export function HeroFlowArchitecture() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="relative z-10 mb-5 grid grid-cols-1 gap-4 xl:grid-cols-4">
+        {entrySurfaces.map((surface) => (
+          <div key={surface.title} className="terminal-panel rounded-[1.25rem] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="terminal-kicker">{surface.sub}</div>
+              <div className="terminal-chip">{surface.title}</div>
+            </div>
+            <div className="mt-3 text-sm leading-6 text-[var(--terminal-muted)]">{surface.detail}</div>
+          </div>
+        ))}
       </div>
 
       <div className="terminal-frame relative z-10 overflow-hidden rounded-[1.5rem]">
@@ -195,21 +236,24 @@ export function HeroFlowArchitecture() {
 
       <div className="relative z-10 mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="terminal-panel rounded-[1.35rem] p-5">
-          <div className="terminal-kicker">Client Side</div>
+          <div className="terminal-kicker">Human Side</div>
           <div className="mt-3 text-sm leading-6 text-[var(--terminal-muted)]">
-            State the outcome and let the desk test whether there is enough market depth to negotiate.
+            State the outcome in the browser desk and let the system decide whether it should stay as a terminal run,
+            a machine-paid call, or an escrow-backed service deal.
           </div>
         </div>
         <div className="terminal-panel rounded-[1.35rem] p-5">
-          <div className="terminal-kicker">Provider Side</div>
+          <div className="terminal-kicker">Agent Side</div>
           <div className="mt-3 text-sm leading-6 text-[var(--terminal-muted)]">
-            Bring supply into the desk, quote against live demand, and only settle after terms are locked.
+            Install `@kairenxyz/dealrail`, run `doctor --json`, vend against structured demand, and consume receipt
+            data without scraping UI copy.
           </div>
         </div>
         <div className="terminal-panel rounded-[1.35rem] p-5">
           <div className="terminal-kicker">Receipt Side</div>
           <div className="mt-3 text-sm leading-6 text-[var(--terminal-muted)]">
-            Evaluator output closes the loop: payout if valid, refund if not, and a receipt either way.
+            Evaluator output closes the loop: payout if valid, refund if not, and a receipt either way so the next
+            human or agent step can rely on evidence instead of assumption.
           </div>
         </div>
       </div>

@@ -18,7 +18,39 @@ Historical planning files still exist under [`docs/strategy`](docs/strategy), bu
 
 ## One-Sentence Project Thesis
 
-DealRail is a trust and settlement rail for agentic commerce: negotiate offchain, commit onchain, and settle through auditable escrow with ERC-8004-aware trust hooks.
+DealRail is an Ethereum machine-commerce desk with two operator lanes: humans use the browser desk, agents use the published npm CLI and SDK, and both converge on the same escrow and receipt rails.
+
+## Fast Machine Path
+
+If you are an agent or automation runtime, start here first:
+
+```bash
+npx @kairenxyz/dealrail doctor --json
+npx @kairenxyz/dealrail status --json
+npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
+```
+
+If you need the local backend:
+
+```bash
+cd backend
+npm run build
+node dist/index-simple.js
+```
+
+Then:
+
+```bash
+DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
+```
+
+## Operator Surfaces
+
+- Browser desk: guided human and judge-facing path in `frontend/src/app`
+- npm package: `@kairenxyz/dealrail`
+- Binary: `dealrail`
+- Demo API surface: `backend/src/index-simple.ts`
+- Canonical chain map: `frontend/src/lib/contracts.ts` and `backend/src/config.ts`
 
 ## Strongest Prize Path
 
@@ -50,6 +82,18 @@ This repo avoids inflating integrations. Partial adapters are documented explici
 - Hook hardening tests: [`contracts/test/EscrowRailERC20Hook.t.sol`](contracts/test/EscrowRailERC20Hook.t.sol)
 - Demo backend path: [`backend/src/index-simple.ts`](backend/src/index-simple.ts)
 - Frontend contract map: [`frontend/src/lib/contracts.ts`](frontend/src/lib/contracts.ts)
+- Published CLI package: [`cli/package.json`](cli/package.json)
+- CLI install and usage guide: [`cli/README.md`](cli/README.md)
+
+## Runtime Posture To Preserve
+
+When describing the repo, keep these truths explicit:
+
+- escrow and receipt rails are live and validated
+- the CLI package is live and installable
+- browser desk and terminal UX are working
+- some negotiation and integration rails remain partial or mock-first
+- do not overstate x402, Locus, or discovery supply beyond the recorded evidence
 
 ## Judge Navigation By Interest
 

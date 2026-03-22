@@ -3,6 +3,13 @@
 DealRail is an Ethereum-first machine-commerce execution desk for agent-to-agent and human-assisted service deals.
 It combines market competition, machine payments, onchain escrow, evaluator-mediated settlement, and ERC-8004 reputation hooks.
 
+Humans can operate it from the browser desk.
+Agents can operate it from the published npm package and stable JSON CLI mode.
+
+Published package:
+- `@kairenxyz/dealrail`
+- current verified npm release in this repo: `0.1.1`
+
 Hackathon context:
 - Event: The Synthesis
 - Submission deadline: March 22, 2026 at 11:59 PM PST
@@ -29,6 +36,63 @@ Track-specific briefs:
 - [`docs/submission/tracks/LOCUS.md`](docs/submission/tracks/LOCUS.md)
 - [`docs/submission/tracks/AGENTCASH_X402.md`](docs/submission/tracks/AGENTCASH_X402.md)
 
+## Start In 60 Seconds
+
+### Human Operator
+
+Use the browser desk:
+- home overview: [`frontend/src/app/page.tsx`](frontend/src/app/page.tsx)
+- terminal desk: [`frontend/src/app/terminal/page.tsx`](frontend/src/app/terminal/page.tsx)
+- docs desk: [`frontend/src/app/docs/page.tsx`](frontend/src/app/docs/page.tsx)
+
+Or use the terminal package:
+
+```bash
+npx @kairenxyz/dealrail help
+npx @kairenxyz/dealrail doctor
+npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24
+```
+
+### Agent Runtime
+
+Use the same package in JSON mode:
+
+```bash
+npx @kairenxyz/dealrail doctor --json
+npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
+```
+
+### Backend Integrator
+
+Run the demo-grade API:
+
+```bash
+cd backend
+npm run build
+node dist/index-simple.js
+```
+
+Then point the CLI at it:
+
+```bash
+DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
+```
+
+## Operator Surfaces
+
+DealRail now has three first-class entry surfaces:
+
+| Surface | Audience | Why it exists |
+|---------|----------|---------------|
+| Browser desk | Humans, judges, mixed operator teams | Explains workflow, shows terminal UX, and gives guided paths into jobs and integrations |
+| npm CLI package | Agents and terminal-native humans | Gives a stable command surface, `--json` mode, and a lightweight install story |
+| Backend API | Integrators and automation | Exposes negotiation, discovery, machine-payment, delegation, and escrow lifecycle endpoints |
+
+The published package is:
+- package: `@kairenxyz/dealrail`
+- binary: `dealrail`
+- SDK entry: `import { DealRailClient } from '@kairenxyz/dealrail'`
+
 ## What Is Real Today
 
 ### Contracts
@@ -47,6 +111,13 @@ Track-specific briefs:
 ### Frontend
 - Next.js operator UI exists in [`frontend/src/app`](frontend/src/app)
 - Canonical contract addresses for frontend reads/writes are in [`frontend/src/lib/contracts.ts`](frontend/src/lib/contracts.ts)
+- Browser demo terminal and operator docs exist in [`frontend/src/app/terminal/page.tsx`](frontend/src/app/terminal/page.tsx) and [`frontend/src/app/docs/page.tsx`](frontend/src/app/docs/page.tsx)
+
+### CLI / SDK
+- Published npm package exists at `@kairenxyz/dealrail`
+- Human-readable CLI lives in [`cli/src/cli.ts`](cli/src/cli.ts)
+- Stable agent JSON shapes live in [`cli/src/types.ts`](cli/src/types.ts)
+- Recordable walkthrough lives in [`cli/demo/dealrail-demo.sh`](cli/demo/dealrail-demo.sh)
 
 ### Evidence
 - Canonical smoke-test transactions are recorded in [`backend/TRANSACTION_LEDGER.md`](backend/TRANSACTION_LEDGER.md)
@@ -80,6 +151,13 @@ Full matrix:
 6. DealRailHook can enforce trust gates before actions and write ERC-8004 reputation after settlement.
 7. Optional execution adapters prepare downstream operations such as Uniswap, Locus, and delegation payloads.
 
+The same loop has two operator entry paths:
+
+```text
+human -> browser desk -> backend -> machine payment or escrow -> receipt
+agent -> npm cli / sdk -> backend -> machine payment or escrow -> receipt
+```
+
 Canonical architecture doc:
 - [`docs/submission/02_ARCHITECTURE.md`](docs/submission/02_ARCHITECTURE.md)
 
@@ -104,6 +182,7 @@ Canonical architecture doc:
 - [`AGENT.md`](AGENT.md): AI-judge and collaborator navigation
 - [`docs/submission`](docs/submission): canonical submission pack
 - [`docs/strategy`](docs/strategy): planning and historical track strategy
+- [`cli`](cli): published npm CLI and lightweight SDK surface
 - [`contracts`](contracts): Solidity contracts and tests
 - [`backend`](backend): Express API, integrations, smoke tests, ledger
 - [`frontend`](frontend): Next.js UI
@@ -128,6 +207,7 @@ Still pending:
 Root commands:
 
 ```bash
+npm run check
 npm run build
 npm run test:contracts
 ```
@@ -145,6 +225,7 @@ Backend:
 
 ```bash
 cd backend
+npm test
 npm run build
 ```
 
@@ -152,8 +233,42 @@ Frontend:
 
 ```bash
 cd frontend
+npm run lint
+npm run type-check
 npm run build
 ```
+
+CLI:
+
+```bash
+cd cli
+npm run check
+npm run build
+npx @kairenxyz/dealrail help
+```
+
+Live API preflight:
+
+```bash
+DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
+```
+
+## Honest Runtime Posture
+
+This repo is working, but it is still disciplined about what is live and what is mock-first.
+
+Live and verified:
+- npm package install and CLI command surface
+- browser desk, docs desk, and demo terminal
+- backend lifecycle API
+- Base Sepolia and Celo Sepolia escrow flows
+- ERC-8004 hook and verifier integration
+
+Present but still mock-first or partial:
+- competition layer posture
+- provider discovery supply
+- x402 paid-path proof in the ledger
+- Locus live payout proof in the ledger
 
 ## Important Claim Discipline
 

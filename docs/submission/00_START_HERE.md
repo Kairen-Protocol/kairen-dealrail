@@ -11,12 +11,46 @@ DealRail is an Ethereum machine-commerce execution desk:
 - settle via ERC-8183-style escrow
 - enforce trust hooks with ERC-8004-aware verification and reputation writes
 
+It has two entry surfaces:
+- humans use the browser desk
+- agents use the published npm package and JSON CLI mode
+
+Published operator package:
+- `@kairenxyz/dealrail`
+- binary: `dealrail`
+
 ## What Makes This Repo Competitive
 
 - Real escrow contracts deployed on Base Sepolia and Celo Sepolia
 - Recorded happy-path and reject-path transactions
 - ERC-8004 verifier and reputation hook integration
+- Published npm CLI package for agent operators
 - AI-judge-friendly docs that distinguish strong claims from partial integrations
+
+## Human And Agent Fast Path
+
+Human evaluator:
+
+```bash
+npx @kairenxyz/dealrail doctor
+npx @kairenxyz/dealrail help
+```
+
+Agent evaluator:
+
+```bash
+npx @kairenxyz/dealrail doctor --json
+npx @kairenxyz/dealrail status --json
+```
+
+Local backend check:
+
+```bash
+cd backend
+npm run build
+node dist/index-simple.js
+DEALRAIL_API_URL=http://localhost:3001 npx @kairenxyz/dealrail doctor --json
+```
 
 ## Best Track Strategy
 
@@ -51,3 +85,4 @@ This pack is intentionally conservative.
 - Strong claims are backed by code and evidence.
 - Partial claims are backed by code but not yet by sponsor-specific proof.
 - Non-load-bearing sponsor surfaces are explicitly excluded from the win strategy.
+- The CLI package is live, but some optional adapters remain partial or mock-first.

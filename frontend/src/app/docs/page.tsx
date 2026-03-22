@@ -1,41 +1,47 @@
 'use client';
 
-const roleGuides = [
+const operatorGuides = [
   {
-    role: 'Client / Buyer',
-    summary: 'Use DealRail when you need a service outcome, want price discovery, and need an escrow + refund path.',
-    steps: ['Open Terminal', 'Type the task, budget, and deadline', 'Scan providers and compare offers', 'Confirm offer and fund escrow', 'Wait for evaluator outcome and receipt'],
+    role: 'Human Operator',
+    summary: 'Use the browser desk or CLI when you want guided discovery, visible workflow, and a clean receipt trail for a real service deal.',
+    steps: ['Open the browser desk or run `dealrail help`', 'Run `doctor` to confirm backend and rails', 'Type the task, budget, and deadline', 'Scan providers and compare offers', 'Choose machine payment or escrow posture', 'Review evaluator outcome and receipt'],
   },
   {
-    role: 'Provider',
-    summary: 'Use DealRail when you want to respond to structured demand instead of cold outbound selling.',
-    steps: ['Open Terminal', 'Type the service you offer', 'Review active negotiation path', 'Submit your quote and delivery terms', 'Deliver the result if selected'],
+    role: 'Agent Runtime',
+    summary: 'Use the npm package when you need stable JSON, lightweight install, and an operator surface that another service can call directly.',
+    steps: ['Install `@kairenxyz/dealrail` or run it with `npx`', 'Run `doctor --json`', 'Use `status --json`, `vend --json`, and `jobs --json`', 'Parse receipt and settlement payloads', 'Escalate to browser desk only when a human review is needed'],
   },
   {
-    role: 'Evaluator',
-    summary: 'Use DealRail when the service needs an explicit verification step before payout.',
-    steps: ['Open Terminal', 'Type the review or verification task', 'Inspect scope and submitted output', 'Approve or reject the result', 'Write the outcome into the receipt trail'],
+    role: 'Evaluator / Reviewer',
+    summary: 'Use DealRail when the service needs an explicit verification step before payout and a rejection path must stay visible.',
+    steps: ['Inspect scope and submitted output', 'Confirm whether the result matches the task', 'Approve or reject the job', 'Write the outcome into the receipt trail', 'Let the next operator reuse the recorded evidence'],
   },
 ];
 
 const lifecycle = [
-  { title: '1. Intent', desc: 'The first message defines who is acting and what the deal is trying to achieve.' },
-  { title: '2. Market Scan', desc: 'Discovery rails surface available providers, prices, reputation, and execution options.' },
-  { title: '3. Offer Formation', desc: 'Competition or direct quote formation converts market interest into candidate offers.' },
-  { title: '4. Payment + Escrow Path', desc: 'One offer is confirmed and translated into machine payment or an onchain escrow lifecycle.' },
-  { title: '5. Receipt', desc: 'The terminal and dashboard keep a record of settlement, refund, and evidence.' },
+  { title: '1. Intent', desc: 'The first step defines role, budget, deadline, and the outcome the desk should purchase.' },
+  { title: '2. Scan', desc: 'Discovery and competition rails surface providers, pricing posture, and trust context.' },
+  { title: '3. Offer', desc: 'One or more candidate offers are formed, ranked, and narrowed into a committed posture.' },
+  { title: '4. Execution Choice', desc: 'The system chooses immediate machine payment or an escrow-backed service workflow.' },
+  { title: '5. Settlement', desc: 'Escrow tracks fund, submit, complete, and reject states onchain when the deal is committed.' },
+  { title: '6. Receipt', desc: 'The CLI and browser desk preserve payout, reject, and trust outcomes as reusable evidence.' },
 ];
 
 const architectureColumns = [
   {
-    title: 'Input Layer',
-    kicker: 'People + agents',
-    points: ['Human operator defines bounds', 'Buyer agent requests service', 'Provider agent responds', 'Evaluator agent decides completion or rejection'],
+    title: 'Entry Surfaces',
+    kicker: 'Human + agent',
+    points: ['Browser desk for guided operation', 'Published npm CLI for terminal-native use', 'Stable `--json` mode for agents', 'One product, multiple entry paths'],
   },
   {
     title: 'Coordination Layer',
     kicker: 'Frontend + backend',
-    points: ['UI captures intent and role', 'Backend ranks offers and tracks lifecycle', 'Discovery adds provider context', 'Integrations workbench prepares downstream rails'],
+    points: ['UI captures intent and role', 'Backend ranks offers and tracks lifecycle', 'Discovery and competition shape the shortlist', 'Integrations workbench prepares downstream rails'],
+  },
+  {
+    title: 'Payment Layer',
+    kicker: 'Immediate or committed',
+    points: ['Machine payments for immediate calls', 'EscrowRail for scoped service deals', 'Backend chooses the right posture', 'Receipts stay consistent across both'],
   },
   {
     title: 'Settlement Layer',
@@ -51,16 +57,51 @@ const architectureColumns = [
 
 const rails = [
   { label: 'Competition', detail: 'ranked offers, counter rounds, and provider selection' },
+  { label: 'Operator Package', detail: 'published npm package `@kairenxyz/dealrail` with human and agent modes' },
+  { label: 'Machine Payments', detail: 'Ethereum-native adapter surface for immediate paid calls, currently x402-first' },
   { label: 'Escrow', detail: 'ERC-8183-style lifecycle on Base Sepolia and Celo Sepolia' },
   { label: 'Trust', detail: 'ERC-8004 verifier plus reputation hook callbacks' },
   { label: 'Extensions', detail: 'Machine payments, delegation, Uniswap, and payout adapter surfaces' },
 ];
 
 const signalFlow = [
-  { title: 'Signal 01', body: 'Intent becomes a structured request with a budget, deadline, and role model.' },
-  { title: 'Signal 02', body: 'Discovery and negotiation narrow the market to a provider-evaluator pair that can actually execute.' },
-  { title: 'Signal 03', body: 'Escrow turns that offchain intent into an onchain commitment that neither side can silently rewrite.' },
-  { title: 'Signal 04', body: 'Evaluation finalizes the deal and lets trust data feed back into the next coordination loop.' },
+  { title: 'Signal 01', body: 'Intent becomes a structured request with budget, deadline, role model, and execution constraints.' },
+  { title: 'Signal 02', body: 'Discovery and competition narrow the market to providers that can actually execute.' },
+  { title: 'Signal 03', body: 'The backend decides whether the deal should stay as a machine-paid call or move into escrow.' },
+  { title: 'Signal 04', body: 'Evaluation finalizes the deal and lets receipt and trust data feed back into the next coordination loop.' },
+];
+
+const installLanes = [
+  {
+    title: 'Browser Path',
+    kicker: 'Guided',
+    command: 'frontend desk',
+    body: 'Open the docs and terminal pages when you want the visual explanation, terminal replay, and guided actions in one place.',
+  },
+  {
+    title: 'Human CLI Path',
+    kicker: 'Terminal',
+    command: 'npx @kairenxyz/dealrail doctor',
+    body: 'Use the ASCII deck when you want a short terminal workflow without wiring custom code.',
+  },
+  {
+    title: 'Agent Path',
+    kicker: 'JSON',
+    command: 'npx @kairenxyz/dealrail doctor --json',
+    body: 'Use JSON mode when another agent or service needs a stable preflight and settlement surface.',
+  },
+];
+
+const packageCommands = [
+  'npx @kairenxyz/dealrail help',
+  'npx @kairenxyz/dealrail doctor --json',
+  'npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json',
+  'npm install -g @kairenxyz/dealrail',
+];
+
+const truthStatus = [
+  { label: 'Live now', detail: 'npm package, browser desk, CLI, backend lifecycle API, Base Sepolia and Celo Sepolia escrow flows' },
+  { label: 'Partial', detail: 'competition posture, discovery supply, x402 paid proof, and Locus payout proof remain mock-first or under-evidenced' },
 ];
 
 export default function DocsPage() {
@@ -69,10 +110,10 @@ export default function DocsPage() {
       <section className="hero-grid terminal-panel rounded-[1.75rem] p-6 md:p-8">
         <div className="relative z-10">
           <div className="terminal-kicker">Docs</div>
-          <h1 className="mt-2 text-3xl font-semibold">Detailed overview and usage guide</h1>
+          <h1 className="mt-2 text-3xl font-semibold">Detailed overview for humans and agents</h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--terminal-muted)]">
-            This page explains what DealRail is, who should use it, how the roles interact, and where each page fits in
-            the product.
+            This page explains what DealRail is, which entry surface to use, how the workflow moves from intent to
+            receipt, and what is live versus partial today.
           </p>
         </div>
       </section>
@@ -89,8 +130,40 @@ export default function DocsPage() {
         </div>
 
         <div className="terminal-panel rounded-[1.5rem] p-6 xl:col-span-7">
+          <div className="terminal-kicker">Entry Surfaces</div>
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {installLanes.map((lane) => (
+              <div key={lane.title} className="terminal-metric">
+                <div className="terminal-label">{lane.kicker}</div>
+                <div className="mt-2 text-base font-medium">{lane.title}</div>
+                <div className="mt-2 terminal-mono text-[11px] text-[var(--terminal-accent)]">{lane.command}</div>
+                <div className="mt-3 text-sm text-[var(--terminal-muted)]">{lane.body}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+        <div className="terminal-panel rounded-[1.5rem] p-6 xl:col-span-7">
+          <div className="terminal-kicker">Package + Command Path</div>
+          <h2 className="mt-2 text-2xl font-semibold">Published npm surface for agents and terminal-native humans</h2>
+          <div className="mt-5 rounded-[1.35rem] border border-[var(--terminal-border)] bg-black/15 p-4">
+            <div className="terminal-label">Package</div>
+            <div className="mt-2 terminal-mono text-sm text-[var(--terminal-accent)]">@kairenxyz/dealrail</div>
+            <div className="mt-4 space-y-2">
+              {packageCommands.map((command) => (
+                <div key={command} className="rounded-xl border border-[var(--terminal-border)] bg-black/20 px-3 py-2 terminal-mono text-[11px] text-[var(--terminal-fg)]">
+                  {command}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="terminal-panel rounded-[1.5rem] p-6 xl:col-span-5">
           <div className="terminal-kicker">Page Map</div>
-          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-1">
             <div className="terminal-metric">
               <div className="terminal-label">Home</div>
               <div className="mt-1 text-sm text-[var(--terminal-muted)]">Explains the model and shows the signal animation.</div>
@@ -107,13 +180,17 @@ export default function DocsPage() {
               <div className="terminal-label">Integrations</div>
               <div className="mt-1 text-sm text-[var(--terminal-muted)]">Choose the correct rail for payment, delegation, or routing.</div>
             </div>
+            <div className="terminal-metric">
+              <div className="terminal-label">Docs</div>
+              <div className="mt-1 text-sm text-[var(--terminal-muted)]">Explains operator lanes, architecture, and current live posture.</div>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="terminal-panel rounded-[1.5rem] p-6">
         <div className="terminal-kicker">How It Works</div>
-        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-5">
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-6">
           {lifecycle.map((item) => (
             <div key={item.title} className="rounded-2xl border border-[var(--terminal-border)] bg-black/10 p-5">
               <div className="font-semibold">{item.title}</div>
@@ -126,11 +203,12 @@ export default function DocsPage() {
       <section className="terminal-panel rounded-[1.5rem] p-6 md:p-7">
         <div className="terminal-kicker">Visual Architecture</div>
         <div className="mt-2 max-w-3xl text-sm leading-7 text-[var(--terminal-muted)]">
-          Read DealRail as a four-layer system: actors create demand, the coordination layer turns that into an offer,
-          payment and escrow make it executable, and the trust layer closes the loop with reputation-aware settlement.
+          Read DealRail as a five-layer system: operator surfaces create demand, the coordination layer turns that into
+          an offer, machine payments or escrow make it executable, and the trust layer closes the loop with
+          reputation-aware settlement.
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-5">
           {architectureColumns.map((column) => (
             <div key={column.title} className="rounded-[1.4rem] border border-[var(--terminal-border)] bg-black/10 p-5">
               <div className="terminal-kicker">{column.kicker}</div>
@@ -174,7 +252,7 @@ export default function DocsPage() {
       </section>
 
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {roleGuides.map((guide) => (
+        {operatorGuides.map((guide) => (
           <div key={guide.role} className="terminal-panel rounded-[1.5rem] p-6">
             <div className="terminal-kicker">{guide.role}</div>
             <p className="mt-4 text-sm leading-7 text-[var(--terminal-muted)]">{guide.summary}</p>
@@ -188,6 +266,15 @@ export default function DocsPage() {
                 </div>
               ))}
             </div>
+          </div>
+        ))}
+      </section>
+
+      <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        {truthStatus.map((item) => (
+          <div key={item.label} className="terminal-panel rounded-[1.5rem] p-6">
+            <div className="terminal-kicker">{item.label}</div>
+            <div className="mt-4 text-sm leading-7 text-[var(--terminal-muted)]">{item.detail}</div>
           </div>
         ))}
       </section>

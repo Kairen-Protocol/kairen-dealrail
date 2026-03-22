@@ -6,30 +6,34 @@ For the visual version, read [`06_VISUAL_ARCHITECTURE.md`](06_VISUAL_ARCHITECTUR
 
 ## System Shape
 
-DealRail has four layers:
+DealRail has five layers:
 
-1. Discovery and negotiation
-2. Onchain escrow and settlement
-3. Trust and reputation hooks
-4. Optional downstream execution adapters
+1. Operator surfaces
+2. Coordination and market competition
+3. Machine payment and escrow commitment
+4. Trust and reputation hooks
+5. Optional downstream execution adapters
 
 ## High-Level System Map
 
 ```mermaid
 flowchart LR
-  H[Human operator] --> UI[Frontend UI]
-  BA[Buyer agent] --> UI
-  PA[Provider agent] --> UI
-  EA[Evaluator agent] --> UI
+  H[Human operator] --> UI[Browser desk]
+  BA[Buyer agent] --> CLI[npm CLI / SDK]
+  PA[Provider agent] --> CLI
+  EA[Evaluator agent] --> CLI
 
   UI --> API[Backend API]
+  CLI --> API
 
-  API --> NEG[x402n negotiation]
+  API --> NEG[Market competition]
+  API --> PAY[Machine payment adapter]
   API --> DISC[Provider discovery]
   API --> ESC[Escrow lifecycle]
   API --> EXEC[Execution adapters]
 
   DISC --> ERC[ERC-8004 identity and reputation]
+  PAY --> X4[x402-first provider]
   ESC --> CHAIN[(Base Sepolia / Celo Sepolia)]
   EXEC --> UNI[Uniswap]
   EXEC --> LOC[Locus]
@@ -53,13 +57,30 @@ The frontend is a Next.js operator UI that:
 - displays jobs and lifecycle state
 - creates jobs
 - surfaces negotiation and integrations workbench flows
+- provides a docs desk and demo terminal for human operators and judges
 - points users to onchain actions and backend adapters
 
 Important files:
 - [`frontend/src/app/page.tsx`](../../frontend/src/app/page.tsx)
+- [`frontend/src/app/docs/page.tsx`](../../frontend/src/app/docs/page.tsx)
+- [`frontend/src/app/terminal/page.tsx`](../../frontend/src/app/terminal/page.tsx)
 - [`frontend/src/app/jobs/[jobId]/page.tsx`](../../frontend/src/app/jobs/[jobId]/page.tsx)
 - [`frontend/src/lib/contracts.ts`](../../frontend/src/lib/contracts.ts)
 - [`frontend/src/lib/api.ts`](../../frontend/src/lib/api.ts)
+
+### CLI / SDK
+
+The published package gives agent-first and terminal-first access to the same backend:
+- stable JSON output with `--json`
+- human-readable ASCII mode
+- preflight `doctor` command
+- lightweight SDK import for custom automation
+
+Important files:
+- [`cli/package.json`](../../cli/package.json)
+- [`cli/src/cli.ts`](../../cli/src/cli.ts)
+- [`cli/src/client.ts`](../../cli/src/client.ts)
+- [`cli/src/types.ts`](../../cli/src/types.ts)
 
 ### Backend
 
@@ -67,10 +88,11 @@ The canonical submission backend is the simplified API server:
 - no database required for the main escrow demo path
 - reads directly from chain
 - exposes lifecycle endpoints
-- exposes negotiation, discovery, delegation, Uniswap, Locus, and x402-related surfaces
+- exposes negotiation, discovery, delegation, Uniswap, Locus, and machine-payment surfaces
 
 Important files:
 - [`backend/src/index-simple.ts`](../../backend/src/index-simple.ts)
+- [`backend/src/services/machine-payments.service.ts`](../../backend/src/services/machine-payments.service.ts)
 - [`backend/src/services/x402n.service.ts`](../../backend/src/services/x402n.service.ts)
 - [`backend/src/services/discovery.service.ts`](../../backend/src/services/discovery.service.ts)
 - [`backend/src/services/delegation.service.ts`](../../backend/src/services/delegation.service.ts)
@@ -96,8 +118,9 @@ Important files:
 ## Runtime Sequence
 
 ```text
-buyer policy -> x402n negotiation -> provider selection -> createJob -> fund
-provider submit -> evaluator complete/reject -> escrow releases or refund path remains available
+human browser or agent CLI -> backend coordination -> provider scan and offer competition
+then -> machine payment for immediate calls OR createJob + fund onchain escrow
+provider submit -> evaluator complete/reject -> payout or refund posture
 after settlement -> DealRailHook can write ERC-8004 reputation
 optional -> prepare downstream Uniswap / Locus / delegation operations
 ```
@@ -106,22 +129,31 @@ optional -> prepare downstream Uniswap / Locus / delegation operations
 
 ```mermaid
 sequenceDiagram
-  participant Buyer
+  participant Human as Human desk
+  participant Agent as Agent CLI
   participant Frontend
   participant Backend
+  participant Payment as Machine payment adapter
   participant Escrow as EscrowRailERC20
   participant Hook as DealRailHook
   participant Evaluator
 
-  Buyer->>Frontend: define task, budget, deadline
+  Human->>Frontend: define task, budget, deadline
+  Agent->>Backend: or call CLI/SDK directly
   Frontend->>Backend: create negotiation session
   Backend-->>Frontend: ranked offers + trust context
-  Buyer->>Frontend: confirm selected provider
-  Frontend->>Backend: create job
-  Backend->>Escrow: createJob
-  Buyer->>Frontend: fund escrow
-  Frontend->>Backend: fund job
-  Backend->>Escrow: fund
+  Human->>Frontend: confirm selected provider
+  alt Immediate machine call
+    Backend->>Payment: proxy provider request
+    Payment-->>Backend: paid response
+    Backend-->>Frontend: receipt payload
+  else Escrow-backed deal
+    Frontend->>Backend: create job
+    Backend->>Escrow: createJob
+    Human->>Frontend: fund escrow
+    Frontend->>Backend: fund job
+    Backend->>Escrow: fund
+  end
   Escrow->>Hook: beforeAction / afterAction
   Frontend->>Backend: submit deliverable
   Backend->>Escrow: submit
@@ -139,6 +171,7 @@ sequenceDiagram
 - reject path on Celo
 - ERC-8004 verifier and hook integration
 - discovery enrichment against ERC-8004 registries
+- published npm CLI package and install path
 
 ### Implemented but not core-evidenced
 - reverse-auction style negotiation sessions
@@ -160,5 +193,6 @@ sequenceDiagram
 ## Architectural Truthfulness Notes
 
 - The simplified backend is the canonical demo server for this submission.
+- The browser desk and published CLI package are both canonical operator surfaces.
 - Database-backed and IPFS-heavy paths exist in the repo but are not required to understand the demonstrated prize path.
 - Optional sponsor adapters are documented separately so they do not muddy the core story.

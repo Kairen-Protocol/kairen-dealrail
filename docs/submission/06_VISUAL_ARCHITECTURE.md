@@ -9,24 +9,29 @@ Use this if you want the quickest visual understanding of the system without rea
 DealRail turns an agent deal into a verifiable execution loop:
 
 ```text
-intent -> negotiation -> escrow -> evaluation -> settlement -> reputation
+intent -> scan -> offer -> machine payment or escrow -> evaluation -> receipt -> reputation
 ```
 
 ## 2. System Overview
 
 ```mermaid
 flowchart LR
-  subgraph Actors
-    H[Human]
-    B[Buyer Agent]
-    P[Provider Agent]
-    E[Evaluator Agent]
+  subgraph Operators
+    H[Human desk]
+    B[Buyer agent]
+    P[Provider agent]
+    E[Evaluator agent]
+  end
+
+  subgraph EntrySurfaces
+    UI[Browser desk]
+    CLI[npm CLI / SDK]
   end
 
   subgraph DealRail
-    UI[Frontend]
     API[Backend API]
-    NEG[x402n Negotiation]
+    NEG[Competition + discovery]
+    PAY[Machine payments]
     DISC[Discovery]
     ESC[Escrow Contracts]
     TRUST[ERC-8004 Trust Layer]
@@ -46,54 +51,68 @@ flowchart LR
   end
 
   H --> UI
-  B --> UI
-  P --> UI
-  E --> UI
+  B --> CLI
+  P --> CLI
+  E --> CLI
 
   UI --> API
+  CLI --> API
   API --> NEG
+  API --> PAY
   API --> DISC
   API --> ESC
   API --> TRUST
   API --> ADAPT
 
   DISC --> TRUST
+  PAY --> X4[x402-first provider]
   ESC --> BASE
   ESC --> CELO
 
   ADAPT --> UNI
   ADAPT --> LOC
   ADAPT --> DEL
-  ADAPT --> X4
 ```
 
 ## 3. What Each Layer Does
 
 | Layer | Purpose | Main Files |
 |-------|---------|------------|
-| Frontend | Operator and judge-facing UI | `frontend/src/app`, `frontend/src/components` |
+| Browser desk | Human and judge-facing UI | `frontend/src/app`, `frontend/src/components` |
+| CLI / SDK | Agent and terminal-native operator surface | `cli/src/cli.ts`, `cli/src/client.ts`, `cli/src/types.ts` |
 | Backend | Lifecycle API and integration adapters | `backend/src/index-simple.ts`, `backend/src/services` |
 | Escrow | Locks funds and enforces state transitions | `contracts/src/EscrowRail.sol`, `contracts/src/EscrowRailERC20.sol` |
 | Trust layer | Checks identity/reputation and writes feedback | `contracts/src/DealRailHook.sol`, `contracts/src/identity/ERC8004Verifier.sol` |
 
-## 4. Canonical Deal Flow
+## 4. Operator Modes
+
+| Mode | Best for | First command or surface |
+|------|----------|--------------------------|
+| Human browser flow | Demo, judging, guided operation | `frontend/src/app/page.tsx` and `frontend/src/app/terminal/page.tsx` |
+| Human terminal flow | Direct operator control | `npx @kairenxyz/dealrail doctor` |
+| Agent runtime | Structured automation | `npx @kairenxyz/dealrail doctor --json` |
+| Embedded integration | Custom orchestration | `import { DealRailClient } from '@kairenxyz/dealrail'` |
+
+## 5. Canonical Deal Flow
 
 ```mermaid
 flowchart TD
-  A[1. Buyer defines policy] --> B[2. Negotiation session created]
-  B --> C[3. Providers ranked]
-  C --> D[4. Buyer confirms one offer]
-  D --> E[5. Onchain job created]
-  E --> F[6. Escrow funded]
-  F --> G[7. Provider submits deliverable]
-  G --> H{8. Evaluator decision}
-  H -->|Complete| I[9. Funds released]
-  H -->|Reject| J[9. Job rejected]
-  I --> K[10. Reputation feedback can be written]
-  J --> L[10. Refund path remains available]
+  A[1. Human or agent defines intent] --> B[2. Backend scans supply and competition]
+  B --> C[3. Providers are ranked]
+  C --> D{4. What execution posture fits}
+  D -->|Immediate paid call| E[5A. Machine payment adapter proxies request]
+  D -->|Scoped service deal| F[5B. Onchain job created]
+  F --> G[6. Escrow funded]
+  G --> H[7. Provider submits deliverable]
+  H --> I{8. Evaluator decision}
+  I -->|Complete| J[9. Funds released]
+  I -->|Reject| K[9. Job rejected]
+  J --> L[10. Reputation feedback can be written]
+  K --> M[10. Refund path remains available]
+  E --> N[6A. Response and receipt returned]
 ```
 
-## 5. Trust Loop
+## 6. Trust Loop
 
 This is the part that makes the Protocol Labs / ERC-8004 story strong.
 
@@ -108,7 +127,7 @@ flowchart LR
   HOOK --> FEED[write feedback to reputation registry]
 ```
 
-## 6. What Is Actually Demonstrated
+## 7. What Is Actually Demonstrated
 
 ```mermaid
 flowchart LR
@@ -117,6 +136,7 @@ flowchart LR
     S2[Celo Sepolia happy path]
     S3[Celo Sepolia reject path]
     S4[ERC-8004 verifier and hook tests]
+    S5[npm package install and CLI execution]
   end
 
   subgraph Partial But Present
@@ -124,22 +144,25 @@ flowchart LR
     P2[Uniswap tx builder]
     P3[Locus bridge]
     P4[x402 and x402n adapters]
+    P5[market competition currently mock-first]
   end
 ```
 
-## 7. Why The Repo Is Organized This Way
+## 8. Why The Repo Is Organized This Way
 
 The repo is split so two audiences can navigate it quickly:
 
 - humans need a simple visual story and direct evidence
 - AI judges need structured markdown, exact file paths, tx hashes, and claim discipline
+- agents need a stable install and JSON command surface
 
 That is why:
 - `docs/submission` is the canonical submission pack
 - `backend/TRANSACTION_LEDGER.md` is the canonical proof log
 - `STATUS.md` is the canonical deployment summary
+- `@kairenxyz/dealrail` is the canonical agent package name
 
-## 8. Best Reading Order For Humans
+## 9. Best Reading Order For Humans
 
 1. [`00_START_HERE.md`](00_START_HERE.md)
 2. [`06_VISUAL_ARCHITECTURE.md`](06_VISUAL_ARCHITECTURE.md)
