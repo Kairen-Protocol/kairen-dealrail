@@ -66,6 +66,9 @@ export default function HomePage() {
                 <Link href="/terminal" className="terminal-btn terminal-btn-accent">
                   Open Desk
                 </Link>
+                <Link href="/base" className="terminal-btn">
+                  Base Services
+                </Link>
                 <Link href="/docs" className="terminal-btn">
                   Read Docs
                 </Link>
@@ -143,7 +146,7 @@ export default function HomePage() {
           <h2 className="mt-3 text-3xl font-semibold">The desk should feel simple</h2>
           <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--terminal-muted)]">
             <p>1. Run `doctor` to confirm the desk can actually see the backend and the current rail posture.</p>
-            <p>2. Run `services` or `vend image generation under 0.08 usdc in 6h` to demo the frontend-only stablecoin simulation path.</p>
+            <p>2. Run `services` to inspect the Base-facing public service directory, or `vend image generation under 0.08 usdc in 6h` to stage a quick demo path.</p>
             <p>3. Connect a wallet only when you want to graduate from demo mode into a real provider or client settlement flow.</p>
           </div>
         </div>

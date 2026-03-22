@@ -65,7 +65,7 @@ export default function TerminalPage() {
               </div>
               <div>
                 <div className="terminal-label">`services`</div>
-                Use this for the frontend-only demo path. It loads the hardcoded service catalog and gives you stablecoin simulation targets immediately.
+                Use this to inspect the Base-facing service directory. It loads the public Base surfaces and visible provider supply instead of a hardcoded list.
               </div>
               <div>
                 <div className="terminal-label">`vend`</div>

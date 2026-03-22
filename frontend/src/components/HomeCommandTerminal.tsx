@@ -175,7 +175,7 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
       { tone: 'system', text: 'vend benchmark report under 0.12 usdc in 24h' },
       { tone: 'system', text: 'rails' },
       { tone: 'system', text: 'status' },
-      { tone: 'system', text: 'demo mode: vend a hardcoded service and inspect the simulated stablecoin settlement' },
+      { tone: 'system', text: 'services now loads the Base-facing service directory and visible provider supply' },
       { tone: 'system', text: 'agent lane: use the CLI with --json after doctor confirms posture' },
       { tone: 'system', text: 'human lane: use services or vend here, then inspect the board and settlement rails' },
     ]);
@@ -183,16 +183,41 @@ export function HomeCommandTerminal({ compact = false, onAction }: Props) {
   }
 
   async function showServices(command: string) {
-    const note = 'Hardcoded service catalog loaded';
-    appendMany([
-      { tone: 'ok', text: 'frontend demo catalog' },
-      ...DEMO_SERVICES.map((service) => ({
-        tone: 'system' as LineTone,
-        text: `${service.name} | ${service.startingPriceUsdc.toFixed(2)} USDC | ${service.deliveryHours}h | ${service.settlementRail}`,
-      })),
-      { tone: 'system', text: 'try: vend image generation under 0.08 usdc in 6h' },
-    ]);
-    emit('market_scan', command, note);
+    try {
+      const directory = await integrationsApi.getBaseAgentServices();
+      const note =
+        directory.catalogMode === 'curated_demo'
+          ? 'Base service directory loaded with curated demo supply'
+          : 'Base service directory loaded';
+
+      appendMany([
+        { tone: directory.catalogMode === 'curated_demo' ? 'warn' : 'ok', text: `base service directory | chain=${directory.chainId} | mode=${directory.catalogMode}` },
+        { tone: 'ok', text: `public surfaces=${directory.publicSurfaces.length} | visible supply=${directory.discovery.providerCount}` },
+        ...directory.publicSurfaces.slice(0, 4).map((surface) => ({
+          tone: 'system' as LineTone,
+          text: `${surface.name} | ${surface.method} ${surface.endpoint} | ${surface.access}`,
+        })),
+        { tone: 'system', text: 'visible supply' },
+        ...directory.supplyPreview.slice(0, 4).map((service) => ({
+          tone: 'system' as LineTone,
+          text: `${service.serviceName} | ${service.basePriceUsdc ?? 'n/a'} USDC | rep ${service.reputationScore ?? 'n/a'} | ${service.source}`,
+        })),
+        { tone: 'system', text: 'next: providers <need> or vend <need> under <budget> usdc in <hours>h' },
+      ]);
+      emit('market_scan', command, note);
+      return;
+    } catch {
+      const note = 'Fallback service catalog loaded';
+      appendMany([
+        { tone: 'warn', text: 'base service directory is unavailable; showing fallback demo catalog' },
+        ...DEMO_SERVICES.map((service) => ({
+          tone: 'system' as LineTone,
+          text: `${service.name} | ${service.startingPriceUsdc.toFixed(2)} USDC | ${service.deliveryHours}h | ${service.settlementRail}`,
+        })),
+        { tone: 'system', text: 'try: vend image generation under 0.08 usdc in 6h' },
+      ]);
+      emit('market_scan', command, note);
+    }
   }
 
   async function runDoctor(command: string) {

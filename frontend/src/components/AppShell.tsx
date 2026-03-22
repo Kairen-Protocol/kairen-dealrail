@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 const NAV = [
   { href: '/', label: 'Home' },
   { href: '/terminal', label: 'Terminal' },
+  { href: '/base', label: 'Base' },
   { href: '/dashboard', label: 'Board' },
   { href: '/docs', label: 'Docs' },
 ];
