@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+const OPERATOR_MODE_KEY = 'dealrail.operatorMode';
+
 const operatorGuides = [
   {
     role: 'Human Operator',
@@ -126,7 +128,7 @@ const modeSwitch = {
     command: 'npx @kairenxyz/dealrail services --json',
     summary: 'Use this when another runtime needs stable JSON, feature-specific skills, and an explicit map of what DealRail can do.',
     steps: [
-      'Read `/skill.md` first for routing.',
+      'Read `/SKILL.md` first for routing.',
       'Run `doctor --json`, `services --json`, and only then move into `vend --json` or job reads.',
       'Pick the matching local skill before acting on discovery, negotiation, escrow, x402, Base, routing, or delegation.',
       'Use the browser only for human review, public Base inspection, or client-side signing.',
@@ -137,50 +139,62 @@ const modeSwitch = {
 const featureSkills = [
   {
     title: 'Provider Discovery',
-    file: '/skills/provider-discovery/SKILL.md',
+    file: 'skills/provider-discovery/SKILL.md',
     command: './skills.sh discovery',
     detail: 'Use when the agent needs visible supply, source mix, and an honest read on whether the market is live or mock.',
   },
   {
     title: 'Negotiation + Auction',
-    file: '/skills/negotiation-auction/SKILL.md',
+    file: 'skills/negotiation-auction/SKILL.md',
     command: './skills.sh negotiation',
     detail: 'Use for `vend`, RFO creation, ranked offers, counter rounds, batching, and negotiation receipts.',
   },
   {
     title: 'Escrow Lifecycle',
-    file: '/skills/escrow-lifecycle/SKILL.md',
+    file: 'skills/escrow-lifecycle/SKILL.md',
     command: './skills.sh escrow',
     detail: 'Use for create, fund, submit, complete, reject, refund, and chain-safe job progression.',
   },
   {
     title: 'Machine Payments',
-    file: '/skills/machine-payments-x402/SKILL.md',
+    file: 'skills/machine-payments-x402/SKILL.md',
     command: './skills.sh x402',
     detail: 'Use when the agent must decide between immediate x402 payment and a negotiated escrowed workflow.',
   },
   {
     title: 'Base Service Directory',
-    file: '/skills/base-service-directory/SKILL.md',
+    file: 'skills/base-service-directory/SKILL.md',
     command: './skills.sh base',
     detail: 'Use for `/base`, `GET /api/v1/base/agent-services`, and the Base-facing public service surface.',
   },
   {
     title: 'Treasury Routing Preview',
-    file: '/skills/treasury-routing-preview/SKILL.md',
+    file: 'skills/treasury-routing-preview/SKILL.md',
     command: './skills.sh routing',
     detail: 'Use only after a completed Base job when the agent needs the Uniswap preview payload path.',
   },
   {
     title: 'Delegation Builder',
-    file: '/skills/delegation-builder/SKILL.md',
+    file: 'skills/delegation-builder/SKILL.md',
     command: './skills.sh delegation',
     detail: 'Use for bounded MetaMask / ERC-7710 payload construction, not for claimed delegated execution proof.',
   },
 ];
 
 export default function DocsPage() {
-  const [guideMode, setGuideMode] = useState<keyof typeof modeSwitch>('human');
+  const [guideMode, setGuideMode] = useState<keyof typeof modeSwitch>(() => {
+    if (typeof window === 'undefined') {
+      return 'human';
+    }
+
+    return window.localStorage.getItem(OPERATOR_MODE_KEY) === 'agent' ? 'agent' : 'human';
+  });
+
+  function selectGuideMode(mode: keyof typeof modeSwitch) {
+    setGuideMode(mode);
+    window.localStorage.setItem(OPERATOR_MODE_KEY, mode);
+  }
+
   const activeMode = modeSwitch[guideMode];
 
   return (
@@ -198,17 +212,17 @@ export default function DocsPage() {
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[0.92fr,1.08fr]">
         <div className="terminal-panel rounded-[1.5rem] p-6">
-          <div className="terminal-kicker">Mode Switch</div>
+          <div className="terminal-kicker">Mode Guide</div>
           <h2 className="mt-2 text-2xl font-semibold">Choose the operating lane first</h2>
           <p className="mt-4 text-sm leading-7 text-[var(--terminal-muted)]">
-            Human and agent paths should not be mixed casually. Pick the mode, then follow the matching surface and skill pack.
+            Human and agent paths should not be mixed casually. The top shell keeps the same toggle visible across the product, and this section expands the run order behind each lane.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             {(['human', 'agent'] as const).map((mode) => (
               <button
                 key={mode}
                 type="button"
-                onClick={() => setGuideMode(mode)}
+                onClick={() => selectGuideMode(mode)}
                 className={`terminal-btn ${guideMode === mode ? 'terminal-btn-accent' : ''}`}
               >
                 {modeSwitch[mode].label}
@@ -239,7 +253,7 @@ export default function DocsPage() {
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="terminal-metric">
               <div className="terminal-label">Public Index</div>
-              <div className="mt-2 terminal-mono text-[11px] text-[var(--terminal-accent)]">/skill.md</div>
+              <div className="mt-2 terminal-mono text-[11px] text-[var(--terminal-accent)]">/SKILL.md</div>
               <div className="mt-3 text-sm text-[var(--terminal-muted)]">
                 The public operating index for agents. Use this before loading deeper repo-local skills.
               </div>
@@ -253,8 +267,8 @@ export default function DocsPage() {
             </div>
           </div>
           <div className="mt-5 flex flex-wrap gap-3">
-            <a href="/skill.md" className="terminal-btn terminal-btn-accent">
-              Open skill.md
+            <a href="/SKILL.md" className="terminal-btn terminal-btn-accent">
+              Open SKILL.md
             </a>
             <Link href="/base" className="terminal-btn">
               Open /base
@@ -295,6 +309,9 @@ export default function DocsPage() {
       <section className="terminal-panel rounded-[1.5rem] p-6">
         <div className="terminal-kicker">Feature Skill Pack</div>
         <h2 className="mt-2 text-2xl font-semibold">Skills mapped to the product surfaces we actually ship</h2>
+        <p className="mt-4 text-sm leading-7 text-[var(--terminal-muted)]">
+          Paths below are repo-local references for collaborators and agents running inside the repo. They are not frontend-served public URLs.
+        </p>
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {featureSkills.map((skill) => (
             <div key={skill.title} className="rounded-[1.35rem] border border-[var(--terminal-border)] bg-black/10 p-5">
@@ -348,7 +365,7 @@ export default function DocsPage() {
               <div className="mt-1 text-sm text-[var(--terminal-muted)]">Explains operator lanes, architecture, and current live posture.</div>
             </div>
             <div className="terminal-metric">
-              <div className="terminal-label">skill.md</div>
+              <div className="terminal-label">SKILL.md</div>
               <div className="mt-1 text-sm text-[var(--terminal-muted)]">Public agent index that routes runtimes into the right local skill or product surface.</div>
             </div>
           </div>

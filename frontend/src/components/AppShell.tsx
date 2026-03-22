@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 type OperatorMode = 'human' | 'agent';
 
 const OPERATOR_MODE_KEY = 'dealrail.operatorMode';
+const PUBLIC_SKILL_URL = 'https://dealrail.kairen.xyz/SKILL.md';
+const PUBLIC_SKILL_CURL = `curl -s ${PUBLIC_SKILL_URL}`;
 
 const NAV = [
   { href: '/', label: 'Home' },
@@ -33,6 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     return window.localStorage.getItem(OPERATOR_MODE_KEY) === 'agent' ? 'agent' : 'human';
   });
+  const [copyNotice, setCopyNotice] = useState('');
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -53,6 +56,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     operatorMode === 'human'
       ? 'Guided browser lane for operators who want visible state, wallet review, and live demo control.'
       : 'Agent lane for runtimes that should start at /SKILL.md, use JSON outputs, and load the matching repo-local skill.';
+
+  async function copyAgentEntry() {
+    try {
+      await navigator.clipboard.writeText(PUBLIC_SKILL_CURL);
+      setCopyNotice('Copied');
+      window.setTimeout(() => setCopyNotice(''), 1400);
+    } catch {
+      setCopyNotice('Copy failed');
+      window.setTimeout(() => setCopyNotice(''), 1800);
+    }
+  }
 
   return (
     <div className="relative min-h-screen bg-[var(--terminal-bg)] text-[var(--terminal-fg)]">
@@ -109,21 +123,51 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="shell-mode-copy">{operatorCopy}</div>
             </div>
             <div className="shell-mode-switch" role="group" aria-label="Entry mode">
-              <Link
-                href="/docs"
+              <button
+                type="button"
                 onClick={() => setOperatorMode('human')}
                 className={`shell-mode-button ${operatorMode === 'human' ? 'shell-mode-button-active' : ''}`}
               >
                 Human
-              </Link>
-              <a
-                href="/SKILL.md"
+              </button>
+              <button
+                type="button"
                 onClick={() => setOperatorMode('agent')}
                 className={`shell-mode-button ${operatorMode === 'agent' ? 'shell-mode-button-active' : ''}`}
               >
                 Agent
-              </a>
+              </button>
             </div>
+          </div>
+
+          <div className="shell-entry-card">
+            {operatorMode === 'human' ? (
+              <>
+                <div className="terminal-label">Human Entry</div>
+                <div className="shell-entry-copy">Stay in the product and start from the guided docs surface.</div>
+                <div className="shell-entry-actions">
+                  <Link href="/docs" className="terminal-command">
+                    open /docs
+                  </Link>
+                  <Link href="/terminal" className="terminal-command">
+                    open /terminal
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="terminal-label">Agent Entry</div>
+                <div className="shell-entry-copy">Fetch the public skill index directly. The toggle only changes mode; it does not redirect.</div>
+                <div className="shell-entry-actions">
+                  <a href={PUBLIC_SKILL_URL} target="_blank" rel="noreferrer" className="terminal-command">
+                    {PUBLIC_SKILL_CURL}
+                  </a>
+                  <button type="button" onClick={copyAgentEntry} className="shell-copy-button">
+                    {copyNotice || 'Copy'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </header>
