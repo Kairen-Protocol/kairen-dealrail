@@ -55,6 +55,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
+            <a
+              href="https://kairen.xyz"
+              target="_blank"
+              rel="noreferrer"
+              className="shell-nav-link shell-nav-link-minimal"
+            >
+              Kairen.xyz
+            </a>
           </nav>
 
           <div className="shell-divider hidden sm:block" />
