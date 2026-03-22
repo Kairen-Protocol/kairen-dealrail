@@ -58,6 +58,7 @@ npm run dev
 - **[backend/TRANSACTION_LEDGER.md](backend/TRANSACTION_LEDGER.md)** - Testnet ledger book (deployments + smoke txs)
 - **[docs/AUDIT_SUMMARY_2026-03-17.md](docs/AUDIT_SUMMARY_2026-03-17.md)** - Contract audit findings + fixes
 - **[docs/](docs/)** - Comprehensive documentation
+- **[docs/strategy/TRACK_FIT_MATRIX_2026-03-22.md](docs/strategy/TRACK_FIT_MATRIX_2026-03-22.md)** - Track applicability matrix with evidence pointers
 
 ## ✅ Hackathon P0 Scope (Must Ship)
 
@@ -93,7 +94,7 @@ DealRail supports multi-source integration:
 | ERC-7710 (MetaMask Delegation) | Planned (P1) | Tracked in PRD + roadmap |
 
 ### Key Guides
-- **[Frontend Integration](docs/FRONTEND_INTEGRATION.md)** - Wallet integration guide
+- **[Frontend Integration](docs/guides/FRONTEND_INTEGRATION.md)** - Wallet integration guide
 - **[API Reference](backend/API_REFERENCE.md)** - Backend API docs
 - **[Testing Guide](backend/tests/README.md)** - USDC recycling workflow
 - **[Repo Structure](REPO_STRUCTURE.md)** - Code organization
