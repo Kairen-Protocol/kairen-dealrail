@@ -1,7 +1,6 @@
 import { contractService } from './contract.service';
 import { discoveryService } from './discovery.service';
 import { executionService } from './execution.service';
-import { machinePaymentsService } from './machine-payments.service';
 import { config } from '../config';
 
 type BaseAgentServiceSurface = {
