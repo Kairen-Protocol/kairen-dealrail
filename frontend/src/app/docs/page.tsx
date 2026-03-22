@@ -1,5 +1,8 @@
 'use client';
 
+import Link from 'next/link';
+import { useState } from 'react';
+
 const operatorGuides = [
   {
     role: 'Human Operator',
@@ -104,7 +107,82 @@ const truthStatus = [
   { label: 'Partial', detail: 'competition posture, discovery supply, x402 paid proof, and Locus payout proof remain mock-first or under-evidenced' },
 ];
 
+const modeSwitch = {
+  human: {
+    label: 'Human Mode',
+    kicker: 'Guided',
+    command: 'Open /docs or /terminal',
+    summary: 'Use this when a person wants guided navigation, visible state, and explicit wallet review before settlement steps.',
+    steps: [
+      'Start in the browser desk or docs surface.',
+      'Run `doctor`, then `services`, then the deal or job flow.',
+      'Use `/base` only when the Base-facing public service surface matters.',
+      'Escalate to wallet signing only for the exact chain and role that owns the action.',
+    ],
+  },
+  agent: {
+    label: 'Agent Mode',
+    kicker: 'Deterministic',
+    command: 'npx @kairenxyz/dealrail services --json',
+    summary: 'Use this when another runtime needs stable JSON, feature-specific skills, and an explicit map of what DealRail can do.',
+    steps: [
+      'Read `/skill.md` first for routing.',
+      'Run `doctor --json`, `services --json`, and only then move into `vend --json` or job reads.',
+      'Pick the matching local skill before acting on discovery, negotiation, escrow, x402, Base, routing, or delegation.',
+      'Use the browser only for human review, public Base inspection, or client-side signing.',
+    ],
+  },
+} as const;
+
+const featureSkills = [
+  {
+    title: 'Provider Discovery',
+    file: '/skills/provider-discovery/SKILL.md',
+    command: './skills.sh discovery',
+    detail: 'Use when the agent needs visible supply, source mix, and an honest read on whether the market is live or mock.',
+  },
+  {
+    title: 'Negotiation + Auction',
+    file: '/skills/negotiation-auction/SKILL.md',
+    command: './skills.sh negotiation',
+    detail: 'Use for `vend`, RFO creation, ranked offers, counter rounds, batching, and negotiation receipts.',
+  },
+  {
+    title: 'Escrow Lifecycle',
+    file: '/skills/escrow-lifecycle/SKILL.md',
+    command: './skills.sh escrow',
+    detail: 'Use for create, fund, submit, complete, reject, refund, and chain-safe job progression.',
+  },
+  {
+    title: 'Machine Payments',
+    file: '/skills/machine-payments-x402/SKILL.md',
+    command: './skills.sh x402',
+    detail: 'Use when the agent must decide between immediate x402 payment and a negotiated escrowed workflow.',
+  },
+  {
+    title: 'Base Service Directory',
+    file: '/skills/base-service-directory/SKILL.md',
+    command: './skills.sh base',
+    detail: 'Use for `/base`, `GET /api/v1/base/agent-services`, and the Base-facing public service surface.',
+  },
+  {
+    title: 'Treasury Routing Preview',
+    file: '/skills/treasury-routing-preview/SKILL.md',
+    command: './skills.sh routing',
+    detail: 'Use only after a completed Base job when the agent needs the Uniswap preview payload path.',
+  },
+  {
+    title: 'Delegation Builder',
+    file: '/skills/delegation-builder/SKILL.md',
+    command: './skills.sh delegation',
+    detail: 'Use for bounded MetaMask / ERC-7710 payload construction, not for claimed delegated execution proof.',
+  },
+];
+
 export default function DocsPage() {
+  const [guideMode, setGuideMode] = useState<keyof typeof modeSwitch>('human');
+  const activeMode = modeSwitch[guideMode];
+
   return (
     <div className="space-y-8">
       <section className="hero-grid terminal-panel rounded-[1.75rem] p-6 md:p-8">
@@ -115,6 +193,76 @@ export default function DocsPage() {
             This page explains what DealRail is, which entry surface to use, how the workflow moves from intent to
             receipt, and what is live versus partial today.
           </p>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-5 xl:grid-cols-[0.92fr,1.08fr]">
+        <div className="terminal-panel rounded-[1.5rem] p-6">
+          <div className="terminal-kicker">Mode Switch</div>
+          <h2 className="mt-2 text-2xl font-semibold">Choose the operating lane first</h2>
+          <p className="mt-4 text-sm leading-7 text-[var(--terminal-muted)]">
+            Human and agent paths should not be mixed casually. Pick the mode, then follow the matching surface and skill pack.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {(['human', 'agent'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setGuideMode(mode)}
+                className={`terminal-btn ${guideMode === mode ? 'terminal-btn-accent' : ''}`}
+              >
+                {modeSwitch[mode].label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-5 rounded-[1.4rem] border border-[var(--terminal-border)] bg-black/10 p-5">
+            <div className="terminal-label">{activeMode.kicker}</div>
+            <div className="mt-2 text-lg font-semibold">{activeMode.label}</div>
+            <div className="mt-3 terminal-mono text-[11px] text-[var(--terminal-accent)]">{activeMode.command}</div>
+            <p className="mt-4 text-sm leading-7 text-[var(--terminal-muted)]">{activeMode.summary}</p>
+            <div className="mt-5 space-y-3">
+              {activeMode.steps.map((step, idx) => (
+                <div key={step} className="flex items-start gap-3 text-sm">
+                  <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--terminal-border)] terminal-mono text-[10px] text-[var(--terminal-accent)]">
+                    {idx + 1}
+                  </div>
+                  <div className="text-[var(--terminal-muted)]">{step}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="terminal-panel rounded-[1.5rem] p-6">
+          <div className="terminal-kicker">Agent Index</div>
+          <h2 className="mt-2 text-2xl font-semibold">Public skill entrypoint plus local helpers</h2>
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="terminal-metric">
+              <div className="terminal-label">Public Index</div>
+              <div className="mt-2 terminal-mono text-[11px] text-[var(--terminal-accent)]">/skill.md</div>
+              <div className="mt-3 text-sm text-[var(--terminal-muted)]">
+                The public operating index for agents. Use this before loading deeper repo-local skills.
+              </div>
+            </div>
+            <div className="terminal-metric">
+              <div className="terminal-label">Local Command</div>
+              <div className="mt-2 terminal-mono text-[11px] text-[var(--terminal-accent)]">./skills.sh features</div>
+              <div className="mt-3 text-sm text-[var(--terminal-muted)]">
+                Prints the feature skill map so agents can route themselves without guessing.
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <a href="/skill.md" className="terminal-btn terminal-btn-accent">
+              Open skill.md
+            </a>
+            <Link href="/base" className="terminal-btn">
+              Open /base
+            </Link>
+            <Link href="/terminal" className="terminal-btn">
+              Open Terminal
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -141,6 +289,21 @@ export default function DocsPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="terminal-panel rounded-[1.5rem] p-6">
+        <div className="terminal-kicker">Feature Skill Pack</div>
+        <h2 className="mt-2 text-2xl font-semibold">Skills mapped to the product surfaces we actually ship</h2>
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {featureSkills.map((skill) => (
+            <div key={skill.title} className="rounded-[1.35rem] border border-[var(--terminal-border)] bg-black/10 p-5">
+              <div className="font-semibold">{skill.title}</div>
+              <div className="mt-2 terminal-mono text-[11px] text-[var(--terminal-accent)]">{skill.command}</div>
+              <div className="mt-3 text-sm leading-6 text-[var(--terminal-muted)]">{skill.detail}</div>
+              <div className="mt-4 break-all terminal-mono text-[11px] text-[var(--terminal-muted)]">{skill.file}</div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -183,6 +346,10 @@ export default function DocsPage() {
             <div className="terminal-metric">
               <div className="terminal-label">Docs</div>
               <div className="mt-1 text-sm text-[var(--terminal-muted)]">Explains operator lanes, architecture, and current live posture.</div>
+            </div>
+            <div className="terminal-metric">
+              <div className="terminal-label">skill.md</div>
+              <div className="mt-1 text-sm text-[var(--terminal-muted)]">Public agent index that routes runtimes into the right local skill or product surface.</div>
             </div>
           </div>
         </div>
