@@ -2,103 +2,77 @@
 
 This file points judges to the strongest proof artifacts in the repository.
 
-## Canonical Deployment Sources
+## Canonical Sources
 
 - [`STATUS.md`](../../STATUS.md)
 - [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md)
-- [`backend/src/config.ts`](../../backend/src/config.ts)
-- [`frontend/src/lib/contracts.ts`](../../frontend/src/lib/contracts.ts)
+- [`docs/progress/DEMO_VALIDATION_2026-03-22.md`](../progress/DEMO_VALIDATION_2026-03-22.md)
+- [`docs/progress/X402_TESTNET_PROOF_2026-03-22.md`](../progress/X402_TESTNET_PROOF_2026-03-22.md)
+- [`docs/submission/agent.json`](agent.json)
+- [`docs/submission/agent_log.json`](agent_log.json)
 
-## Final Canonical Addresses
+## Strongest Onchain Proofs
 
-### Base Sepolia
-- NullVerifier: `0xA61a57fF5570bF989a3a565B87b6421413995317`
-- ERC8004Verifier: `0xDB23657606957B32B385eC0A917d2818156668AC`
-- EscrowRail: `0x8c55C2BB6A396D3654f214726230D81e6fa22b69`
-- EscrowRailERC20: `0xE25B10057556e9714d2ac60992b68f4E61481cF9`
-- DealRailHook: `0x5fA109A74a688a49D254a21C2F3ab238E2A7F62e`
+### Base Sepolia escrow flow
 
-### Celo Sepolia
-- NullVerifier: `0x8728dDDD3c1D7B901c62E9D6a232F17462a931E2`
-- ERC8004Verifier: `0x2700e5B26909301967DFeECE9cb931B9bA3bA2df`
-- EscrowRail: `0x684D32E03642870B88134A3722B0b094666EF42e`
-- EscrowRailERC20: `0xB9dfa53326016415ca6fb9eb16A0f050c8d15C74`
-- DealRailHook: `0x04B0D16f790A5F83dc48c7e4D05467ff2eA57519`
+- create: `0xc6f49d1fa0cd024852ea3651317b9ff31918abf02637fc73c8c5feac9ffd310c`
+- approve: `0x711ad623f80f0b11114ff6dc8a9ab0a79984736b2d4204bbfb284ef8e7eef1e8`
+- fund: `0x7b08af64c1137c6ebcc94d3ba428a4f7a7e2fa1559b159d298e8934e985dc2c2`
+- submit: `0x162d040320623aab308a1dc96f776637efe9c6a96ea04603dc035a66d9c76299`
+- complete: `0x5e44b634e6a85dbc096c4ee8cf72b7b6ad3bb0c853218ed1870cc042c031fcb4`
 
-## Strongest Transaction Proofs
+### Celo Sepolia happy path
 
-### Base Sepolia Escrow Flow
+- create: `0xa256e0a6010897ab6eb2377aebcd12265ea81a147423d42d92a37d7c86db9de0`
+- approve: `0x3093d227710f4f9d811d3fe74637de2c6d2ce3f1b73faa360edd9c459b61388b`
+- fund: `0x25331c72df3ba3f7e297c3abbe4b496c0d5dd48259d52423971aec746e714761`
+- submit: `0x14cb79f543e152d19bc12459dd7c8cde40242f342672250b77512b2aa6d445a6`
+- complete: `0x0bbf3cd7388dce58fe5ef0e58a0b854bfe12a58d14237e1c49b30d26f20fb0b8`
 
-Canonical run recorded in [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md):
-- createJob: `0xc88a6bcef436cad6fefb0e012bf7ccf57ea991905f6b22615287701692952430`
-- approve: `0xae617b8867bb6739bf13e9aedde6045ebd8d8e49690f02175ffedb4b8abfb02d`
-- fund: `0xb0de61acee165e1e86a587edec2f8ab4c89a3ceae9e101d23a012b31ef9f66e5`
-- submit: `0x7ceaed4c8f145be9978289f0eea39cab4f92aa8417a33d1a06a98e8243de7f88`
-- complete: `0xfe06fa5f1c85d2c33f2c78c5d38fc03a2ab72628c292d3378830cd591f4cc519`
+### Celo Sepolia reject path
 
-### Celo Sepolia Happy Path
+- create: `0xde835a7f2805fb4fae137f68df3dcc1b583e953d7742212604edb3e2b0a7ec0e`
+- approve: `0x7882010329019bea497ec4e2c61f64b19a7c7848f38927aaf7822bb8acd3213e`
+- fund: `0x86030983f61549d91e72c798f3ae0d133fa69278b3123c1df2d2e185edf4f5a5`
+- submit: `0x1ae3a9a65a0bc5037ccc539cf81522c662f8c372d535a05e6734d4b8a9051b22`
+- reject: `0x70970f5155186d17d93f1510fc18afd300da80ea43b076d7563feeac923b9519`
 
-Canonical run recorded in [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md):
-- createJob: `0x5424798f49767904187831f74c1aff76ca173f05cf24522e49e10f206a1813e5`
-- approve: `0xcf465c9617badda28db452e0ca18201429c908231855d03035acf98200cae8ee`
-- fund: `0x16603b8ae114379ccb440b931c1e59e5f06037fe66b461b2cd588bb133627a1d`
-- submit: `0x0512fc165fce20db039dc202f551d894ba51c260a9ff71cb0829ac1a9fda0f19`
-- complete: `0x33a7fbf3c45f9c12a43c59c344d7ae1aaaf3e0928cd157c3dd63feb0d737ce24`
+### x402 Base Sepolia paid request
 
-### Celo Sepolia Reject Path
-
-Canonical run recorded in [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md):
-- createJob: `0x772b595b728a565098a0d68567792dbff2bb71c3a524427c896ab440c7a9f3f1`
-- approve: `0xf93ad09eb4168d47010ba881fca673cfa7965ec65d3c8f4273b07fd1b86a1453`
-- fund: `0xe04dfcbb499a3b3f2252e5b840adbc034071e11fe3bb62cc0103653f3944c017`
-- submit: `0xdb6dc84e97d4f2f39e3f5008786dff0fb3908a753d95b7c6017fc3890238235a`
-- reject: `0xb94efcdcfc41f7e3da223b9068e649797a575039d4e2e15b71b9beb19e31efb3`
-
-### x402 Base Sepolia Paid Request
-
-Canonical run recorded in [`backend/TRANSACTION_LEDGER.md`](../../backend/TRANSACTION_LEDGER.md):
 - settlement tx: `0x8dfabc6a77205b0740aa7bc48e230b7516acc76295536d18a6a30db19476940c`
 - network: `eip155:84532`
 - price: `0.01 USDC`
-- proof script: [`backend/tests/proof-x402-testnet.ts`](../../backend/tests/proof-x402-testnet.ts)
-- human-readable note: [`docs/progress/X402_TESTNET_PROOF_2026-03-22.md`](../progress/X402_TESTNET_PROOF_2026-03-22.md)
 
-## Test Evidence
+## Trust Evidence
 
-Canonical test references:
-- [`contracts/test/EscrowRail.t.sol`](../../contracts/test/EscrowRail.t.sol)
-- [`contracts/test/EscrowRailERC20Hook.t.sol`](../../contracts/test/EscrowRailERC20Hook.t.sol)
-- [`backend/tests/test-lifecycle.ts`](../../backend/tests/test-lifecycle.ts)
-- [`backend/tests/test-lifecycle-celo-sepolia.ts`](../../backend/tests/test-lifecycle-celo-sepolia.ts)
-
-Reported status in [`STATUS.md`](../../STATUS.md):
-- root `npm run check`
-- backend `npm test`
-- frontend `npm run build`
-- CLI `npm run build`
-
-## Strongest Trust Evidence
-
-The best ERC-8004-related evidence lives in:
+Strong ERC-8004 proof lives in:
 - [`contracts/src/identity/ERC8004Verifier.sol`](../../contracts/src/identity/ERC8004Verifier.sol)
 - [`contracts/src/DealRailHook.sol`](../../contracts/src/DealRailHook.sol)
 - [`contracts/test/EscrowRailERC20Hook.t.sol`](../../contracts/test/EscrowRailERC20Hook.t.sol)
 
-This is strong because ERC-8004 affects behavior, not just labeling:
-- provider trust can gate actions
-- reputation reads influence acceptance criteria
-- reputation writes happen after successful settlement
+Why this is strong:
+- trust data is read before sensitive actions
+- hook logic affects execution
+- settlement can write reusable trust feedback
 
-## Evidence Upgrade Zones
+## Agent Evidence
 
-These integrations are implemented, but their sponsor-grade evidence is still incomplete:
+The strongest Let the Agent Cook proof is:
+- published package `@kairenxyz/dealrail`
+- live CLI path against the deployed backend
+- canonical agent descriptors in [`agent.json`](agent.json) and [`agent_log.json`](agent_log.json)
 
-| Track | Readiness | Missing artifact |
-|------|-----------|------------------|
-| Let the Agent Cook | 70% | `agent.json`, `agent_log.json`, structured autonomous run |
-| Base Agent Services on Base | 75% | discoverable public paid service proof |
-| MetaMask Delegations | 60% | delegated tx hash |
-| Uniswap | 55% | executed swap tx hash |
-| Locus | 45% | live operation proof |
+## Evidence Posture By Track
 
-Those should stay out of the primary claim set until new proof is recorded.
+| Track | Readiness | Strongest evidence | Missing proof |
+|------|-----------|--------------------|---------------|
+| Open Track | High | live product plus Base and Celo txs | final video only |
+| Protocol Labs ERC-8004 | High | hook, verifier, tests, deployments | optional stronger identity artifact |
+| Protocol Labs Let the Agent Cook | High | package + CLI run + agent artifacts | final packaging only |
+| Virtuals ERC-8183 | High | commerce loop is the core product | mostly explanatory polish |
+| Celo | High | happy and reject tx sets | none beyond demo emphasis |
+| AgentCash / x402 | High | paid-request tx proof | more proofs optional |
+| Base Agent Services on Base | Medium | Base evidence plus coherent discovery | public open-market proof |
+| MetaMask | Low | builder/signing path | delegated tx hash |
+| Uniswap | Low | Base-only preview payload builder | swap tx hash |
+| Locus | Low | adapter exists | live proof |

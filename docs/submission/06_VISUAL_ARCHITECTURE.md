@@ -1,18 +1,14 @@
 # Visual Architecture
 
-This file is the human-friendly visual explanation of how DealRail works.
+This file is the quickest visual explanation of how DealRail works.
 
-Use this if you want the quickest visual understanding of the system without reading every implementation note.
-
-## 1. One-Line Thesis
-
-DealRail turns an agent deal into a verifiable execution loop:
+## One-Line Flow
 
 ```text
-intent -> scan -> offer -> machine payment or escrow -> evaluation -> receipt -> reputation
+intent -> discovery -> offer ranking -> payment or escrow -> evaluation -> receipt -> trust feedback
 ```
 
-## 2. System Overview
+## System Overview
 
 ```mermaid
 flowchart LR
@@ -23,18 +19,19 @@ flowchart LR
     E[Evaluator agent]
   end
 
-  subgraph EntrySurfaces
+  subgraph Entry
     UI[Browser desk]
     CLI[npm CLI / SDK]
   end
 
   subgraph DealRail
     API[Backend API]
-    NEG[Competition + discovery]
+    DISC[Provider discovery]
+    NEG[Offer ranking]
     PAY[Machine payments]
-    ESC[Escrow Contracts]
-    TRUST[ERC-8004 Trust Layer]
-    ADAPT[Optional Adapters]
+    ESC[Escrow lifecycle]
+    TRUST[ERC-8004 trust layer]
+    ADAPT[Preview / adapter zone]
   end
 
   subgraph Chains
@@ -43,105 +40,82 @@ flowchart LR
   end
 
   subgraph Extensions
-    UNI[Uniswap]
-    LOC[Locus]
-    DEL[MetaMask Delegations]
-    X4[x402 / AgentCash]
+    X4[x402]
+    UNI[Uniswap preview]
+    DEL[Delegation builder]
+    LOC[Locus adapter]
   end
 
   H --> UI
   B --> CLI
   P --> CLI
   E --> CLI
-
   UI --> API
   CLI --> API
-  API --> NEG
+  API --> DISC
+  DISC --> NEG
   API --> PAY
   API --> ESC
   API --> TRUST
   API --> ADAPT
-
   PAY --> X4
   ESC --> BASE
   ESC --> CELO
   ADAPT --> UNI
-  ADAPT --> LOC
   ADAPT --> DEL
+  ADAPT --> LOC
 ```
 
-## 3. What Each Layer Does
-
-| Layer | Purpose | Main Files |
-|-------|---------|------------|
-| Browser desk | Human and judge-facing UI | `frontend/src/app`, `frontend/src/components` |
-| CLI / SDK | Agent and terminal-native operator surface | `cli/src/cli.ts`, `cli/src/client.ts`, `cli/src/types.ts` |
-| Backend | Lifecycle API and integration adapters | `backend/src/index-simple.ts`, `backend/src/services` |
-| Escrow | Locks funds and enforces state transitions | `contracts/src/EscrowRail.sol`, `contracts/src/EscrowRailERC20.sol` |
-| Trust layer | Checks identity/reputation and writes feedback | `contracts/src/DealRailHook.sol`, `contracts/src/identity/ERC8004Verifier.sol` |
-
-## 4. Canonical Deal Flow
+## Deal Flow
 
 ```mermaid
 flowchart TD
-  A[1. Human or agent defines intent] --> B[2. Backend scans supply and competition]
-  B --> C[3. Providers are ranked]
+  A[1. Buyer defines task] --> B[2. DealRail scans supply]
+  B --> C[3. Offers are ranked]
   C --> D{4. Which execution posture fits}
-  D -->|Immediate paid call| E[5A. Machine payment adapter proxies request]
-  D -->|Scoped service deal| F[5B. Onchain job created]
-  F --> G[6. Escrow funded]
-  G --> H[7. Provider submits deliverable]
+  D -->|Immediate call| E[5A. x402 payment path]
+  D -->|Scoped service| F[5B. Escrow-backed job]
+  F --> G[6. Buyer funds escrow]
+  G --> H[7. Provider submits]
   H --> I{8. Evaluator decision}
-  I -->|Complete| J[9. Funds released]
-  I -->|Reject| K[9. Job rejected]
-  J --> L[10. Reputation feedback can be written]
-  K --> M[10. Refund or retry posture remains]
-  E --> N[6A. Response and receipt returned]
+  I -->|Complete| J[9. Release funds]
+  I -->|Reject| K[9. Reject job]
+  J --> L[10. Trust feedback can be written]
+  K --> M[10. Refund or retry posture]
+  J --> N[11. Optional Base routing preview]
+  E --> O[6A. Paid response + receipt]
 ```
 
-## 5. Trust Loop
+## Confidence Map
 
 ```mermaid
 flowchart LR
-  REG[ERC-8004 identity registry] --> VER[ERC8004Verifier]
-  REP[ERC-8004 reputation registry] --> VER
-  VER --> DISC[discovery enrichment]
-  VER --> HOOK[DealRailHook]
-  HOOK --> FUND[allow or block action]
-  SETTLE[successful settlement] --> HOOK
-  HOOK --> FEED[write feedback to reputation registry]
-```
-
-## 6. Readiness Map
-
-```mermaid
-flowchart LR
-  subgraph 85% Plus
-    S1[Open Track 95%]
-    S2[ERC-8004 90%]
-    S3[Virtuals ERC-8183 92%]
-    S4[Celo 90%]
-    S5[x402 85%]
+  subgraph High
+    H1[Open Track]
+    H2[ERC-8004]
+    H3[Let the Agent Cook]
+    H4[Virtuals ERC-8183]
+    H5[Celo]
+    H6[x402]
   end
 
-  subgraph 70% To 84%
-    M1[Let the Agent Cook 70%]
-    M2[Base Agent Services on Base 75%]
+  subgraph Medium
+    M1[Base Agent Services on Base]
   end
 
-  subgraph Below 70%
-    P1[MetaMask 60%]
-    P2[Uniswap 55%]
-    P3[Locus 45%]
+  subgraph Low
+    L1[MetaMask]
+    L2[Uniswap]
+    L3[Locus]
   end
 ```
 
-## 7. Future Kairen Stack
+## Kairen Stack Map
 
 ```mermaid
 flowchart LR
   SITE[kairen.xyz]
-  MARKET[Market]
+  MARKET[market]
   X402[x402n]
   DEAL[DealRail]
   ID[ForgeID / SIGNET]
@@ -156,21 +130,7 @@ flowchart LR
 ```
 
 Meaning:
-- `Market` becomes public provider and service discovery
-- `x402n` becomes the live negotiation and transcript router
-- `ForgeID / SIGNET` becomes deeper identity, prestige, and access control
-- `DealRail` remains the execution, settlement, and receipts layer
-
-## 8. Why The Repo Is Organized This Way
-
-The repo is split so two audiences can navigate it quickly:
-
-- humans need a simple visual story and direct evidence
-- AI judges need structured markdown, exact file paths, tx hashes, and claim discipline
-- agents need a stable install and JSON command surface
-
-That is why:
-- `docs/submission` is the canonical judging pack
-- `backend/TRANSACTION_LEDGER.md` is the canonical proof log
-- `STATUS.md` is the canonical deployment summary
-- `@kairenxyz/dealrail` is the canonical agent package name
+- `market` becomes public discovery
+- `x402n` becomes live negotiation and transcripts
+- `ForgeID / SIGNET` deepens trust and access
+- `DealRail` stays the execution, settlement, and receipt desk
