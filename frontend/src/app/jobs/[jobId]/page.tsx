@@ -1,11 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { integrationsApi, jobsApi, Job, getErrorMessage } from '@/lib/api';
 import { formatDistanceToNow, format } from 'date-fns';
 import Link from 'next/link';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSendTransaction, useSwitchChain } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
 import { parseUnits, encodePacked, keccak256 } from 'viem';
 import { ESCROW_ABI, USDC_ABI, getChainLabel, getEscrowAddress, getUSDCAddress } from '@/lib/contracts';
 
@@ -29,7 +29,7 @@ const stateDescriptions: Record<string, string> = {
 
 export default function JobDetailPage() {
   const params = useParams();
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const { address, chainId } = useAccount();
   const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
   const [job, setJob] = useState<Job | null>(null);
@@ -46,9 +46,12 @@ export default function JobDetailPage() {
   const [postSettlementPayload, setPostSettlementPayload] = useState<any | null>(null);
   const [postSettlementLoading, setPostSettlementLoading] = useState(false);
 
-  const { sendTransactionAsync } = useSendTransaction();
-
   const jobId = params?.jobId ? parseInt(params.jobId as string) : null;
+  const requestedChain = searchParams?.get('chain');
+  const requestedSettlementChain =
+    requestedChain === 'baseSepolia' || requestedChain === 'celoSepolia'
+      ? requestedChain
+      : undefined;
 
   // Contract write hooks
   const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
@@ -62,7 +65,10 @@ export default function JobDetailPage() {
     try {
       setLoading(true);
       setError(null);
-      const jobData = await jobsApi.getByJobId(jobId);
+      const jobData = await jobsApi.getByJobId(
+        jobId,
+        requestedSettlementChain ? { chain: requestedSettlementChain } : undefined
+      );
       setJob(jobData);
     } catch (error) {
       console.error('Failed to load job:', error);
@@ -70,13 +76,14 @@ export default function JobDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [jobId]);
+  }, [jobId, requestedSettlementChain]);
 
   useEffect(() => {
     void loadJob();
   }, [loadJob]);
 
   const settlementChainId = job?.chainId ?? null;
+  const isBaseSettlementJob = settlementChainId === 84532;
   const isWalletOnJobChain = !!settlementChainId && chainId === settlementChainId;
 
   function ensureWalletReadyForJobWrite(): boolean {
@@ -238,7 +245,12 @@ export default function JobDetailPage() {
   }
 
   async function handleBuildPostSettlementSwap() {
-    if (!jobId) return;
+    if (!jobId || !job) return;
+    if (job.chain !== 'baseSepolia') {
+      setActionError('Base treasury routing preview is only available for Base Sepolia jobs right now.');
+      setPostSettlementPayload(null);
+      return;
+    }
     setPostSettlementLoading(true);
     setActionError(null);
     try {
@@ -246,31 +258,13 @@ export default function JobDetailPage() {
         tokenOut: 'WETH',
         fee: 3000,
         slippageBps: 300,
+        chain: job.chain,
       });
       setPostSettlementPayload(payload);
     } catch (error) {
       setActionError(getErrorMessage(error));
     } finally {
       setPostSettlementLoading(false);
-    }
-  }
-
-  async function executePostSettlementTx(kind: 'approve' | 'swap') {
-    if (!postSettlementPayload) return;
-    if (!ensureWalletReadyForJobWrite()) return;
-    const tx = kind === 'approve'
-      ? postSettlementPayload.execution?.approveTx
-      : postSettlementPayload.execution?.swapTx;
-    if (!tx) return;
-
-    try {
-      await sendTransactionAsync({
-        to: tx.to as `0x${string}`,
-        data: tx.data as `0x${string}`,
-        value: BigInt(tx.value || '0'),
-      });
-    } catch (error) {
-      setActionError(getErrorMessage(error));
     }
   }
 
@@ -467,7 +461,7 @@ export default function JobDetailPage() {
                   d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                 />
               </svg>
-              View on BaseScan
+              View on Explorer
             </a>
           </div>
 
@@ -651,36 +645,54 @@ export default function JobDetailPage() {
               {/* COMPLETED STATE */}
               {job.stateCode === 3 && (
                 <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg space-y-3">
-                  <p className="text-green-400">
-                    Job completed. You can now build post-settlement Uniswap payloads from this job.
-                  </p>
-                  <button
-                    onClick={handleBuildPostSettlementSwap}
-                    disabled={postSettlementLoading}
-                    className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded transition-colors"
-                  >
-                    {postSettlementLoading ? 'Building...' : 'Build Post-Settlement Swap'}
-                  </button>
-                  {postSettlementPayload && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-300">
-                        Quote: {postSettlementPayload.quote?.amountOut} (min: {postSettlementPayload.execution?.amountOutMinimum})
+                  {isBaseSettlementJob ? (
+                    <>
+                      <p className="text-green-400">
+                        Job completed on Base Sepolia. You can now build a Base treasury routing preview for the
+                        provider payout.
                       </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => executePostSettlementTx('approve')}
-                          className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded transition-colors"
-                        >
-                          Execute Approve
-                        </button>
-                        <button
-                          onClick={() => executePostSettlementTx('swap')}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded transition-colors"
-                        >
-                          Execute Swap
-                        </button>
-                      </div>
-                    </div>
+                      <p className="text-sm text-gray-300">
+                        This is intentionally preview-only for now. The UI will show Base routing payloads and chain
+                        policy, but it will not execute live swaps from this screen yet.
+                      </p>
+                      <button
+                        onClick={handleBuildPostSettlementSwap}
+                        disabled={postSettlementLoading}
+                        className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded transition-colors"
+                      >
+                        {postSettlementLoading ? 'Building...' : 'Build Base Routing Preview'}
+                      </button>
+                      {postSettlementPayload && (
+                        <div className="space-y-3 rounded-lg border border-emerald-500/20 bg-black/10 p-4">
+                          <div className="text-sm text-gray-300">
+                            Quote: {postSettlementPayload.quote?.amountOut} (min: {postSettlementPayload.execution?.amountOutMinimum})
+                          </div>
+                          <div className="text-xs leading-5 text-gray-400">
+                            Preview chain: {getChainLabel(postSettlementPayload.routePolicy?.executionChainId ?? postSettlementPayload.execution?.swapTx?.chainId)}
+                          </div>
+                          {Array.isArray(postSettlementPayload.notes) && postSettlementPayload.notes.length > 0 && (
+                            <div className="space-y-1 text-xs leading-5 text-gray-400">
+                              {postSettlementPayload.notes.map((note: string) => (
+                                <div key={note}>{note}</div>
+                              ))}
+                            </div>
+                          )}
+                          <pre className="overflow-auto rounded bg-black/20 p-3 text-xs text-gray-300">
+                            {JSON.stringify(postSettlementPayload, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-green-400">
+                        Job completed on {getChainLabel(settlementChainId)}.
+                      </p>
+                      <p className="text-sm text-gray-300">
+                        Treasury routing is intentionally Base-first for now. Celo remains a settlement rail, but this
+                        Uniswap extension is not enabled for Celo jobs yet.
+                      </p>
+                    </>
                   )}
                 </div>
               )}

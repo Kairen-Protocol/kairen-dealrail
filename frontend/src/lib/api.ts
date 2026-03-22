@@ -475,7 +475,12 @@ export const integrationsApi = {
   },
   buildPostSettlementSwapTxs: async (
     jobId: number,
-    params?: { tokenOut?: 'USDC' | 'WETH'; fee?: number; slippageBps?: number }
+    params?: {
+      tokenOut?: 'USDC' | 'WETH';
+      fee?: number;
+      slippageBps?: number;
+      chain?: 'baseSepolia' | 'celoSepolia';
+    }
   ) => {
     const response = await api.get(`/integrations/uniswap/post-settlement/${jobId}`, { params });
     return response.data;

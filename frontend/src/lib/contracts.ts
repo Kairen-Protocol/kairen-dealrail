@@ -4,6 +4,11 @@ import { Address } from 'viem';
 export const SUPPORTED_SETTLEMENT_CHAIN_IDS = [84532, 11142220] as const;
 
 export const CHAIN_INFO: Record<number, { key: string; label: string; explorerBaseUrl: string }> = {
+  8453: {
+    key: 'base',
+    label: 'Base',
+    explorerBaseUrl: 'https://basescan.org',
+  },
   84532: {
     key: 'baseSepolia',
     label: 'Base Sepolia',

@@ -98,7 +98,10 @@ export function JobCard({ job, currentAddress }: JobCardProps) {
       {/* Actions */}
       <div className="border-t border-gray-700 pt-4">
         <Link
-          href={`/jobs/${job.jobId}`}
+          href={{
+            pathname: `/jobs/${job.jobId}`,
+            query: { chain: job.chain },
+          }}
           className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors text-center"
         >
           View Details
