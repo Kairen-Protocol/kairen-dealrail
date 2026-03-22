@@ -14,6 +14,7 @@ Live product:
 - Browser desk: `https://dealrail.kairen.xyz/`
 - Backend API: `https://kairen-dealrail-production.up.railway.app/`
 - Agent package: `@kairenxyz/dealrail`
+- Base service directory: `https://dealrail.kairen.xyz/base`
 
 ## What This Repo Really Is
 
@@ -40,6 +41,7 @@ Agent:
 
 ```bash
 npx @kairenxyz/dealrail doctor --json
+npx @kairenxyz/dealrail services --json
 npx @kairenxyz/dealrail status --json
 npx @kairenxyz/dealrail vend "automation benchmark report" --budget 0.12 --hours 24 --json
 ```
@@ -89,6 +91,12 @@ Read these in order:
 3. The preview shows candidate payloads and slippage assumptions.
 4. It is intentionally labeled as preview-only until a real swap proof exists.
 
+### Scenario 4: Judge wants the Base-facing public surface
+
+1. Open `/base` or call `GET /api/v1/base/agent-services`.
+2. Inspect the public Base service directory, visible supply, and settlement rail.
+3. Verify that the surface is real and public, while still clearly labeled as curated when discovery is in mock mode.
+
 ## Readiness Model
 
 Use these labels throughout the repo:
@@ -107,7 +115,7 @@ Current track posture:
 | Virtuals ERC-8183 | High | Core commerce thesis |
 | Celo | High | Real happy and reject proofs |
 | AgentCash / x402 | High | Real Base Sepolia paid-request proof |
-| Base Agent Services on Base | Medium | Curated discovery is real but still not a public open market |
+| Base Agent Services on Base | Medium | Public Base service directory exists, but supply is still not a public open market |
 | MetaMask Delegations | Low | Builder and signing path only |
 | Uniswap | Low | Base-only routing preview, no recorded swap tx |
 | Locus | Low | Adapter exists, live proof absent |
