@@ -1,0 +1,59 @@
+{
+  "runId": "dealrail-agent-log-2026-03-22",
+  "truthNote": "This artifact packages the validated CLI run recorded in docs/progress/DEMO_VALIDATION_2026-03-22.md. It does not invent a new transaction or claim a fully autonomous onchain settlement flow beyond what was already verified.",
+  "package": "@kairenxyz/dealrail@0.1.1",
+  "environment": {
+    "validatedBackend": "http://localhost:3001",
+    "liveBackend": "https://kairen-dealrail-production.up.railway.app/",
+    "mode": "CLI human+agent surface against the simplified backend"
+  },
+  "steps": [
+    {
+      "order": 1,
+      "command": "DEALRAIL_API_URL=http://localhost:3001 node dist/cli.js status --json",
+      "purpose": "Confirm backend health and chain posture before work begins.",
+      "observedResult": {
+        "status": "healthy",
+        "activeChain": "baseSepolia"
+      }
+    },
+    {
+      "order": 2,
+      "command": "DEALRAIL_API_URL=http://localhost:3001 node dist/cli.js jobs --limit 4 --json",
+      "purpose": "Read recent onchain jobs and verify receipt-backed history.",
+      "observedResult": {
+        "recentCompletedJobSeen": 2
+      }
+    },
+    {
+      "order": 3,
+      "command": "DEALRAIL_API_URL=http://localhost:3001 node dist/cli.js scan automation",
+      "purpose": "Inspect visible provider supply before negotiation.",
+      "observedResult": {
+        "catalogMode": "curated_demo",
+        "providerMatchFound": true
+      }
+    },
+    {
+      "order": 4,
+      "command": "DEALRAIL_API_URL=http://localhost:3001 node dist/cli.js vend \"automation benchmark report\" --budget 0.12 --hours 24 --json",
+      "purpose": "Create a negotiation session and rank offers from the same curated supply catalog.",
+      "observedResult": {
+        "negotiationId": "neg_c40dce13",
+        "offersRanked": 3,
+        "bestOfferUsdc": 0.09
+      }
+    },
+    {
+      "order": 5,
+      "command": "Reference backend/TRANSACTION_LEDGER.md",
+      "purpose": "Bind the autonomous operator path back to onchain proof surfaces.",
+      "observedResult": {
+        "baseEscrowProof": true,
+        "celoEscrowProof": true,
+        "x402Proof": true
+      }
+    }
+  ],
+  "readiness": "High"
+}

@@ -1,0 +1,38 @@
+{
+  "name": "DealRail Operator Agent",
+  "package": "@kairenxyz/dealrail",
+  "binary": "dealrail",
+  "entrypoint": "npx @kairenxyz/dealrail",
+  "frontendUrl": "https://dealrail.kairen.xyz/",
+  "backendUrl": "https://kairen-dealrail-production.up.railway.app/",
+  "goal": "Turn a buyer request into a provider shortlist, an execution posture, and a verifiable receipt trail.",
+  "audience": [
+    "AI agents",
+    "terminal-native humans",
+    "judges verifying autonomy surfaces"
+  ],
+  "capabilities": [
+    "doctor preflight checks",
+    "status and job reads",
+    "provider scan and vend workflow",
+    "stable --json outputs",
+    "shared backend with the browser desk"
+  ],
+  "guardrails": [
+    "The public backend does not accept raw private keys for settlement routes.",
+    "Public settlement writes only support managed demo actors on the hosted backend.",
+    "Curated discovery in mock mode is described as curated demo supply, not a fully live market.",
+    "Uniswap is exposed as a Base-only routing preview, not as recorded swap execution."
+  ],
+  "canonicalRun": [
+    "npx @kairenxyz/dealrail doctor --json",
+    "npx @kairenxyz/dealrail status --json",
+    "npx @kairenxyz/dealrail vend \"automation benchmark report\" --budget 0.12 --hours 24 --json"
+  ],
+  "evidence": [
+    "docs/submission/agent_log.json",
+    "docs/progress/DEMO_VALIDATION_2026-03-22.md",
+    "backend/TRANSACTION_LEDGER.md"
+  ],
+  "readiness": "High"
+}
